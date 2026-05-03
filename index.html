@@ -3,8 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dongne — Live in Korea like a local</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<title>Locali — Live in Seoul like a local</title>
+<meta name="description" content="The all-in-one platform for living in Seoul like a local. Curated mid-term stays, visa support, eSIM, bank account setup, and a 24/7 concierge — everything you need, before you land." />
+<meta property="og:title" content="Locali — Live in Seoul like a local" />
+<meta property="og:description" content="30-day to 2-year stays in Seoul's best neighborhoods. Accommodation, visa, eSIM, bank account — all in one place." />
+<meta property="og:url" content="https://localiseoul.com" />
+<meta property="og:site_name" content="Locali" />
+<meta property="og:image" content="https://localiseoul.com/og-image.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Locali — Live in Seoul like a local" />
+<meta name="twitter:description" content="The all-in-one platform for foreigners living in Seoul." />
+<link rel="canonical" href="https://localiseoul.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
@@ -166,13 +176,11 @@ const ProgressBar = ({ step, total }) => (
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
 const NavBar = ({ onHome, onQuickMatch, scrolled }) => (
   <nav style={{ height:64, background:T.white, borderBottom:`1px solid ${scrolled?T.border:'transparent'}`, display:'flex', alignItems:'center', padding:'0 32px', justifyContent:'space-between', position:'sticky', top:0, zIndex:150, boxShadow:scrolled?'0 1px 8px rgba(44,36,32,0.06)':'none', transition:'all 0.2s' }}>
-    <div onClick={onHome} style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
-      <div style={{ width:28, height:28, background:T.accent, borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center' }}>
-        <span style={{ color:'#fff', fontSize:14, fontWeight:700, fontFamily:'Noto Sans KR,sans-serif' }}>동</span>
-      </div>
-      <span style={{ fontSize:18, fontWeight:700, color:T.primary, letterSpacing:'-0.3px', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-        dongne<span style={{ color:T.accent }}>.</span>
+    <div onClick={onHome} style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
+      <span style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:300, letterSpacing:'-0.5px', lineHeight:1 }}>
+        <span style={{ color:T.primary }}>Loc</span><span style={{ color:T.accent }}>ali</span>
       </span>
+      <span style={{ fontSize:11, color:T.muted, fontFamily:'Plus Jakarta Sans,sans-serif', fontWeight:500, letterSpacing:'0.04em', marginTop:2 }}>Seoul</span>
     </div>
     <div style={{ display:'flex', gap:10, alignItems:'center' }}>
       <button style={{ height:36, padding:'0 14px', background:'transparent', color:T.muted, border:'none', cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:500 }}>Log in</button>
@@ -409,16 +417,16 @@ const PricingSection = ({ onStart }) => {
 const Footer = () => (
   <footer style={{ background:T.primary, padding:'48px 32px 32px' }}>
     <div style={{ maxWidth:1100, margin:'0 auto' }}>
-      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:24 }}>
-        <div style={{ width:24, height:24, background:T.accent, borderRadius:5, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <span style={{ color:'#fff', fontSize:12, fontWeight:700, fontFamily:'Noto Sans KR,sans-serif' }}>동</span>
-        </div>
-        <span style={{ fontSize:16, fontWeight:700, color:'#FAF7F2' }}>dongne<span style={{ color:T.accent }}>.</span></span>
+      <div style={{ marginBottom:8 }}>
+        <span style={{ fontFamily:'Fraunces,serif', fontSize:26, fontWeight:300, letterSpacing:'-0.5px', lineHeight:1 }}>
+          <span style={{ color:'#FAF7F2' }}>Loc</span><span style={{ color:T.accent }}>ali</span>
+        </span>
       </div>
-      <p style={{ fontSize:13, color:T.muted, marginBottom:24, maxWidth:400, lineHeight:1.65 }}>Live in Korea like a local. Long-term stays for foreigners, with full concierge support.</p>
+      <p style={{ fontSize:13, color:T.muted, marginBottom:6, fontStyle:'italic' }}>Seoul, lived locally.</p>
+      <p style={{ fontSize:13, color:T.muted, marginBottom:24, maxWidth:400, lineHeight:1.65 }}>The all-in-one platform for living in Seoul like a local. Curated stays, visa support, eSIM, and 24/7 concierge.</p>
       <div style={{ height:1, background:T.n800, marginBottom:20 }}/>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:12 }}>
-        <span style={{ fontSize:12, color:T.n600 }}>© 2026 Dongne. All rights reserved.</span>
+        <span style={{ fontSize:12, color:T.n600 }}>© 2026 Locali Inc. All rights reserved.</span>
         <div style={{ display:'flex', gap:20 }}>
           {['Privacy','Terms','Contact'].map(l => <a key={l} href="#" style={{ fontSize:12, color:T.n600, textDecoration:'none' }}>{l}</a>)}
         </div>
