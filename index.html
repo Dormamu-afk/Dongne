@@ -127,6 +127,163 @@ const TYPE_COLORS = {
   'Serviced': { color: T.n600,     bg: T.surface },
 };
 
+// ─── MATCH DATA ───────────────────────────────────────────────────────────────
+const INTERESTS = [
+  { id:'tradition', emoji:'🏯', title:'Tradition & Heritage', titleKo:'전통과 역사',
+    description:'Palaces, hanok villages, royal tea ceremonies, historic alleys',
+    scores:{ jongno:10, hannam:5, yeonnam:4, euljiro:6, seongsu:3 } },
+  { id:'kpop', emoji:'🎤', title:'K-Pop & Entertainment', titleKo:'K-팝 & 엔터',
+    description:'Idol cafés, music shows, concert venues, fan culture, HYBE/SM HQ',
+    scores:{ apgujeong:10, jamsil:9, gangnam:8, hongdae:6 } },
+  { id:'beauty', emoji:'💄', title:'K-Beauty & Wellness', titleKo:'K-뷰티 & 웰니스',
+    description:'Dermatology clinics, spas, skincare flagships, hair salons',
+    scores:{ apgujeong:10, gangnam:9, hannam:7, yeonnam:5, hongdae:4 } },
+  { id:'food', emoji:'🍜', title:'Food & Markets', titleKo:'음식 & 시장',
+    description:'Street food, traditional markets, late-night BBQ, foodie tours',
+    scores:{ mangwon:9, jongno:8, hongdae:7, itaewon:7, seongsu:6 } },
+  { id:'art', emoji:'🎨', title:'Art & Design', titleKo:'예술 & 디자인',
+    description:'Galleries, design studios, vintage shops, creative warehouses',
+    scores:{ seongsu:10, hannam:9, itaewon:7, yeonnam:7, hongdae:6 } },
+  { id:'nightlife', emoji:'🌃', title:'Nightlife & Bars', titleKo:'밤문화 & 바',
+    description:'Rooftop bars, clubs, hidden speakeasies, late-night vibes',
+    scores:{ hongdae:10, itaewon:9, gangnam:8, seongsu:5, jamsil:4 } },
+  { id:'nature', emoji:'🌳', title:'Nature & Outdoors', titleKo:'자연 & 야외',
+    description:'Han River parks, hiking, cherry blossoms, weekend cycling',
+    scores:{ mangwon:9, jamsil:8, yeonnam:6, seongsu:5, hannam:4 } },
+  { id:'shopping', emoji:'🛍️', title:'Shopping & Fashion', titleKo:'쇼핑 & 패션',
+    description:'Department stores, K-fashion, vintage hunting, pop-up markets',
+    scores:{ gangnam:10, apgujeong:9, jamsil:7, hongdae:7, seongsu:6 } },
+];
+
+const TRAVEL_STYLES = [
+  { id:'early-bird', emoji:'🌅', title:'Early bird',
+    description:'Morning markets, sunrise hikes, slow café mornings, park walks',
+    scores:{ mangwon:8, jongno:8, yeonnam:6, hannam:5 } },
+  { id:'night-owl', emoji:'🌙', title:'Night owl',
+    description:'Late dinners, hidden bars, 24-hour cities, after-midnight energy',
+    scores:{ hongdae:10, itaewon:9, gangnam:7, seongsu:6 } },
+  { id:'social', emoji:'👥', title:'Social butterfly',
+    description:'Meet locals, group activities, language exchange, community dinners',
+    scores:{ itaewon:10, hongdae:9, gangnam:6, hannam:5 } },
+  { id:'observer', emoji:'📚', title:'Quiet observer',
+    description:'Cafés, museums, slow days, reading by the river, solo exploration',
+    scores:{ yeonnam:10, hannam:8, mangwon:8, jongno:6 } },
+];
+
+const STAY_LENGTHS = [
+  { id:'1-2weeks', label:'A taste', detail:'1–2 weeks', emoji:'✨', desc:'Short immersion. Best for first visits.' },
+  { id:'1month',   label:'One month', detail:'30–31 days', emoji:'🗓️', desc:'Enough time to find your routines.' },
+  { id:'2-3months',label:'A season', detail:'2–3 months', emoji:'🌸', desc:'Go deep. Find your neighborhood café.' },
+  { id:'6months',  label:'Long stay', detail:'6 months+', emoji:'🏡', desc:'Live it, not just visit it.' },
+];
+
+const MATCH_NEIGHBORHOODS = [
+  { id:'jongno', staysId:'euljiro', name:'Jongno · Insadong', nameKo:'종로·인사동',
+    tagline:'The historic heart of Seoul',
+    description:"Walk past Gyeongbokgung at dawn, sip tea in 100-year-old hanok cafés, and catch the changing of the royal guard. The most authentically 'Korean' Seoul gets.",
+    vibes:['Historic','Walkable','Cultural'], metroLines:[1,3,5],
+    nearbyLandmarks:['Gyeongbokgung Palace','Bukchon Hanok Village','Insadong'],
+    avgPrice:{min:800,max:1400} },
+  { id:'apgujeong', staysId:'gangnam', name:'Apgujeong · Cheongdam', nameKo:'압구정·청담',
+    tagline:'K-pop and luxury beauty central',
+    description:'Home to SM, JYP, and HYBE HQ. Top dermatology clinics, K-beauty flagship stores, and the neighbourhood where idols actually live.',
+    vibes:['Trendy','Upscale','Fashion-forward'], metroLines:[3,7],
+    nearbyLandmarks:['SM Entertainment HQ','Cheongdam Fashion Street','Galleria Dept. Store'],
+    avgPrice:{min:1200,max:2500} },
+  { id:'hongdae', staysId:'hongdae', name:'Hongdae', nameKo:'홍대',
+    tagline:'The eternal college party',
+    description:'Live indie music every night, street performers, vintage shops, and cheap-but-good food. Energy that genuinely never sleeps.',
+    vibes:['Energetic','Young','Creative'], metroLines:[2,6],
+    nearbyLandmarks:['Hongik University','Yeonnam Park','Gyeongui Line Forest'],
+    avgPrice:{min:700,max:1200} },
+  { id:'yeonnam', staysId:'yeonnam', name:'Yeonnam-dong', nameKo:'연남동',
+    tagline:'Indie cafés, park life, vinyl shops',
+    description:'Tree-lined alleys, indie cafés in converted houses, record stores, and the best people-watching from Yeontral Park benches.',
+    vibes:['Chill','Indie','Creative'], metroLines:[2,6],
+    nearbyLandmarks:['Yeonnam Park','Gyeongui Line Forest Park','Hongdae'],
+    avgPrice:{min:800,max:1400} },
+  { id:'seongsu', staysId:'seongsu', name:'Seongsu-dong', nameKo:'성수동',
+    tagline:'Brooklyn of Seoul',
+    description:'Old shoe factories turned design studios, specialty coffee labs, pop-up flagships from every major brand. The creative capital of Korea right now.',
+    vibes:['Creative','Industrial','Trendy'], metroLines:[2],
+    nearbyLandmarks:['Seoul Forest','Common Ground','Daelim Changgo'],
+    avgPrice:{min:900,max:1600} },
+  { id:'itaewon', staysId:'itaewon', name:'Itaewon · HBC', nameKo:'이태원·해방촌',
+    tagline:"Seoul's most international village",
+    description:'Rooftop bars with N Seoul Tower views, food from every continent, the most diverse crowd in Korea. Perfect if English makes you comfortable.',
+    vibes:['International','Diverse','Lively'], metroLines:[6],
+    nearbyLandmarks:['Namsan Tower','Leeum Museum','HBC Village'],
+    avgPrice:{min:900,max:1700} },
+  { id:'gangnam', staysId:'gangnam', name:'Gangnam', nameKo:'강남',
+    tagline:'Where business meets nightlife',
+    description:'Sleek skyscrapers by day, premium K-beauty clinics, the COEX underground city, and clubs that go till sunrise. Connected to everywhere.',
+    vibes:['Modern','Business','Upscale'], metroLines:[2,9],
+    nearbyLandmarks:['COEX Mall','Gangnam Station','Bongeunsa Temple'],
+    avgPrice:{min:1100,max:2200} },
+  { id:'jamsil', staysId:'jamsil', name:'Jamsil · Songpa', nameKo:'잠실·송파',
+    tagline:'Lakeside calm meets Lotte World',
+    description:"Lotte World Tower views, Olympic Park concerts, Seokchon Lake walks. The K-pop concert venue of Seoul — if you're here for shows, this is it.",
+    vibes:['Calm','Family-friendly','Modern'], metroLines:[2,8,9],
+    nearbyLandmarks:['Lotte World','Olympic Park','Seokchon Lake'],
+    avgPrice:{min:1000,max:1800} },
+  { id:'mangwon', staysId:'mapo', name:'Mangwon · Mapo', nameKo:'망원동·마포',
+    tagline:'The neighborhood Seoulites actually live in',
+    description:'Authentic local market, riverside picnics on the Han, absolutely no tourists. Where you go to feel like you genuinely live in Seoul.',
+    vibes:['Local','Quiet','Authentic'], metroLines:[6],
+    nearbyLandmarks:['Mangwon Market','Han River Park','World Cup Park'],
+    avgPrice:{min:700,max:1200} },
+  { id:'hannam', staysId:'hannam', name:'Hannam-dong', nameKo:'한남동',
+    tagline:'Quiet luxury, hillside galleries',
+    description:"Tree-lined streets, embassies, the best contemporary art galleries in Korea (Leeum, Pace), and Seoul's most refined café scene.",
+    vibes:['Refined','Quiet','Artistic'], metroLines:[6],
+    nearbyLandmarks:['Leeum Samsung Museum','Hannam Furniture Street','Itaewon'],
+    avgPrice:{min:1100,max:2000} },
+];
+
+// ─── MATCHING ALGORITHM ───────────────────────────────────────────────────────
+function calculateMatches(interests, travelStyle, stayLength) {
+  const scores = {};
+  const reasons = {};
+
+  interests.forEach(id => {
+    const interest = INTERESTS.find(i => i.id === id);
+    if (!interest) return;
+    Object.entries(interest.scores).forEach(([nbhd, score]) => {
+      scores[nbhd] = (scores[nbhd] || 0) + score;
+      if (score >= 8) {
+        reasons[nbhd] = reasons[nbhd] || [];
+        const r = `Top pick for ${interest.title.toLowerCase()}`;
+        if (!reasons[nbhd].includes(r)) reasons[nbhd].push(r);
+      }
+    });
+  });
+
+  const style = TRAVEL_STYLES.find(s => s.id === travelStyle);
+  if (style) {
+    Object.entries(style.scores).forEach(([nbhd, score]) => {
+      scores[nbhd] = (scores[nbhd] || 0) + score;
+      if (score >= 8) {
+        reasons[nbhd] = reasons[nbhd] || [];
+        const r = `Suits your ${style.title.toLowerCase()} vibe`;
+        if (!reasons[nbhd].includes(r)) reasons[nbhd].push(r);
+      }
+    });
+  }
+
+  const maxScore = Math.max(...Object.values(scores), 1);
+
+  return MATCH_NEIGHBORHOODS
+    .filter(n => (scores[n.id] || 0) > 0)
+    .map(n => ({
+      neighborhood: n,
+      score: scores[n.id] || 0,
+      matchPercentage: Math.round(((scores[n.id] || 0) / maxScore) * 100),
+      matchReasons: (reasons[n.id] || [n.tagline]).slice(0, 3),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+}
+
 // ─── SHARED UI ────────────────────────────────────────────────────────────────
 const StarIcon = ({ size=12 }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="#C4890A">
@@ -959,165 +1116,266 @@ const StayDetailPage = ({ stay, onBack }) => {
   );
 };
 
-// ─── QUICK MATCH WIZARD ───────────────────────────────────────────────────────
-const QuickMatch = ({ onDone, onBack }) => {
-  const [qStep, setQStep] = React.useState(0);
-  const [answers, setAnswers] = React.useState({});
-  const [dateVal, setDateVal] = React.useState('');
-  const [submitted, setSubmitted] = React.useState(false);
-  const [booking, setBooking] = React.useState({ slot:null, name:'', email:'' });
+// ─── MATCH WIZARD ─────────────────────────────────────────────────────────────
+const MatchProgressBar = ({ step, total }) => (
+  <div style={{ marginBottom:28 }}>
+    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+      <span style={{ fontSize:11, fontWeight:600, color:T.muted, letterSpacing:'0.06em', textTransform:'uppercase' }}>Step {step} of {total}</span>
+      <span style={{ fontSize:11, color:T.muted }}>{Math.round(step/total*100)}% complete</span>
+    </div>
+    <div style={{ height:3, background:T.border, borderRadius:2, overflow:'hidden' }}>
+      <div style={{ height:'100%', width:`${step/total*100}%`, background:`linear-gradient(90deg,${T.accent},${T.accentHov})`, borderRadius:2, transition:'width 0.4s ease' }}/>
+    </div>
+  </div>
+);
 
-  const QUESTIONS = [
-    { key:'arrival',  title:"When are you arriving in Korea?", type:'date' },
-    { key:'duration', title:"How long are you planning to stay?", type:'choice', options:[
-      { value:'1mo', label:'~1 month',   sub:'30–45 days' },
-      { value:'2mo', label:'~2 months',  sub:'45–90 days' },
-      { value:'3mo', label:'3 months+',  sub:'90+ days' },
-      { value:'1yr', label:'1 year+',    sub:'F-1-D visa required' },
-    ]},
-    { key:'visa', title:"What's your visa status?", type:'choice', options:[
-      { value:'b2',    label:'B-2 Tourist',      sub:'Up to 90 days, visa-free' },
-      { value:'f1d',   label:'F-1-D Workcation', sub:'Up to 1 year, $66k+ income req.' },
-      { value:'d4',    label:'D-4 Student',       sub:'Language school enrollment' },
-      { value:'unsure',label:'Not sure yet',       sub:'Concierge will guide you' },
-    ]},
-    { key:'budget', title:"What's your monthly budget?", type:'choice', options:[
-      { value:'low',     label:'Under $800',   sub:'~₩1,000,000' },
-      { value:'mid',     label:'$800–1,200',   sub:'~₩1,000–1,500,000' },
-      { value:'high',    label:'$1,200–2,000', sub:'~₩1,500–2,500,000' },
-      { value:'premium', label:'$2,000+',      sub:'₩2,500,000+' },
-    ]},
-    { key:'vibe', title:"What kind of neighborhood vibe do you want?", type:'choice', options:[
-      { value:'creative', label:'Creative & Trendy', sub:'Yeonnam · Seongsu',   icon:'🎨' },
-      { value:'expat',    label:'Expat Hub',          sub:'Haebangchon · Itaewon', icon:'🌍' },
-      { value:'business', label:'Business Central',   sub:'Gangnam · Yeoksam',  icon:'💼' },
-      { value:'quiet',    label:'Quiet & Local',      sub:'Mangwon · Hapjeong', icon:'🌿' },
-    ]},
-  ];
+const Step1Interests = ({ selected, onToggle, onNext }) => (
+  <div className="animate-in">
+    <div style={{ marginBottom:28 }}>
+      <div style={{ display:'inline-block', background:T.accentSubtle, color:T.accent, fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', padding:'4px 12px', borderRadius:100, marginBottom:14 }}>Step 1 of 4</div>
+      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:700, color:T.primary, lineHeight:1.2, marginBottom:8 }}>What brings you to Seoul?</h2>
+      <p style={{ fontSize:14, color:T.muted, lineHeight:1.6 }}>Pick everything that applies. The more you choose, the better your match.</p>
+    </div>
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(190px,1fr))', gap:12, marginBottom:28 }}>
+      {INTERESTS.map(i => {
+        const active = selected.includes(i.id);
+        return (
+          <button key={i.id} onClick={()=>onToggle(i.id)}
+            style={{ textAlign:'left', padding:'18px 16px', border:`2px solid ${active?T.accent:T.border}`, borderRadius:12, background:active?T.accentSubtle:T.white, cursor:'pointer', transition:'all 0.15s', fontFamily:'Plus Jakarta Sans,sans-serif' }}
+            onMouseEnter={e=>{if(!active)e.currentTarget.style.borderColor=T.accent;}}
+            onMouseLeave={e=>{if(!active)e.currentTarget.style.borderColor=T.border;}}>
+            <div style={{ fontSize:26, marginBottom:10 }}>{i.emoji}</div>
+            <div style={{ fontSize:13, fontWeight:700, color:active?T.accent:T.primary, marginBottom:4 }}>{i.title}</div>
+            <div style={{ fontSize:11, color:T.muted, lineHeight:1.45 }}>{i.description}</div>
+            {active && <div style={{ marginTop:10, display:'flex', alignItems:'center', gap:4 }}>
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill={T.accent}/><path d="M6 10l3 3 5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <span style={{ fontSize:11, fontWeight:600, color:T.accent }}>Selected</span>
+            </div>}
+          </button>
+        );
+      })}
+    </div>
+    <Btn onClick={onNext} disabled={selected.length===0} full size="lg">
+      {selected.length===0 ? 'Select at least one interest' : `Continue with ${selected.length} interest${selected.length>1?'s':''} →`}
+    </Btn>
+  </div>
+);
 
-  const SLOTS = [
-    { id:1, day:'Today',    time:'3:00 PM',  avail:true },
-    { id:2, day:'Today',    time:'5:00 PM',  avail:true },
-    { id:3, day:'Tomorrow', time:'10:00 AM', avail:true },
-    { id:4, day:'Tomorrow', time:'2:00 PM',  avail:false },
-    { id:5, day:'Tomorrow', time:'4:00 PM',  avail:true },
-    { id:6, day:'Day after', time:'11:00 AM', avail:true },
-    { id:7, day:'Day after', time:'1:00 PM',  avail:true },
-    { id:8, day:'Day after', time:'3:00 PM',  avail:false },
-  ];
+const Step2Style = ({ selected, onSelect }) => (
+  <div className="animate-in">
+    <div style={{ marginBottom:28 }}>
+      <div style={{ display:'inline-block', background:T.accentSubtle, color:T.accent, fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', padding:'4px 12px', borderRadius:100, marginBottom:14 }}>Step 2 of 4</div>
+      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:700, color:T.primary, lineHeight:1.2, marginBottom:8 }}>How do you move through a city?</h2>
+      <p style={{ fontSize:14, color:T.muted, lineHeight:1.6 }}>Choose the one that feels most like you.</p>
+    </div>
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:12 }}>
+      {TRAVEL_STYLES.map(s => {
+        const active = selected === s.id;
+        return (
+          <button key={s.id} onClick={()=>onSelect(s.id)}
+            style={{ textAlign:'left', padding:'24px 20px', border:`2px solid ${active?T.accent:T.border}`, borderRadius:12, background:active?T.accentSubtle:T.white, cursor:'pointer', transition:'all 0.15s', fontFamily:'Plus Jakarta Sans,sans-serif', position:'relative' }}
+            onMouseEnter={e=>{if(!active)e.currentTarget.style.borderColor=T.accent;}}
+            onMouseLeave={e=>{if(!active)e.currentTarget.style.borderColor=T.border;}}>
+            {active && <div style={{ position:'absolute', top:12, right:12 }}><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill={T.accent}/><path d="M6 10l3 3 5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}
+            <div style={{ fontSize:30, marginBottom:12 }}>{s.emoji}</div>
+            <div style={{ fontSize:16, fontWeight:700, color:active?T.accent:T.primary, marginBottom:6 }}>{s.title}</div>
+            <div style={{ fontSize:12, color:T.muted, lineHeight:1.55 }}>{s.description}</div>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
 
-  const q = QUESTIONS[qStep];
-  const pickChoice = v => {
-    const newAns = { ...answers, [q.key]: v };
-    setAnswers(newAns);
-    if (qStep < QUESTIONS.length-1) setTimeout(()=>setQStep(qStep+1), 220);
-    else setQStep(QUESTIONS.length);
+const Step3Length = ({ selected, onSelect }) => (
+  <div className="animate-in">
+    <div style={{ marginBottom:28 }}>
+      <div style={{ display:'inline-block', background:T.accentSubtle, color:T.accent, fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', padding:'4px 12px', borderRadius:100, marginBottom:14 }}>Step 3 of 4</div>
+      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:700, color:T.primary, lineHeight:1.2, marginBottom:8 }}>How long are you staying?</h2>
+      <p style={{ fontSize:14, color:T.muted, lineHeight:1.6 }}>This helps us match you to the right type of space and host.</p>
+    </div>
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:12 }}>
+      {STAY_LENGTHS.map(l => {
+        const active = selected === l.id;
+        return (
+          <button key={l.id} onClick={()=>onSelect(l.id)}
+            style={{ textAlign:'left', padding:'24px 20px', border:`2px solid ${active?T.accent:T.border}`, borderRadius:12, background:active?T.accentSubtle:T.white, cursor:'pointer', transition:'all 0.15s', fontFamily:'Plus Jakarta Sans,sans-serif', position:'relative' }}
+            onMouseEnter={e=>{if(!active)e.currentTarget.style.borderColor=T.accent;}}
+            onMouseLeave={e=>{if(!active)e.currentTarget.style.borderColor=T.border;}}>
+            {active && <div style={{ position:'absolute', top:12, right:12 }}><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill={T.accent}/><path d="M6 10l3 3 5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}
+            <div style={{ fontSize:26, marginBottom:12 }}>{l.emoji}</div>
+            <div style={{ fontSize:16, fontWeight:700, color:active?T.accent:T.primary, marginBottom:4 }}>{l.label}</div>
+            <div style={{ fontSize:12, color:T.accent, fontWeight:600, marginBottom:6 }}>{l.detail}</div>
+            <div style={{ fontSize:12, color:T.muted, lineHeight:1.55 }}>{l.desc}</div>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
+const Step4Optional = ({ data, onChange, onSubmit, onSkip }) => (
+  <div className="animate-in">
+    <div style={{ marginBottom:28 }}>
+      <div style={{ display:'inline-block', background:T.accentSubtle, color:T.accent, fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', padding:'4px 12px', borderRadius:100, marginBottom:14 }}>Step 4 · Optional</div>
+      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:700, color:T.primary, lineHeight:1.2, marginBottom:8 }}>A little more about you</h2>
+      <p style={{ fontSize:14, color:T.muted, lineHeight:1.6 }}>Skip if you'd like — your match is already ready. These details just help us fine-tune it.</p>
+    </div>
+    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:16 }}>
+      <div>
+        <label style={{ display:'block', fontSize:11, fontWeight:600, color:T.muted, textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:6 }}>Traveling with</label>
+        <select value={data.travelingWith||''} onChange={e=>onChange('travelingWith',e.target.value)}
+          style={{ width:'100%', height:44, padding:'0 14px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:14, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', outline:'none', background:T.white, cursor:'pointer' }}>
+          <option value="">Select...</option>
+          {['Solo','Partner','Family','Friends','Remote team'].map(v=><option key={v} value={v}>{v}</option>)}
+        </select>
+      </div>
+      <div>
+        <label style={{ display:'block', fontSize:11, fontWeight:600, color:T.muted, textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:6 }}>From</label>
+        <select value={data.country||''} onChange={e=>onChange('country',e.target.value)}
+          style={{ width:'100%', height:44, padding:'0 14px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:14, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', outline:'none', background:T.white, cursor:'pointer' }}>
+          <option value="">Select country...</option>
+          {['United States','United Kingdom','Canada','Australia','Germany','France','Japan','Singapore','Other'].map(v=><option key={v} value={v}>{v}</option>)}
+        </select>
+      </div>
+    </div>
+    <div style={{ marginBottom:28 }}>
+      <label style={{ display:'block', fontSize:11, fontWeight:600, color:T.muted, textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:6 }}>Anything specific? (optional)</label>
+      <textarea value={data.notes||''} onChange={e=>onChange('notes',e.target.value)} placeholder="e.g. I need a home office, prefer quieter streets, pet-friendly..."
+        style={{ width:'100%', minHeight:80, padding:'12px 14px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:14, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', outline:'none', background:T.white, resize:'vertical', boxSizing:'border-box' }}
+        onFocus={e=>e.target.style.borderColor=T.accent} onBlur={e=>e.target.style.borderColor=T.border}/>
+    </div>
+    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      <Btn onClick={onSubmit} full size="lg">See my matches →</Btn>
+      <button onClick={onSkip} style={{ background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', padding:'8px', textDecoration:'underline' }}>
+        Skip and see results
+      </button>
+    </div>
+  </div>
+);
+
+const MatchWizard = ({ onResults, onBack }) => {
+  const [step, setStep] = React.useState(1);
+  const [interests, setInterests] = React.useState([]);
+  const [travelStyle, setTravelStyle] = React.useState(null);
+  const [stayLength, setStayLength] = React.useState(null);
+  const [optional, setOptional] = React.useState({});
+
+  const toggleInterest = id => setInterests(prev => prev.includes(id) ? prev.filter(i=>i!==id) : [...prev, id]);
+  const updateOptional = (key, val) => setOptional(prev => ({ ...prev, [key]: val }));
+
+  const handleSubmit = () => {
+    const results = calculateMatches(interests, travelStyle, stayLength);
+    onResults({ results, interests, travelStyle, stayLength, optional });
   };
 
-  if (submitted) return (
-    <div className="animate-in" style={{ maxWidth:520, margin:'80px auto', padding:'0 24px', textAlign:'center' }}>
-      <div style={{ width:72, height:72, borderRadius:'50%', background:T.successBg, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', fontSize:30 }}>✓</div>
-      <Badge color={T.success} bg={T.successBg}>Confirmed!</Badge>
-      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:26, fontWeight:700, color:T.primary, margin:'14px 0 10px' }}>Concierge call booked!</h2>
-      <p style={{ fontSize:14, color:T.muted, lineHeight:1.7, marginBottom:28 }}>A 15-min video call to find your perfect listings.<br/>Check your email for the Google Meet link.</p>
-      <Btn onClick={onBack} full>Back to home</Btn>
+  return (
+    <div style={{ maxWidth:700, margin:'0 auto', padding:'40px 24px 60px' }}>
+      <button onClick={step===1?onBack:()=>setStep(s=>s-1)} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', marginBottom:28, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round"/></svg>
+        {step===1?'Back to home':'Previous'}
+      </button>
+      <MatchProgressBar step={step} total={4}/>
+      {step===1 && <Step1Interests selected={interests} onToggle={toggleInterest} onNext={()=>setStep(2)}/>}
+      {step===2 && <Step2Style selected={travelStyle} onSelect={v=>{setTravelStyle(v);setTimeout(()=>setStep(3),240);}}/>}
+      {step===3 && <Step3Length selected={stayLength} onSelect={v=>{setStayLength(v);setTimeout(()=>setStep(4),240);}}/>}
+      {step===4 && <Step4Optional data={optional} onChange={updateOptional} onSubmit={handleSubmit} onSkip={handleSubmit}/>}
     </div>
   );
+};
 
-  // Concierge booking step
-  if (qStep === QUESTIONS.length) return (
-    <div className="animate-in" style={{ maxWidth:680, margin:'0 auto', padding:'40px 24px 60px' }}>
-      <button onClick={()=>setQStep(QUESTIONS.length-1)} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', marginBottom:28, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round"/></svg>
-        Back
-      </button>
-      <Badge color={T.accent} bg={T.accentSubtle}>Last step</Badge>
-      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:26, fontWeight:700, color:T.primary, margin:'12px 0 6px' }}>Book a free concierge call</h2>
-      <p style={{ fontSize:14, color:T.muted, marginBottom:28, lineHeight:1.65 }}>15-min video call — we'll curate 3 listings perfectly matched to your answers.</p>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:32, alignItems:'start' }}>
+const NeighborhoodMatchCard = ({ match, rank, onViewStays }) => {
+  const { neighborhood:n, matchPercentage, matchReasons } = match;
+  const isFeatured = rank === 0;
+  return (
+    <div style={{ border:`${isFeatured?2:1.5}px solid ${isFeatured?T.accent:T.border}`, borderRadius:isFeatured?16:12, padding:isFeatured?'28px':'20px', background:isFeatured?`linear-gradient(135deg,${T.white} 0%,${T.accentSubtle} 100%)`:T.white, position:'relative', overflow:'hidden', boxShadow:isFeatured?'0 8px 32px rgba(196,113,74,0.15)':'none', transition:'box-shadow 0.2s' }}>
+      {isFeatured && (
+        <div style={{ position:'absolute', top:0, right:0, background:T.accent, color:'#fff', fontSize:10, fontWeight:700, letterSpacing:'0.08em', padding:'6px 16px', borderRadius:'0 16px 0 10px' }}>YOUR TOP MATCH</div>
+      )}
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, marginBottom:isFeatured?16:12 }}>
         <div>
-          <div style={{ fontSize:13, fontWeight:600, color:T.primary, marginBottom:12 }}>Select a time</div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:24 }}>
-            {SLOTS.map(s=>(
-              <button key={s.id} onClick={()=>s.avail&&setBooking({...booking,slot:s.id})} disabled={!s.avail}
-                style={{ padding:'10px 8px', borderRadius:8, border:`2px solid ${booking.slot===s.id?T.accent:T.border}`, background:!s.avail?T.surface:booking.slot===s.id?T.accentSubtle:T.white, cursor:s.avail?'pointer':'not-allowed', fontFamily:'Plus Jakarta Sans,sans-serif', opacity:s.avail?1:0.4, transition:'all 0.15s' }}>
-                <div style={{ fontSize:10, color:T.muted, marginBottom:2, fontWeight:500 }}>{s.day}</div>
-                <div style={{ fontSize:13, fontWeight:700, color:booking.slot===s.id?T.accent:T.primary }}>{s.time}</div>
-              </button>
-            ))}
-          </div>
-          <FormInput label="Your name" placeholder="Jane Morrison" value={booking.name} onChange={e=>setBooking({...booking,name:e.target.value})}/>
-          <FormInput label="Email address" type="email" placeholder="jane@example.com" value={booking.email} onChange={e=>setBooking({...booking,email:e.target.value})} hint="We'll send a confirmation + Google Meet link"/>
-          <Btn onClick={()=>booking.slot&&booking.name&&booking.email&&setSubmitted(true)}
-            disabled={!booking.slot||!booking.name||!booking.email} full size="lg">
-            {booking.slot&&booking.name&&booking.email?'Confirm Concierge Call →':'Fill in all fields to continue'}
-          </Btn>
+          <h3 style={{ fontFamily:'Fraunces,serif', fontSize:isFeatured?22:16, fontWeight:700, color:T.primary, marginBottom:3, lineHeight:1.2 }}>{n.name}</h3>
+          <div style={{ fontSize:12, color:T.muted }}>{n.nameKo} · {n.tagline}</div>
         </div>
-        <div style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:12, padding:'20px' }}>
-          <div style={{ fontSize:14, fontWeight:700, color:T.primary, marginBottom:14 }}>What we cover in the call</div>
-          {[
-            { icon:'🏠', title:'Listing curation', desc:'3 hand-picked listings based on your answers' },
-            { icon:'📋', title:'Visa guidance', desc:'Document checklist tailored to your visa type' },
-            { icon:'📱', title:'eSIM + bank setup', desc:'Everything you need to know for Day 1' },
-            { icon:'💬', title:'24/7 KakaoTalk', desc:'Unlimited follow-up questions via chat' },
-          ].map(item=>(
-            <div key={item.title} style={{ display:'flex', gap:10, marginBottom:14 }}>
-              <span style={{ fontSize:18, flexShrink:0, lineHeight:1.3 }}>{item.icon}</span>
-              <div>
-                <div style={{ fontSize:13, fontWeight:600, color:T.primary, marginBottom:2 }}>{item.title}</div>
-                <div style={{ fontSize:12, color:T.muted, lineHeight:1.5 }}>{item.desc}</div>
-              </div>
-            </div>
-          ))}
-          <div style={{ background:T.accentSubtle, borderRadius:8, padding:'12px 14px', border:`1px solid ${T.accentLight}` }}>
-            <div style={{ fontSize:12, fontWeight:700, color:T.accent, marginBottom:2 }}>Completely free</div>
-            <div style={{ fontSize:11, color:T.muted }}>First call is free. Payment only after booking.</div>
-          </div>
+        <div style={{ textAlign:'center', flexShrink:0 }}>
+          <div style={{ fontFamily:'Fraunces,serif', fontSize:isFeatured?30:22, fontWeight:700, color:T.accent, lineHeight:1 }}>{matchPercentage}%</div>
+          <div style={{ fontSize:10, color:T.muted, fontWeight:600, marginTop:2 }}>match</div>
         </div>
+      </div>
+      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:isFeatured?14:10 }}>
+        {n.vibes.map(v=><span key={v} style={{ fontSize:11, fontWeight:600, background:T.surface, color:T.muted, padding:'3px 10px', borderRadius:100, border:`1px solid ${T.border}` }}>{v}</span>)}
+        {n.metroLines.map(l=><span key={l} style={{ fontSize:10, fontWeight:700, background:'rgba(196,113,74,0.12)', color:T.accent, padding:'3px 8px', borderRadius:100 }}>Line {l}</span>)}
+      </div>
+      <div style={{ marginBottom:isFeatured?16:12 }}>
+        {matchReasons.slice(0,isFeatured?3:2).map((r,i)=>(
+          <div key={i} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:5, fontSize:isFeatured?13:12, color:T.n600 }}>
+            <div style={{ width:5, height:5, borderRadius:'50%', background:T.accent, flexShrink:0 }}/>
+            {r}
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
+        <div style={{ fontSize:isFeatured?13:12, color:T.muted }}>
+          <span style={{ fontWeight:700, color:T.primary }}>${n.avgPrice.min.toLocaleString()}–${n.avgPrice.max.toLocaleString()}</span>
+          <span> / month</span>
+        </div>
+        <Btn onClick={()=>onViewStays(n.staysId)} size={isFeatured?'md':'sm'}>View stays →</Btn>
       </div>
     </div>
   );
+};
+
+const MatchResults = ({ data, onViewStays, onRetake, onBack }) => {
+  const { results, interests } = data;
+  if (!results || results.length === 0) return (
+    <div style={{ maxWidth:520, margin:'80px auto', padding:'0 24px', textAlign:'center' }}>
+      <div style={{ fontSize:40, marginBottom:16 }}>🤔</div>
+      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:24, fontWeight:700, color:T.primary, marginBottom:12 }}>No matches found</h2>
+      <p style={{ fontSize:14, color:T.muted, marginBottom:24, lineHeight:1.7 }}>Try selecting different interests or a different travel style.</p>
+      <Btn onClick={onRetake} full>Retake the quiz →</Btn>
+    </div>
+  );
+
+  const [top, ...rest] = results;
+  const interestLabels = interests.map(id => INTERESTS.find(i=>i.id===id)?.title).filter(Boolean);
 
   return (
-    <div style={{ maxWidth:600, margin:'0 auto', padding:'40px 24px 60px' }}>
-      <button onClick={()=>qStep===0?onBack():setQStep(qStep-1)} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', marginBottom:28, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+    <div className="animate-in" style={{ maxWidth:860, margin:'0 auto', padding:'40px 24px 60px' }}>
+      <button onClick={onBack} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', marginBottom:32, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round"/></svg>
-        {qStep===0?'Back':'Previous'}
+        Back to home
       </button>
-      <ProgressBar step={qStep+1} total={QUESTIONS.length}/>
-      <div className="animate-in" key={qStep} style={{ marginBottom:28 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-          <div style={{ width:32, height:32, borderRadius:'50%', background:T.accentSubtle, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <span style={{ fontSize:13, fontWeight:700, color:T.accent }}>{qStep+1}</span>
-          </div>
-          <span style={{ fontSize:11, fontWeight:600, color:T.muted, letterSpacing:'0.06em', textTransform:'uppercase' }}>Quick Match · {qStep+1}/{QUESTIONS.length}</span>
+      <div style={{ textAlign:'center', marginBottom:44 }}>
+        <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:T.accentSubtle, border:`1px solid ${T.accentLight}`, borderRadius:100, padding:'5px 16px', marginBottom:16 }}>
+          <span style={{ fontSize:12, fontWeight:600, color:T.accent }}>Your Seoul match is ready ✦</span>
         </div>
-        <h2 style={{ fontFamily:'Fraunces,serif', fontSize:26, fontWeight:700, color:T.primary, lineHeight:1.3 }}>{q.title}</h2>
+        <h1 style={{ fontFamily:'Fraunces,serif', fontSize:'clamp(26px,4vw,36px)', fontWeight:700, color:T.primary, marginBottom:10, lineHeight:1.2 }}>
+          We found your <span style={{ color:T.accent }}>perfect match</span>
+        </h1>
+        {interestLabels.length > 0 && (
+          <p style={{ fontSize:14, color:T.muted, lineHeight:1.65, maxWidth:480, margin:'0 auto' }}>
+            Based on your interest in {interestLabels.length > 1
+              ? `${interestLabels.slice(0,-1).join(', ')} and ${interestLabels[interestLabels.length-1]}`
+              : interestLabels[0]}.
+          </p>
+        )}
       </div>
-      {q.type==='date' && (
-        <div className="animate-in">
-          <input type="date" value={dateVal} onChange={e=>setDateVal(e.target.value)}
-            style={{ width:'100%', height:52, padding:'0 18px', border:`2px solid ${dateVal?T.accent:T.border}`, borderRadius:10, fontSize:16, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', outline:'none', marginBottom:20, background:T.white, transition:'border-color 0.15s' }}
-            onFocus={e=>e.target.style.borderColor=T.accent} onBlur={e=>{if(!dateVal)e.target.style.borderColor=T.border;}}/>
-          <Btn onClick={()=>dateVal&&pickChoice(dateVal)} disabled={!dateVal} full size="lg">Next →</Btn>
+      <div style={{ marginBottom:32 }}>
+        <NeighborhoodMatchCard match={top} rank={0} onViewStays={onViewStays}/>
+      </div>
+      {rest.length > 0 && (
+        <div>
+          <div style={{ fontSize:12, fontWeight:700, color:T.muted, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:16 }}>Also a great fit</div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))', gap:14 }}>
+            {rest.map((m,i)=><NeighborhoodMatchCard key={m.neighborhood.id} match={m} rank={i+1} onViewStays={onViewStays}/>)}
+          </div>
         </div>
       )}
-      {q.type==='choice' && (
-        <div className="animate-in" style={{ display:'flex', flexDirection:'column', gap:10 }}>
-          {q.options.map(opt=>(
-            <button key={opt.value} onClick={()=>pickChoice(opt.value)}
-              style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'16px 18px', border:`2px solid ${answers[q.key]===opt.value?T.accent:T.border}`, borderRadius:10, background:answers[q.key]===opt.value?T.accentSubtle:T.white, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s' }}
-              onMouseEnter={e=>{if(answers[q.key]!==opt.value)e.currentTarget.style.borderColor=T.accent;}}
-              onMouseLeave={e=>{if(answers[q.key]!==opt.value)e.currentTarget.style.borderColor=T.border;}}>
-              <div style={{ textAlign:'left' }}>
-                <div style={{ fontSize:15, fontWeight:600, color:T.primary }}>{opt.icon&&<span style={{ marginRight:8 }}>{opt.icon}</span>}{opt.label}</div>
-                <div style={{ fontSize:12, color:T.muted, marginTop:2 }}>{opt.sub}</div>
-              </div>
-              {answers[q.key]===opt.value && <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill={T.accent}/><path d="M6 10l3 3 5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-            </button>
-          ))}
-        </div>
-      )}
+      <div style={{ textAlign:'center', marginTop:44 }}>
+        <button onClick={onRetake} style={{ background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', textDecoration:'underline' }}>
+          Retake with different answers
+        </button>
+      </div>
     </div>
   );
 };
@@ -1151,7 +1409,7 @@ const LandingPage = ({ onQuickMatch, onNeighborhood }) => (
             Start Quick Match →
           </button>
           <p style={{ fontSize:13, color:'#8B7355', margin:0 }}>
-            Answer 5 quick questions. Get matched with your perfect stay in 24 hours.
+            Answer a few questions. Get your perfect Seoul match in 60 seconds.
           </p>
         </div>
 
@@ -1203,13 +1461,13 @@ const App = () => {
     <div style={{ minHeight:'100vh', background:T.surface }}>
       <NavBar
         onHome={()=>navigate('landing')}
-        onQuickMatch={()=>navigate('quick-match')}
+        onQuickMatch={()=>navigate('match')}
         scrolled={scrolled}
       />
 
       {route.page==='landing' && (
         <LandingPage
-          onQuickMatch={()=>navigate('quick-match')}
+          onQuickMatch={()=>navigate('match')}
           onNeighborhood={id=>navigate('stays',{neighborhoodId:id})}
         />
       )}
@@ -1229,9 +1487,18 @@ const App = () => {
         />
       )}
 
-      {route.page==='quick-match' && (
-        <QuickMatch
-          onDone={()=>navigate('landing')}
+      {route.page==='match' && (
+        <MatchWizard
+          onResults={data=>navigate('match-results',{matchData:data})}
+          onBack={()=>navigate('landing')}
+        />
+      )}
+
+      {route.page==='match-results' && route.matchData && (
+        <MatchResults
+          data={route.matchData}
+          onViewStays={nbhdId=>navigate('stays',{neighborhoodId:nbhdId})}
+          onRetake={()=>navigate('match')}
           onBack={()=>navigate('landing')}
         />
       )}
