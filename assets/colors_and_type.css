@@ -1,0 +1,333 @@
+/**
+ * 커먼쿤스트 동네 — Marketplace Design System
+ * Design Tokens: Colors & Typography
+ * Source: Marketplace Design System 2.0 (Community) — Codelevate
+ */
+
+/* ============================================================
+   GOOGLE FONTS IMPORT
+   Primary: Roboto (all UI text)
+   Secondary: Inter (labels, callouts)
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ============================================================
+   BASE COLOR TOKENS
+   ============================================================ */
+:root {
+  /* ============================================================
+     커먼쿤스트 동네 — WARM KOREAN-INSPIRED PALETTE
+     ============================================================ */
+
+  /* --- Accent / Terracotta Scale (Primary CTA) --- */
+  --color-accent-900:  #5C2E16;
+  --color-accent-800:  #7A3D1E;
+  --color-accent-700:  #9C5030;
+  --color-accent-600:  #B4623E;
+  --color-accent-500:  #C4714A;   /* Brand accent / CTA */
+  --color-accent-400:  #D08B6A;
+  --color-accent-300:  #DDA98A;
+  --color-accent-200:  #EAC7AE;
+  --color-accent-100:  #F5E2D4;
+  --color-accent-050:  #FBF3EE;
+
+  /* --- Neutral / Warm Brown Scale --- */
+  --color-neutral-900: #2C2420;   /* Deep charcoal brown / primary text */
+  --color-neutral-800: #3E332D;
+  --color-neutral-700: #564840;
+  --color-neutral-600: #6E5E54;
+  --color-neutral-500: #8B7355;   /* Muted / secondary text */
+  --color-neutral-400: #A8917E;   /* Placeholder text */
+  --color-neutral-300: #C4B3A3;   /* Disabled text */
+  --color-neutral-200: #D8CFC5;   /* Subtle border */
+  --color-neutral-100: #E8E0D5;   /* Divider / border — warm beige */
+  --color-neutral-050: #FAF7F2;   /* Page background — cream white */
+
+  /* --- Success / Muted Green --- */
+  --color-success-700: #2F5C3A;
+  --color-success-600: #3A6B47;
+  --color-success-500: #4A7C59;   /* Base success — muted green */
+  --color-success-400: #6A9B78;
+  --color-success-300: #92BA9E;
+  --color-success-200: #B8D4C0;
+  --color-success-100: #D5E8DB;
+  --color-success-050: #EEF6F1;
+
+  /* --- Warning / Amber --- */
+  --color-warning-500: #C4890A;   /* Warm amber */
+  --color-warning-050: #FBF5E6;
+
+  /* --- Error / Warm Red --- */
+  --color-error-700:   #8C2D1E;
+  --color-error-500:   #C04035;   /* Warm red */
+  --color-error-200:   #E8B4AE;
+  --color-error-050:   #FAF0EE;
+
+  /* --- Pure --- */
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+
+  /* ============================================================
+     SEMANTIC COLOR TOKENS — LIGHT MODE
+     ============================================================ */
+
+  /* Backgrounds */
+  --bg-page:             var(--color-neutral-050);   /* #FAF7F2 cream */
+  --bg-surface:          var(--color-white);
+  --bg-primary:          var(--color-neutral-900);   /* #2C2420 deep brown */
+  --bg-primary-hover:    var(--color-neutral-800);   /* #3E332D */
+  --bg-accent:           var(--color-accent-500);    /* #C4714A terracotta */
+  --bg-accent-hover:     var(--color-accent-600);    /* #B4623E */
+  --bg-accent-disabled:  var(--color-accent-100);    /* #F5E2D4 */
+  --bg-success:          var(--color-success-050);   /* #EEF6F1 */
+  --bg-warning:          var(--color-warning-050);   /* #FBF5E6 */
+  --bg-error:            var(--color-error-050);     /* #FAF0EE */
+
+  /* Foreground / Text */
+  --fg-primary:          var(--color-neutral-900);   /* #2C2420 */
+  --fg-secondary:        var(--color-neutral-500);   /* #8B7355 */
+  --fg-placeholder:      var(--color-neutral-400);   /* #A8917E */
+  --fg-disabled:         var(--color-neutral-300);   /* #C4B3A3 */
+  --fg-on-primary:       var(--color-white);
+  --fg-link:             var(--color-accent-500);    /* #C4714A terracotta */
+  --fg-link-hover:       var(--color-accent-600);    /* #B4623E */
+  --fg-success:          var(--color-success-500);   /* #4A7C59 */
+  --fg-warning:          var(--color-warning-500);
+  --fg-error:            var(--color-error-500);
+
+  /* Borders */
+  --border-default:      var(--color-neutral-100);   /* #E8E0D5 warm beige */
+  --border-strong:       var(--color-neutral-200);   /* #D8CFC5 */
+  --border-accent:       var(--color-accent-500);    /* #C4714A */
+  --border-focus:        var(--color-accent-500);
+  --border-success:      var(--color-success-500);
+  --border-warning:      var(--color-warning-500);
+  --border-error:        var(--color-error-500);
+
+  /* Icons */
+  --icon-default:        var(--color-neutral-900);
+  --icon-muted:          var(--color-neutral-500);
+  --icon-accent:         var(--color-accent-500);
+  --icon-on-primary:     var(--color-white);
+
+  /* ============================================================
+     DARK MODE SEMANTIC TOKENS
+     ============================================================ */
+  --dark-bg-page:        #1A1410;
+  --dark-bg-surface:     #2C2420;
+  --dark-border:         #3E332D;
+  --dark-fg-primary:     #FAF7F2;
+  --dark-fg-secondary:   #8B7355;
+
+  /* ============================================================
+     ELEVATION / SHADOWS
+     ============================================================ */
+  --shadow-xs:   0px 1px 2px 0px rgba(0,0,0,0.05);
+  --shadow-sm:   0px 2px 4px 0px rgba(0,0,0,0.06), 0px 1px 2px 0px rgba(0,0,0,0.04);
+  --shadow-md:   0px 4px 6px 0px rgba(0,0,0,0.10), 0px 2px 4px 0px rgba(0,0,0,0.06);
+  --shadow-lg:   0px 8px 16px 0px rgba(0,0,0,0.10), 0px 4px 6px 0px rgba(0,0,0,0.06);
+  --shadow-xl:   0px 10px 15px 0px rgba(0,0,0,0.10), 0px 4px 6px 0px rgba(0,0,0,0.05);
+  --shadow-2xl:  0px 25px 50px 0px rgba(0,0,0,0.25);
+  --shadow-inner: inset 0px 2px 4px 0px rgba(0,0,0,0.06);
+
+  /* ============================================================
+     BORDER RADIUS
+     ============================================================ */
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;    /* Cards, inputs */
+  --radius-xl:   12px;   /* Listing card images */
+  --radius-2xl:  16px;
+  --radius-3xl:  24px;
+  --radius-pill: 100px;  /* Badges, pills, tags */
+
+  /* ============================================================
+     SPACING SCALE
+     ============================================================ */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  28px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ============================================================
+     TYPOGRAPHY — FONT FAMILIES
+     ============================================================ */
+  --font-primary:   'Roboto', sans-serif;
+  --font-secondary: 'Inter', sans-serif;
+
+  /* ============================================================
+     TYPOGRAPHY — SEMANTIC STYLES
+     ============================================================ */
+
+  /* Headings */
+  --type-h-size:     32px;
+  --type-h-weight:   500;
+  --type-h-lh:       1.4;
+
+  --type-h1-size:    28px;
+  --type-h1-weight:  500;
+  --type-h1-lh:      1.4;
+
+  --type-h2-size:    24px;
+  --type-h2-weight:  500;
+  --type-h2-lh:      1.4;
+
+  --type-h3-size:    20px;
+  --type-h3-weight:  500;
+  --type-h3-lh:      1.4;
+
+  --type-h4-size:    18px;
+  --type-h4-weight:  500;
+  --type-h4-lh:      1.4;
+
+  --type-h5-size:    16px;
+  --type-h5-weight:  600;
+  --type-h5-lh:      1.4;
+
+  /* Body */
+  --type-body1-size:     16px;
+  --type-body1-weight:   400;
+  --type-body1-med-weight: 500;
+  --type-body1-lh:       1.4;
+
+  --type-body2-size:     14px;
+  --type-body2-weight:   400;
+  --type-body2-med-weight: 500;
+  --type-body2-lh:       1.4;
+
+  --type-body3-size:     12px;
+  --type-body3-weight:   400;
+  --type-body3-med-weight: 500;
+  --type-body3-lh:       1.4;
+
+  /* Labels */
+  --type-label-size:     10px;
+  --type-label-weight:   400;
+  --type-label-med-weight: 500;
+  --type-label-lh:       1.4;
+
+  /* Buttons */
+  --type-btn1-size:      16px;
+  --type-btn1-weight:    600;
+  --type-btn2-size:      14px;
+  --type-btn2-weight:    600;
+  --type-btn3-size:      12px;
+  --type-btn3-weight:    600;
+
+  /* Links */
+  --type-link1-size:     14px;
+  --type-link2-size:     12px;
+  --type-link-weight:    500;
+
+  /* ============================================================
+     COMPONENT SIZES
+     ============================================================ */
+  --nav-height:      64px;
+  --input-height-sm: 32px;
+  --input-height-md: 38px;
+  --input-height-lg: 44px;
+  --input-height-xl: 52px;
+
+  --btn-height-sm:   32px;
+  --btn-height-md:   38px;
+  --btn-height-lg:   44px;
+  --btn-height-xl:   52px;
+
+  --avatar-sm:   24px;
+  --avatar-md:   32px;
+  --avatar-lg:   40px;
+  --avatar-xl:   48px;
+}
+
+/* ============================================================
+   BASE ELEMENT STYLES
+   ============================================================ */
+body {
+  font-family: var(--font-primary);
+  font-size: var(--type-body1-size);
+  font-weight: var(--type-body1-weight);
+  line-height: var(--type-body1-lh);
+  color: var(--fg-primary);
+  background-color: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+
+h1, .h1 {
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: var(--type-h1-lh);
+  color: var(--fg-primary);
+}
+
+h2, .h2 {
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  line-height: var(--type-h2-lh);
+  color: var(--fg-primary);
+}
+
+h3, .h3 {
+  font-size: var(--type-h3-size);
+  font-weight: var(--type-h3-weight);
+  line-height: var(--type-h3-lh);
+  color: var(--fg-primary);
+}
+
+h4, .h4 {
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  line-height: var(--type-h4-lh);
+  color: var(--fg-primary);
+}
+
+h5, .h5 {
+  font-size: var(--type-h5-size);
+  font-weight: var(--type-h5-weight);
+  line-height: var(--type-h5-lh);
+  color: var(--fg-primary);
+}
+
+p, .body1 {
+  font-size: var(--type-body1-size);
+  font-weight: var(--type-body1-weight);
+  line-height: var(--type-body1-lh);
+}
+
+.body2 {
+  font-size: var(--type-body2-size);
+  line-height: var(--type-body2-lh);
+}
+
+.body3, small {
+  font-size: var(--type-body3-size);
+  line-height: var(--type-body3-lh);
+}
+
+.label {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+}
+
+.text-muted { color: var(--fg-secondary); }
+.text-primary { color: var(--fg-link); }
+.text-success { color: var(--fg-success); }
+.text-warning { color: var(--fg-warning); }
+.text-error { color: var(--fg-error); }
+
+a {
+  color: var(--fg-link);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--fg-link-hover);
+}
