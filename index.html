@@ -4,1298 +4,946 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dongne — Live in Korea like a local</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Roboto', sans-serif; background: #FAF7F2; color: #2C2420; -webkit-font-smoothing: antialiased; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #FAF7F2; color: #2C2420; -webkit-font-smoothing: antialiased; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: #FAF7F2; }
   ::-webkit-scrollbar-thumb { background: #D8CFC5; border-radius: 3px; }
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; } to { opacity: 1; }
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
-  }
+  @keyframes fadeSlideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+  @keyframes pinBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px);} }
   .animate-in { animation: fadeSlideUp 0.35s ease both; }
-  .fade-in    { animation: fadeIn 0.25s ease both; }
-  input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
-  input::placeholder { color: #A8917E; }
-  textarea::placeholder { color: #A8917E; }
+  .fade-in { animation: fadeIn 0.25s ease both; }
+  input[type="date"]::-webkit-calendar-picker-indicator { opacity:0.5; cursor:pointer; }
+  input::placeholder, textarea::placeholder { color:#A8917E; }
+  .map-pin { cursor:pointer; transition: all 0.2s ease; }
+  .map-pin:hover .pin-dot { r:9; fill:#2C2420; }
+  .map-pin:hover .pin-label { font-weight:700; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
 
-// ─── TOKENS ─────────────────────────────────────────────────────────────────
+// ─── TOKENS ──────────────────────────────────────────────────────────────────
 const T = {
-  accent:      '#C4714A',
-  accentHov:   '#B4623E',
-  accentLight: '#F5E2D4',
-  accentSubtle:'#FBF3EE',
-  primary:     '#2C2420',
-  n800:        '#3E332D',
-  n700:        '#564840',
-  n600:        '#6E5E54',
-  muted:       '#8B7355',
-  placeholder: '#A8917E',
-  disabled:    '#C4B3A3',
-  border:      '#E8E0D5',
-  borderStrong:'#D8CFC5',
-  surface:     '#FAF7F2',
-  white:       '#FFFFFF',
-  success:     '#4A7C59',
-  successBg:   '#EEF6F1',
-  warning:     '#C4890A',
-  warningBg:   '#FBF5E6',
-  blue:        '#2C71F6',
-  blueBg:      '#F5F8FF',
+  accent:'#C4714A', accentHov:'#B4623E', accentLight:'#F5E2D4', accentSubtle:'#FBF3EE',
+  primary:'#2C2420', n800:'#3E332D', n700:'#564840', n600:'#6E5E54',
+  muted:'#8B7355', placeholder:'#A8917E', disabled:'#C4B3A3',
+  border:'#E8E0D5', borderStrong:'#D8CFC5', surface:'#FAF7F2', white:'#FFFFFF',
+  success:'#4A7C59', successBg:'#EEF6F1', warning:'#C4890A', warningBg:'#FBF5E6',
+  blue:'#2C71F6', blueBg:'#F5F8FF', river:'#B8D4E3',
 };
 
-// ─── I18N ────────────────────────────────────────────────────────────────────
-const LANGS = [
-  { code: 'en', label: 'English',  flag: '🇺🇸' },
-  { code: 'zh', label: '中文',      flag: '🇨🇳' },
-  { code: 'ja', label: '日本語',    flag: '🇯🇵' },
-  { code: 'es', label: 'Español',  flag: '🇪🇸' },
-  { code: 'de', label: 'Deutsch',  flag: '🇩🇪' },
+// ─── NEIGHBORHOODS DATA ───────────────────────────────────────────────────────
+const NEIGHBORHOODS_DATA = [
+  { id:'yeonnam',  name:'Yeonnam-dong',        ko:'연남동',      desc:'Creative & chill. Indie cafés, vinyl shops, and the park life.',                           mapX:195, mapY:222 },
+  { id:'hongdae',  name:'Hongdae',              ko:'홍대',        desc:'Nonstop energy. Street art, live music, and late-night eats.',                            mapX:175, mapY:240 },
+  { id:'itaewon',  name:'Itaewon/Haebangchon',  ko:'이태원/해방촌', desc:"Seoul's most international village. Rooftop bars and global food.",                   mapX:285, mapY:260 },
+  { id:'seongsu',  name:'Seongsu-dong',         ko:'성수동',      desc:'Brooklyn of Seoul. Converted warehouses, design studios, coffee labs.',                  mapX:375, mapY:248 },
+  { id:'gangnam',  name:'Gangnam',              ko:'강남',        desc:'Business hub. Sleek towers, premium clinics, and K-beauty flagships.',                   mapX:332, mapY:318 },
+  { id:'jamsil',   name:'Jamsil/Songpa',        ko:'잠실/송파',   desc:'Family-friendly lakeside. Lotte Tower, Olympic Park, and calm vibes.',                  mapX:435, mapY:295 },
+  { id:'mapo',     name:'Mapo/Mangwon',         ko:'마포/망원',   desc:'Local market life. The neighborhood Seoulites actually live in.',                       mapX:148, mapY:242 },
+  { id:'euljiro',  name:'Euljiro/Jongno',       ko:'을지로/종로',  desc:'Old meets new. Hidden bars in 1970s alleys, palace walks.',                            mapX:282, mapY:208 },
+  { id:'yongsan',  name:'Yongsan',              ko:'용산',        desc:'Central & connected. The new cultural heart of Seoul.',                                   mapX:255, mapY:268 },
+  { id:'hannam',   name:'Hannam-dong',          ko:'한남동',      desc:'Upscale & quiet. Galleries, embassies, and tree-lined streets.',                        mapX:308, mapY:268 },
 ];
 
-const COPY = {
-  en: {
-    navCta: 'Quick Match',
-    login: 'Log in', signup: 'Sign up',
-    heroTag: 'Seoul · 30-day+ stays · Foreigners only',
-    heroH1: ['The platform for', 'long-term living', 'in Korea.'],
-    heroAccent: 'long-term living',
-    heroSub: 'From visa to eSIM to bank account — everything you need to live like a local, all in one place.',
-    heroCta: 'Start Quick Match →',
-    heroBrowse: 'Browse listings',
-    trustItems: ['✓ Foreigner-verified listings only', '✓ English-speaking concierge', '✓ International card payments'],
-    listingsTitle: 'Verified long-stay listings',
-    listingsSub: 'Foreigner-approved hosts · English communication guaranteed',
-    quickMatchCta: 'Get matched fast →',
-    filterAll: 'All',
-    nights: '/ mo',
-    reviews: 'reviews',
-    neighborhoodTitle: 'Which neighborhood fits your vibe?',
-    neighborhoodSub: 'Compare lifestyles and find the right area for you.',
-    detailBack: 'Back to listings',
-    detailBadge1: 'Foreigner-friendly',
-    detailBadge2: 'English host',
-    detailBadge3: 'Instant booking',
-    hostLabel: 'Host',
-    superhost: 'Superhost · 100% response · 3 yrs',
-    amenitiesTitle: 'Amenities',
-    reviewsTitle: 'Guest reviews',
-    stayLength: 'Stay duration',
-    moveInDate: 'Move-in date',
-    reserveBtn: 'Request reservation',
-    reserveNote: "You won't be charged yet · Concierge confirms within 24h",
-    quickMatchWidget: 'Get matched faster',
-    quickMatchWidgetSub: 'Answer 5 questions and we\'ll pick 3 listings for you',
-    quickMatchWidgetBtn: 'Start Quick Match →',
-    qmTitle: 'Quick Match',
-    qmQ1: 'When are you arriving in Korea?',
-    qmQ2: 'How long are you planning to stay?',
-    qmQ3: 'What\'s your visa status?',
-    qmQ4: 'What\'s your monthly budget? (incl. accommodation)',
-    qmQ5: 'What kind of neighborhood vibe do you want?',
-    qmNext: 'Next →',
-    qmBack: 'Previous',
-    qmBackFirst: 'Back',
-    conciergeTitle: 'Book a Concierge Call',
-    conciergeSub: 'Free 15-min video call — we\'ll curate 3 listings perfectly matched to your Quick Match answers.',
-    selectTime: 'Select a time',
-    yourName: 'Your name',
-    yourNameP: 'Jane Morrison',
-    yourEmail: 'Email address',
-    yourEmailP: 'jane@example.com',
-    emailHint: 'We\'ll send a confirmation + Google Meet link',
-    confirmBtn: 'Confirm Concierge Call →',
-    confirmDisabled: 'Fill in all fields to continue',
-    whatWeHelp: 'What we cover in the call',
-    successTitle: 'Concierge call booked!',
-    successSub: 'A 15-min video call to find your perfect listings.\nWe sent a Google Calendar invite to your email.',
-    bannerCta: 'Start Quick Match →',
-    bannerTag: 'Only 5 questions · Takes 2 minutes',
-    bannerTitle: 'Let us find your perfect match',
-    bannerSub: 'Tell us your neighborhood vibe, budget, and visa status.',
-    today: 'Today', tomorrow: 'Tomorrow', dayAfter: 'Day after',
-    unavailable: 'Unavailable',
-    qmDurations: [
-      { value: '1mo', label: '~1 month', sub: '30–45 days' },
-      { value: '2mo', label: '~2 months', sub: '45–90 days' },
-      { value: '3mo', label: '3 months+', sub: '90+ days' },
-      { value: '1yr', label: '1 year+', sub: 'F-1-D visa required' },
-    ],
-    qmVisas: [
-      { value: 'b2', label: 'B-2 Tourist', sub: 'Up to 90 days, visa-free' },
-      { value: 'f1d', label: 'F-1-D Workcation', sub: 'Up to 1 year, $66k+ income req.' },
-      { value: 'd4', label: 'D-4 Student', sub: 'Language school enrollment' },
-      { value: 'unsure', label: 'Not sure yet', sub: 'Concierge will guide you' },
-    ],
-    qmBudgets: [
-      { value: 'low', label: 'Under $800', sub: '~₩1,000,000' },
-      { value: 'mid', label: '$800–1,200', sub: '~₩1,000–1,500,000' },
-      { value: 'high', label: '$1,200–2,000', sub: '~₩1,500–2,500,000' },
-      { value: 'premium', label: '$2,000+', sub: '₩2,500,000+' },
-    ],
-    qmVibes: [
-      { value: 'creative', label: 'Creative & Trendy', sub: 'Yeonnam · Seongsu', icon: '🎨' },
-      { value: 'expat', label: 'Expat Hub', sub: 'Haebangchon · Itaewon', icon: '🌍' },
-      { value: 'business', label: 'Business Central', sub: 'Gangnam · Yeoksam', icon: '💼' },
-      { value: 'quiet', label: 'Quiet & Local', sub: 'Mangwon · Hapjeong', icon: '🌿' },
-    ],
-    callHelp: [
-      { icon: '🏠', title: 'Listing curation', desc: '3 hand-picked listings based on your Quick Match answers' },
-      { icon: '📋', title: 'Visa guidance', desc: 'Document checklist tailored to your visa type' },
-      { icon: '📱', title: 'eSIM + bank setup', desc: 'Everything you need to know for Day 1 in Korea' },
-      { icon: '💬', title: '24/7 KakaoTalk', desc: 'Unlimited follow-up questions via chat' },
-    ],
-    itsFree: 'Completely free',
-    itsFreeNote: 'First call is free. Payment only after booking.',
-    neighborhoods: [
-      { id: 'yeonnam', name: 'Yeonnam-dong', ko: '연남동', vibe: 'Creative & Café', desc: 'Next to Hongdae — indie cafés, galleries, and bookshops in quiet alleyways.', tags: ['Café paradise', 'Quiet streets', 'Artists\' quarter'], price: '$900–1,200/mo', score: 98, color: T.accent },
-      { id: 'seongsu', name: 'Seongsu-dong', ko: '성수동', vibe: 'Trendy & Industrial', desc: 'Seoul\'s Brooklyn. Packed with pop-ups, brunch spots, and co-working spaces.', tags: ['Trendy vibes', 'Co-working', 'Café tours'], price: '$1,000–1,400/mo', score: 95, color: T.success },
-      { id: 'hbc', name: 'Haebangchon', ko: '해방촌', vibe: 'Expat Hub', desc: 'Highest foreigner density in Seoul. English menus, international grocery stores.', tags: ['Many expats', 'English-friendly', 'International food'], price: '$750–1,100/mo', score: 92, color: T.blue },
-      { id: 'gangnam', name: 'Gangnam-gu', ko: '강남', vibe: 'Business District', desc: 'Best transport links. Ideal for business nomads with frequent meetings.', tags: ['Great transit', 'Business hub', 'Premium amenities'], price: '$1,300–1,800/mo', score: 88, color: T.muted },
-    ],
-  },
-  zh: {
-    navCta: '快速匹配',
-    login: '登录', signup: '注册',
-    heroTag: '首尔 · 30天以上住宿 · 仅限外国人',
-    heroH1: ['专为外国人设计的', '韩国长期居住', '一站式平台'],
-    heroAccent: '韩国长期居住',
-    heroSub: '从签证到eSIM到银行账户——像本地人一样生活所需的一切，一站搞定。',
-    heroCta: '开始快速匹配 →',
-    heroBrowse: '浏览房源',
-    trustItems: ['✓ 仅限外国人认证房源', '✓ 英语专属礼宾服务', '✓ 支持国际信用卡'],
-    listingsTitle: '认证长租房源',
-    listingsSub: '外国人认证房东 · 保证英语沟通',
-    quickMatchCta: '立即获取匹配 →',
-    filterAll: '全部',
-    nights: '/ 月',
-    reviews: '条评价',
-    neighborhoodTitle: '哪个街区适合你？',
-    neighborhoodSub: '比较生活方式，找到适合你的区域。',
-    detailBack: '返回列表',
-    detailBadge1: '外国人友好',
-    detailBadge2: '英语房东',
-    detailBadge3: '即时预订',
-    hostLabel: '房东',
-    superhost: '超赞房东 · 100%回复 · 3年经验',
-    amenitiesTitle: '设施',
-    reviewsTitle: '住客评价',
-    stayLength: '居住时长',
-    moveInDate: '入住日期',
-    reserveBtn: '提交预订申请',
-    reserveNote: '暂不收费 · 礼宾在24小时内确认',
-    quickMatchWidget: '更快找到匹配',
-    quickMatchWidgetSub: '回答5个问题，我们为您精选3套房源',
-    quickMatchWidgetBtn: '开始快速匹配 →',
-    qmTitle: '快速匹配',
-    qmQ1: '您何时抵达韩国？',
-    qmQ2: '您计划住多长时间？',
-    qmQ3: '您的签证状态是什么？',
-    qmQ4: '您的月预算是多少？（含住宿）',
-    qmQ5: '您想要什么样的街区氛围？',
-    qmNext: '下一步 →',
-    qmBack: '上一步',
-    qmBackFirst: '返回',
-    conciergeTitle: '预约礼宾电话咨询',
-    conciergeSub: '免费15分钟视频通话——我们将根据您的快速匹配答案精选3套房源。',
-    selectTime: '选择时间',
-    yourName: '您的姓名',
-    yourNameP: '张三',
-    yourEmail: '电子邮件',
-    yourEmailP: 'zhang@example.com',
-    emailHint: '我们将发送确认邮件和Google Meet链接',
-    confirmBtn: '确认礼宾电话 →',
-    confirmDisabled: '请填写所有字段',
-    whatWeHelp: '通话内容',
-    successTitle: '礼宾电话已预约！',
-    successSub: '15分钟视频通话，为您找到完美房源。\n确认邮件已发送至您的邮箱。',
-    bannerCta: '开始快速匹配 →',
-    bannerTag: '仅需5个问题 · 2分钟完成',
-    bannerTitle: '让我们为您找到完美匹配',
-    bannerSub: '告诉我们您的街区偏好、预算和签证状态。',
-    today: '今天', tomorrow: '明天', dayAfter: '后天',
-    unavailable: '不可用',
-    qmDurations: [
-      { value: '1mo', label: '约1个月', sub: '30–45天' },
-      { value: '2mo', label: '约2个月', sub: '45–90天' },
-      { value: '3mo', label: '3个月以上', sub: '90天以上' },
-      { value: '1yr', label: '1年以上', sub: '需要F-1-D签证' },
-    ],
-    qmVisas: [
-      { value: 'b2', label: 'B-2旅游签证', sub: '最多90天，免签' },
-      { value: 'f1d', label: 'F-1-D工作度假', sub: '最多1年，需$66k+收入' },
-      { value: 'd4', label: 'D-4学生签证', sub: '需要语言学校注册' },
-      { value: 'unsure', label: '还不确定', sub: '礼宾将为您指导' },
-    ],
-    qmBudgets: [
-      { value: 'low', label: '800美元以下', sub: '约₩1,000,000' },
-      { value: 'mid', label: '$800–1,200', sub: '约₩1,000–1,500,000' },
-      { value: 'high', label: '$1,200–2,000', sub: '约₩1,500–2,500,000' },
-      { value: 'premium', label: '$2,000以上', sub: '₩2,500,000以上' },
-    ],
-    qmVibes: [
-      { value: 'creative', label: '创意潮流', sub: '延南洞 · 圣水洞', icon: '🎨' },
-      { value: 'expat', label: '外籍人士聚集地', sub: '解放村 · 梨泰院', icon: '🌍' },
-      { value: 'business', label: '商务中心', sub: '江南 · 驿三', icon: '💼' },
-      { value: 'quiet', label: '安静本地', sub: '望遠洞 · 合井', icon: '🌿' },
-    ],
-    callHelp: [
-      { icon: '🏠', title: '房源精选', desc: '根据快速匹配答案手选3套房源' },
-      { icon: '📋', title: '签证指导', desc: '根据您的签证类型定制文件清单' },
-      { icon: '📱', title: 'eSIM和银行开户', desc: '入韩第一天所需的一切' },
-      { icon: '💬', title: '24/7 KakaoTalk', desc: '随时通过聊天提问' },
-    ],
-    itsFree: '完全免费',
-    itsFreeNote: '第一次通话免费。仅在预订后付款。',
-    neighborhoods: [
-      { id: 'yeonnam', name: '延南洞', ko: '연남동', vibe: '创意咖啡', desc: '紧邻弘大——安静小巷里有独立咖啡馆、画廊和书店。', tags: ['咖啡天堂', '安静街道', '艺术区'], price: '$900–1,200/月', score: 98, color: T.accent },
-      { id: 'seongsu', name: '圣水洞', ko: '성수동', vibe: '潮流工业', desc: '首尔的布鲁克林。满是快闪店、早午餐和联合办公空间。', tags: ['潮流氛围', '联合办公', '咖啡巡游'], price: '$1,000–1,400/月', score: 95, color: T.success },
-      { id: 'hbc', name: '解放村', ko: '해방촌', vibe: '外籍人士聚集地', desc: '首尔外籍人士密度最高。英语菜单，国际超市随处可见。', tags: ['外籍人士多', '英语友好', '国际美食'], price: '$750–1,100/月', score: 92, color: T.blue },
-      { id: 'gangnam', name: '江南区', ko: '강남', vibe: '商务区', desc: '交通最便捷，适合商务往来频繁的数字游民。', tags: ['交通便利', '商务中心', '高端设施'], price: '$1,300–1,800/月', score: 88, color: T.muted },
-    ],
-  },
-  ja: {
-    navCta: 'クイックマッチ',
-    login: 'ログイン', signup: '登録',
-    heroTag: 'ソウル · 30日以上の滞在 · 外国人専用',
-    heroH1: ['外国人のための', '韓国長期滞在', 'オールインワンプラットフォーム'],
-    heroAccent: '韓国長期滞在',
-    heroSub: 'ビザからeSIM、銀行口座まで——地元の人のように暮らすために必要なすべてを一箇所で。',
-    heroCta: 'クイックマッチを始める →',
-    heroBrowse: '物件を見る',
-    trustItems: ['✓ 外国人入居確認済み物件のみ', '✓ 英語対応コンシェルジュ', '✓ 海外カード決済対応'],
-    listingsTitle: '認定長期滞在物件',
-    listingsSub: '外国人認定ホスト · 英語対応保証',
-    quickMatchCta: 'すぐにマッチングを受ける →',
-    filterAll: 'すべて',
-    nights: '/ 月',
-    reviews: '件のレビュー',
-    neighborhoodTitle: 'どのエリアがあなたに合っていますか？',
-    neighborhoodSub: 'ライフスタイルを比較して、最適なエリアを見つけましょう。',
-    detailBack: '一覧に戻る',
-    detailBadge1: '外国人フレンドリー',
-    detailBadge2: '英語対応ホスト',
-    detailBadge3: '即時予約',
-    hostLabel: 'ホスト',
-    superhost: 'スーパーホスト · 返信率100% · 経験3年',
-    amenitiesTitle: '設備',
-    reviewsTitle: 'ゲストレビュー',
-    stayLength: '滞在期間',
-    moveInDate: '入居予定日',
-    reserveBtn: '予約リクエストを送る',
-    reserveNote: '今すぐ請求されません · コンシェルジュが24時間以内に確認します',
-    quickMatchWidget: 'より早くマッチングを',
-    quickMatchWidgetSub: '5問に答えるだけで、最適な物件を3件ご提案します',
-    quickMatchWidgetBtn: 'クイックマッチを始める →',
-    qmTitle: 'クイックマッチ',
-    qmQ1: '韓国にはいつ到着しますか？',
-    qmQ2: 'どのくらい滞在する予定ですか？',
-    qmQ3: 'ビザの状況を教えてください',
-    qmQ4: '月々の予算はどのくらいですか？（宿泊費含む）',
-    qmQ5: 'どんなエリアの雰囲気が好きですか？',
-    qmNext: '次へ →',
-    qmBack: '前へ',
-    qmBackFirst: '戻る',
-    conciergeTitle: 'コンシェルジュコールを予約',
-    conciergeSub: '無料15分ビデオ通話——クイックマッチの回答をもとに、3件の物件をご提案します。',
-    selectTime: '時間を選択',
-    yourName: 'お名前',
-    yourNameP: '山田太郎',
-    yourEmail: 'メールアドレス',
-    yourEmailP: 'yamada@example.com',
-    emailHint: '確認メールとGoogle MeetリンクをMELに送信します',
-    confirmBtn: 'コンシェルジュコールを確定 →',
-    confirmDisabled: 'すべての項目を入力してください',
-    whatWeHelp: 'コール内容',
-    successTitle: 'コンシェルジュコールが予約されました！',
-    successSub: '15分のビデオ通話で最適な物件を見つけます。\nメールにGoogleカレンダーの招待を送信しました。',
-    bannerCta: 'クイックマッチを始める →',
-    bannerTag: '5問だけ · 2分で完了',
-    bannerTitle: '最適なマッチングをお届けします',
-    bannerSub: 'エリアの好み、予算、ビザの状況をお聞かせください。',
-    today: '今日', tomorrow: '明日', dayAfter: '明後日',
-    unavailable: '予約不可',
-    qmDurations: [
-      { value: '1mo', label: '約1ヶ月', sub: '30〜45日' },
-      { value: '2mo', label: '約2ヶ月', sub: '45〜90日' },
-      { value: '3mo', label: '3ヶ月以上', sub: '90日以上' },
-      { value: '1yr', label: '1年以上', sub: 'F-1-Dビザ必要' },
-    ],
-    qmVisas: [
-      { value: 'b2', label: 'B-2観光ビザ', sub: '最大90日、ビザ不要' },
-      { value: 'f1d', label: 'F-1-Dワーケーション', sub: '最大1年、年収$66k+必要' },
-      { value: 'd4', label: 'D-4学生ビザ', sub: '語学学校への入学必要' },
-      { value: 'unsure', label: 'まだわからない', sub: 'コンシェルジュがご案内します' },
-    ],
-    qmBudgets: [
-      { value: 'low', label: '$800未満', sub: '約₩1,000,000' },
-      { value: 'mid', label: '$800〜1,200', sub: '約₩1,000〜1,500,000' },
-      { value: 'high', label: '$1,200〜2,000', sub: '約₩1,500〜2,500,000' },
-      { value: 'premium', label: '$2,000以上', sub: '₩2,500,000以上' },
-    ],
-    qmVibes: [
-      { value: 'creative', label: 'クリエイティブ', sub: '延南洞 · 聖水洞', icon: '🎨' },
-      { value: 'expat', label: '外国人エリア', sub: '解放村 · 梨泰院', icon: '🌍' },
-      { value: 'business', label: 'ビジネス中心', sub: '江南 · 駅三', icon: '💼' },
-      { value: 'quiet', label: '静かなローカル', sub: '望遠洞 · 合井', icon: '🌿' },
-    ],
-    callHelp: [
-      { icon: '🏠', title: '物件キュレーション', desc: 'クイックマッチの回答をもとに3件の物件を厳選' },
-      { icon: '📋', title: 'ビザガイダンス', desc: 'ビザの種類に合わせた書類チェックリスト' },
-      { icon: '📱', title: 'eSIMと銀行口座', desc: '韓国初日に必要なことをすべてご説明' },
-      { icon: '💬', title: '24/7 KakaoTalk', desc: 'いつでもチャットで質問可能' },
-    ],
-    itsFree: '完全無料',
-    itsFreeNote: '最初の通話は無料。お支払いは予約後のみ。',
-    neighborhoods: [
-      { id: 'yeonnam', name: '延南洞', ko: '연남동', vibe: 'クリエイティブ', desc: '弘大の隣——静かな路地にインディーカフェ、ギャラリー、書店が点在。', tags: ['カフェ天国', '静かな路地', 'アーティストの街'], price: '$900〜1,200/月', score: 98, color: T.accent },
-      { id: 'seongsu', name: '聖水洞', ko: '성수동', vibe: 'トレンディ', desc: 'ソウルのブルックリン。ポップアップ、ブランチ、コワーキングが集まるホットスポット。', tags: ['トレンディ', 'コワーキング', 'カフェ巡り'], price: '$1,000〜1,400/月', score: 95, color: T.success },
-      { id: 'hbc', name: '解放村', ko: '해방촌', vibe: '外国人エリア', desc: 'ソウルで外国人密度No.1。英語メニュー・輸入食材店が充実。', tags: ['外国人多い', '英語OK', '多国籍料理'], price: '$750〜1,100/月', score: 92, color: T.blue },
-      { id: 'gangnam', name: '江南区', ko: '강남', vibe: 'ビジネス', desc: 'アクセス最強。ミーティングが多いビジネスノマドに最適。', tags: ['交通便利', 'ビジネス中心', '高級施設'], price: '$1,300〜1,800/月', score: 88, color: T.muted },
-    ],
-  },
-  es: {
-    navCta: 'Matcheo Rápido',
-    login: 'Iniciar sesión', signup: 'Registrarse',
-    heroTag: 'Seúl · Estancias de 30+ días · Solo extranjeros',
-    heroH1: ['La plataforma para', 'vivir a largo plazo', 'en Corea.'],
-    heroAccent: 'vivir a largo plazo',
-    heroSub: 'Desde el visado hasta la SIM y la cuenta bancaria — todo lo que necesitas para vivir como un local, en un solo lugar.',
-    heroCta: 'Iniciar Matcheo Rápido →',
-    heroBrowse: 'Ver alojamientos',
-    trustItems: ['✓ Solo alojamientos verificados para extranjeros', '✓ Conserje en inglés', '✓ Pagos con tarjeta internacional'],
-    listingsTitle: 'Alojamientos verificados para larga estancia',
-    listingsSub: 'Anfitriones aprobados · Comunicación en inglés garantizada',
-    quickMatchCta: 'Obtener coincidencia →',
-    filterAll: 'Todos',
-    nights: '/ mes',
-    reviews: 'reseñas',
-    neighborhoodTitle: '¿Qué barrio encaja con tu estilo?',
-    neighborhoodSub: 'Compara estilos de vida y encuentra el área ideal para ti.',
-    detailBack: 'Volver a alojamientos',
-    detailBadge1: 'Apto para extranjeros',
-    detailBadge2: 'Anfitrión en inglés',
-    detailBadge3: 'Reserva instantánea',
-    hostLabel: 'Anfitrión',
-    superhost: 'Superanfitrión · 100% respuesta · 3 años',
-    amenitiesTitle: 'Comodidades',
-    reviewsTitle: 'Reseñas de huéspedes',
-    stayLength: 'Duración de la estancia',
-    moveInDate: 'Fecha de entrada',
-    reserveBtn: 'Solicitar reserva',
-    reserveNote: 'No se cobrará ahora · El conserje confirma en 24h',
-    quickMatchWidget: 'Encuentra tu match más rápido',
-    quickMatchWidgetSub: 'Responde 5 preguntas y te elegiremos 3 alojamientos',
-    quickMatchWidgetBtn: 'Iniciar Matcheo Rápido →',
-    qmTitle: 'Matcheo Rápido',
-    qmQ1: '¿Cuándo llegas a Corea?',
-    qmQ2: '¿Cuánto tiempo planeas quedarte?',
-    qmQ3: '¿Cuál es tu situación de visado?',
-    qmQ4: '¿Cuál es tu presupuesto mensual? (incl. alojamiento)',
-    qmQ5: '¿Qué tipo de ambiente de barrio prefieres?',
-    qmNext: 'Siguiente →',
-    qmBack: 'Anterior',
-    qmBackFirst: 'Volver',
-    conciergeTitle: 'Reservar llamada con el Conserje',
-    conciergeSub: 'Videollamada gratuita de 15 min — seleccionaremos 3 alojamientos perfectos según tus respuestas.',
-    selectTime: 'Selecciona un horario',
-    yourName: 'Tu nombre',
-    yourNameP: 'María García',
-    yourEmail: 'Correo electrónico',
-    yourEmailP: 'maria@ejemplo.com',
-    emailHint: 'Te enviaremos confirmación + enlace de Google Meet',
-    confirmBtn: 'Confirmar llamada con Conserje →',
-    confirmDisabled: 'Completa todos los campos para continuar',
-    whatWeHelp: 'Qué cubrimos en la llamada',
-    successTitle: '¡Llamada con el Conserje reservada!',
-    successSub: 'Videollamada de 15 min para encontrar tus alojamientos perfectos.\nTe hemos enviado una invitación de Google Calendar.',
-    bannerCta: 'Iniciar Matcheo Rápido →',
-    bannerTag: 'Solo 5 preguntas · 2 minutos',
-    bannerTitle: 'Déjanos encontrar tu match perfecto',
-    bannerSub: 'Cuéntanos tu ambiente preferido, presupuesto y situación de visado.',
-    today: 'Hoy', tomorrow: 'Mañana', dayAfter: 'Pasado mañana',
-    unavailable: 'No disponible',
-    qmDurations: [
-      { value: '1mo', label: '~1 mes', sub: '30–45 días' },
-      { value: '2mo', label: '~2 meses', sub: '45–90 días' },
-      { value: '3mo', label: '3 meses+', sub: '90+ días' },
-      { value: '1yr', label: '1 año+', sub: 'Requiere visado F-1-D' },
-    ],
-    qmVisas: [
-      { value: 'b2', label: 'B-2 Turista', sub: 'Hasta 90 días, sin visado' },
-      { value: 'f1d', label: 'F-1-D Workcation', sub: 'Hasta 1 año, ingresos $66k+' },
-      { value: 'd4', label: 'D-4 Estudiante', sub: 'Requiere inscripción en escuela de idiomas' },
-      { value: 'unsure', label: 'Aún no sé', sub: 'El conserje te orientará' },
-    ],
-    qmBudgets: [
-      { value: 'low', label: 'Menos de $800', sub: '~₩1,000,000' },
-      { value: 'mid', label: '$800–1,200', sub: '~₩1,000–1,500,000' },
-      { value: 'high', label: '$1,200–2,000', sub: '~₩1,500–2,500,000' },
-      { value: 'premium', label: '$2,000+', sub: '₩2,500,000+' },
-    ],
-    qmVibes: [
-      { value: 'creative', label: 'Creativo y Moderno', sub: 'Yeonnam · Seongsu', icon: '🎨' },
-      { value: 'expat', label: 'Hub de Expatriados', sub: 'Haebangchon · Itaewon', icon: '🌍' },
-      { value: 'business', label: 'Centro de Negocios', sub: 'Gangnam · Yeoksam', icon: '💼' },
-      { value: 'quiet', label: 'Tranquilo y Local', sub: 'Mangwon · Hapjeong', icon: '🌿' },
-    ],
-    callHelp: [
-      { icon: '🏠', title: 'Selección de alojamientos', desc: '3 alojamientos escogidos a mano según tus respuestas' },
-      { icon: '📋', title: 'Orientación sobre visado', desc: 'Lista de documentos según tu tipo de visado' },
-      { icon: '📱', title: 'eSIM y cuenta bancaria', desc: 'Todo lo que necesitas saber para el Día 1 en Corea' },
-      { icon: '💬', title: '24/7 KakaoTalk', desc: 'Preguntas ilimitadas por chat en cualquier momento' },
-    ],
-    itsFree: 'Completamente gratis',
-    itsFreeNote: 'Primera llamada gratis. Pago solo después de reservar.',
-    neighborhoods: [
-      { id: 'yeonnam', name: 'Yeonnam-dong', ko: '연남동', vibe: 'Creativo y Café', desc: 'Junto a Hongdae — cafeterías indie, galerías y librerías en callejuelas tranquilas.', tags: ['Paraíso del café', 'Calles tranquilas', 'Barrio artístico'], price: '$900–1,200/mes', score: 98, color: T.accent },
-      { id: 'seongsu', name: 'Seongsu-dong', ko: '성수동', vibe: 'Moderno e Industrial', desc: 'El Brooklyn de Seúl. Lleno de pop-ups, brunch y espacios de coworking.', tags: ['Ambiente trendy', 'Coworking', 'Tours de café'], price: '$1,000–1,400/mes', score: 95, color: T.success },
-      { id: 'hbc', name: 'Haebangchon', ko: '해방촌', vibe: 'Hub de Expatriados', desc: 'Mayor densidad de extranjeros en Seúl. Menús en inglés, supermercados internacionales.', tags: ['Muchos expats', 'English-friendly', 'Comida internacional'], price: '$750–1,100/mes', score: 92, color: T.blue },
-      { id: 'gangnam', name: 'Gangnam-gu', ko: '강남', vibe: 'Zona de Negocios', desc: 'Mejor transporte. Ideal para nómadas digitales con reuniones frecuentes.', tags: ['Gran transporte', 'Hub de negocios', 'Instalaciones premium'], price: '$1,300–1,800/mes', score: 88, color: T.muted },
-    ],
-  },
-  de: {
-    navCta: 'Quick Match',
-    login: 'Anmelden', signup: 'Registrieren',
-    heroTag: 'Seoul · Aufenthalte ab 30 Tagen · Nur für Ausländer',
-    heroH1: ['Die Plattform für', 'Langzeitaufenthalte', 'in Korea.'],
-    heroAccent: 'Langzeitaufenthalte',
-    heroSub: 'Von Visum über eSIM bis Bankkonto — alles, was du brauchst, um wie ein Local zu leben, an einem Ort.',
-    heroCta: 'Quick Match starten →',
-    heroBrowse: 'Unterkünfte ansehen',
-    trustItems: ['✓ Nur für Ausländer geprüfte Unterkünfte', '✓ Englischsprachiger Concierge', '✓ Internationale Kartenzahlung'],
-    listingsTitle: 'Geprüfte Langzeitunterkünfte',
-    listingsSub: 'Für Ausländer zugelassene Gastgeber · Englische Kommunikation garantiert',
-    quickMatchCta: 'Sofort gematcht werden →',
-    filterAll: 'Alle',
-    nights: '/ Mo.',
-    reviews: 'Bewertungen',
-    neighborhoodTitle: 'Welches Viertel passt zu dir?',
-    neighborhoodSub: 'Vergleiche Lebensstile und finde das richtige Viertel für dich.',
-    detailBack: 'Zurück zur Liste',
-    detailBadge1: 'Ausländerfreundlich',
-    detailBadge2: 'Englischsprachiger Gastgeber',
-    detailBadge3: 'Sofortbuchung',
-    hostLabel: 'Gastgeber',
-    superhost: 'Superhost · 100% Antwortrate · 3 Jahre Erfahrung',
-    amenitiesTitle: 'Ausstattung',
-    reviewsTitle: 'Gästebewertungen',
-    stayLength: 'Aufenthaltsdauer',
-    moveInDate: 'Einzugsdatum',
-    reserveBtn: 'Buchungsanfrage senden',
-    reserveNote: 'Keine Zahlung jetzt · Concierge bestätigt innerhalb 24h',
-    quickMatchWidget: 'Schneller zum passenden Match',
-    quickMatchWidgetSub: 'Beantworte 5 Fragen und wir wählen 3 Unterkünfte für dich aus',
-    quickMatchWidgetBtn: 'Quick Match starten →',
-    qmTitle: 'Quick Match',
-    qmQ1: 'Wann kommst du in Korea an?',
-    qmQ2: 'Wie lange planst du zu bleiben?',
-    qmQ3: 'Was ist dein Visumsstatus?',
-    qmQ4: 'Was ist dein monatliches Budget? (inkl. Unterkunft)',
-    qmQ5: 'Welches Viertel-Feeling bevorzugst du?',
-    qmNext: 'Weiter →',
-    qmBack: 'Zurück',
-    qmBackFirst: 'Zurück',
-    conciergeTitle: 'Concierge-Gespräch buchen',
-    conciergeSub: 'Kostenloses 15-min-Videogespräch — wir wählen 3 perfekt passende Unterkünfte aus.',
-    selectTime: 'Zeit auswählen',
-    yourName: 'Dein Name',
-    yourNameP: 'Max Müller',
-    yourEmail: 'E-Mail-Adresse',
-    yourEmailP: 'max@beispiel.de',
-    emailHint: 'Wir senden eine Bestätigung + Google Meet-Link',
-    confirmBtn: 'Concierge-Gespräch bestätigen →',
-    confirmDisabled: 'Bitte alle Felder ausfüllen',
-    whatWeHelp: 'Was wir im Gespräch besprechen',
-    successTitle: 'Concierge-Gespräch gebucht!',
-    successSub: '15-min-Videogespräch, um deine perfekte Unterkunft zu finden.\nWir haben eine Google-Kalender-Einladung an deine E-Mail gesendet.',
-    bannerCta: 'Quick Match starten →',
-    bannerTag: 'Nur 5 Fragen · 2 Minuten',
-    bannerTitle: 'Lass uns dein perfektes Match finden',
-    bannerSub: 'Sag uns dein bevorzugtes Viertel, Budget und Visumsstatus.',
-    today: 'Heute', tomorrow: 'Morgen', dayAfter: 'Übermorgen',
-    unavailable: 'Nicht verfügbar',
-    qmDurations: [
-      { value: '1mo', label: '~1 Monat', sub: '30–45 Tage' },
-      { value: '2mo', label: '~2 Monate', sub: '45–90 Tage' },
-      { value: '3mo', label: '3 Monate+', sub: '90+ Tage' },
-      { value: '1yr', label: '1 Jahr+', sub: 'F-1-D-Visum erforderlich' },
-    ],
-    qmVisas: [
-      { value: 'b2', label: 'B-2 Touristenvisum', sub: 'Bis zu 90 Tage, visumsfrei' },
-      { value: 'f1d', label: 'F-1-D Workcation', sub: 'Bis zu 1 Jahr, Einkommen $66k+' },
-      { value: 'd4', label: 'D-4 Studentenvisum', sub: 'Sprachschule erforderlich' },
-      { value: 'unsure', label: 'Noch nicht sicher', sub: 'Concierge hilft dir weiter' },
-    ],
-    qmBudgets: [
-      { value: 'low', label: 'Unter $800', sub: '~₩1.000.000' },
-      { value: 'mid', label: '$800–1.200', sub: '~₩1.000.000–1.500.000' },
-      { value: 'high', label: '$1.200–2.000', sub: '~₩1.500.000–2.500.000' },
-      { value: 'premium', label: '$2.000+', sub: '₩2.500.000+' },
-    ],
-    qmVibes: [
-      { value: 'creative', label: 'Kreativ & Trendy', sub: 'Yeonnam · Seongsu', icon: '🎨' },
-      { value: 'expat', label: 'Expat-Viertel', sub: 'Haebangchon · Itaewon', icon: '🌍' },
-      { value: 'business', label: 'Business-Zentrum', sub: 'Gangnam · Yeoksam', icon: '💼' },
-      { value: 'quiet', label: 'Ruhig & Lokal', sub: 'Mangwon · Hapjeong', icon: '🌿' },
-    ],
-    callHelp: [
-      { icon: '🏠', title: 'Unterkunfts-Auswahl', desc: '3 handverlesene Unterkünfte basierend auf deinen Antworten' },
-      { icon: '📋', title: 'Visumsberatung', desc: 'Dokumenten-Checkliste für deinen Visumtyp' },
-      { icon: '📱', title: 'eSIM & Bankkonto', desc: 'Alles, was du für Tag 1 in Korea wissen musst' },
-      { icon: '💬', title: '24/7 KakaoTalk', desc: 'Unbegrenzte Fragen per Chat jederzeit' },
-    ],
-    itsFree: 'Völlig kostenlos',
-    itsFreeNote: 'Erstes Gespräch kostenlos. Zahlung erst nach Buchung.',
-    neighborhoods: [
-      { id: 'yeonnam', name: 'Yeonnam-dong', ko: '연남동', vibe: 'Kreativ & Café', desc: 'Neben Hongdae — Indie-Cafés, Galerien und Buchläden in ruhigen Gassen.', tags: ['Café-Paradies', 'Ruhige Gassen', 'Künstlerviertel'], price: '$900–1.200/Mo.', score: 98, color: T.accent },
-      { id: 'seongsu', name: 'Seongsu-dong', ko: '성수동', vibe: 'Trendy & Industrial', desc: 'Seouls Brooklyn. Vollgepackt mit Pop-ups, Brunch-Spots und Co-Working-Spaces.', tags: ['Trendiges Flair', 'Co-Working', 'Café-Touren'], price: '$1.000–1.400/Mo.', score: 95, color: T.success },
-      { id: 'hbc', name: 'Haebangchon', ko: '해방촌', vibe: 'Expat-Viertel', desc: 'Höchste Ausländerdichte Seouls. Englische Speisekarten, internationale Lebensmittelläden.', tags: ['Viele Expats', 'Englisch OK', 'Internationale Küche'], price: '$750–1.100/Mo.', score: 92, color: T.blue },
-      { id: 'gangnam', name: 'Gangnam-gu', ko: '강남', vibe: 'Geschäftsviertel', desc: 'Beste Verkehrsanbindung. Ideal für Business-Nomaden mit häufigen Meetings.', tags: ['Top-ÖPNV', 'Business-Hub', 'Premium-Ausstattung'], price: '$1.300–1.800/Mo.', score: 88, color: T.muted },
-    ],
-  },
-};
-
-// ─── LISTINGS DATA ────────────────────────────────────────────────────────────
-const LISTINGS = [
-  { id: 1, dong: 'Yeonnam-dong', neighborhood: 'Yeonnam-dong · Mapo-gu', title: 'Modern Studio in Yeonnam', type: 'Studio · Entire unit', guests: 2, beds: 1, baths: 1, priceUSD: 950, rating: 4.9, reviews: 43, badge: 'Top Pick', vibe: 'creative', image: 'assets/images/listing-1.jpg' },
-  { id: 2, dong: 'Seongsu-dong', neighborhood: 'Seongsu-dong · Seongdong-gu', title: 'Vintage Loft in Seongsu', type: 'Loft · Entire unit', guests: 2, beds: 1, baths: 1, priceUSD: 1100, rating: 4.8, reviews: 31, badge: 'Instant Book', vibe: 'creative', image: 'assets/images/listing-2.jpg' },
-  { id: 3, dong: 'Haebangchon', neighborhood: 'Haebangchon · Yongsan-gu', title: 'Cozy Officetel in HBC', type: 'Officetel · Entire unit', guests: 1, beds: 1, baths: 1, priceUSD: 820, rating: 4.7, reviews: 58, badge: 'Expat Fav', vibe: 'expat', image: 'assets/images/listing-3.jpg' },
-  { id: 4, dong: 'Gangnam-gu', neighborhood: 'Gangnam-gu · Station 5min', title: 'Premium Officetel Gangnam', type: 'Officetel · Entire unit', guests: 2, beds: 1, baths: 1, priceUSD: 1450, rating: 5.0, reviews: 19, badge: 'Superhost', vibe: 'business', image: 'assets/images/listing-1.jpg' },
-  { id: 5, dong: 'Yeonnam-dong', neighborhood: 'Yeonnam-dong · Near Hongdae', title: 'Garden-view Flat, Yeonnam', type: 'Apartment · Entire unit', guests: 2, beds: 1, baths: 1, priceUSD: 880, rating: 4.9, reviews: 67, badge: 'New', vibe: 'creative', image: 'assets/images/listing-2.jpg' },
-  { id: 6, dong: 'Seongsu-dong', neighborhood: 'Seongsu-dong · Hip Block', title: 'Industrial Studio, Seongsu', type: 'Studio · Entire unit', guests: 1, beds: 1, baths: 1, priceUSD: 990, rating: 4.6, reviews: 24, badge: 'Top Pick', vibe: 'creative', image: 'assets/images/listing-3.jpg' },
+// ─── STAYS DATA ───────────────────────────────────────────────────────────────
+const STAYS_DATA = [
+  // Yeonnam
+  { id:'yn-1', neighborhoodId:'yeonnam', neighborhood:'Yeonnam-dong', title:'Sunlit Studio near Gyeongui Line Park', type:'Studio', priceUSD:780, rating:4.9, reviews:31, sqm:24, guests:2, image:'assets/images/listing-1.jpg', badge:'Foreigner-friendly', amenities:['WiFi','AC','Washing machine','Kitchen','Elevator'], description:"Cozy studio steps from the Gyeongui Line Forest Park. Perfect for indie café lovers.", available:true },
+  { id:'yn-2', neighborhoodId:'yeonnam', neighborhood:'Yeonnam-dong', title:'Designer Officetel in Heart of Yeonnam', type:'Officetel', priceUSD:1050, rating:4.8, reviews:22, sqm:33, guests:2, image:'assets/images/listing-2.jpg', badge:'Foreign reviews', amenities:['WiFi','AC','Gym','Rooftop','Concierge'], description:'Modern officetel with rooftop terrace and building gym.', available:true },
+  { id:'yn-3', neighborhoodId:'yeonnam', neighborhood:'Yeonnam-dong', title:'Co-living Room in Yeonnam Collective', type:'Co-living', priceUSD:650, rating:4.7, reviews:48, sqm:18, guests:1, image:'assets/images/listing-3.jpg', badge:'Community pick', amenities:['WiFi','AC','Shared kitchen','Events','Laundry'], description:'Join a community of digital nomads and expats.', available:true },
+  // Hongdae
+  { id:'hd-1', neighborhoodId:'hongdae', neighborhood:'Hongdae', title:'Modern Studio Above Hongdae Park', type:'Studio', priceUSD:820, rating:4.8, reviews:45, sqm:26, guests:2, image:'assets/images/listing-1.jpg', badge:'Foreigner-friendly', amenities:['WiFi','AC','Washing machine','Kitchen'], description:'Energy-packed location steps from Hongdae street art and live music.', available:true },
+  { id:'hd-2', neighborhoodId:'hongdae', neighborhood:'Hongdae', title:'Compact Officetel near Hapjeong Station', type:'Officetel', priceUSD:950, rating:4.7, reviews:38, sqm:28, guests:2, image:'assets/images/listing-2.jpg', badge:'English host', amenities:['WiFi','AC','Kitchen','Security'], description:'Well-located officetel with easy subway access.', available:false },
+  { id:'hd-3', neighborhoodId:'hongdae', neighborhood:'Hongdae', title:'Serviced Studio — Hongdae Express', type:'Serviced', priceUSD:1380, rating:4.9, reviews:19, sqm:30, guests:2, image:'assets/images/listing-3.jpg', badge:'Premium', amenities:['WiFi','AC','Daily cleaning','Concierge','Gym'], description:'Hotel-like serviced apartment with English concierge included.', available:true },
+  { id:'hd-4', neighborhoodId:'hongdae', neighborhood:'Hongdae', title:'Co-living Loft in Sangsu-dong', type:'Co-living', priceUSD:580, rating:4.6, reviews:62, sqm:16, guests:1, image:'assets/images/listing-1.jpg', badge:'Community pick', amenities:['WiFi','AC','Shared kitchen','Events'], description:'Vibrant co-living community. Meet people from 20+ countries.', available:true },
+  // Itaewon
+  { id:'it-1', neighborhoodId:'itaewon', neighborhood:'Itaewon/Haebangchon', title:'HBC Village Room with City View', type:'Studio', priceUSD:750, rating:4.8, reviews:52, sqm:22, guests:2, image:'assets/images/listing-2.jpg', badge:'Expat community', amenities:['WiFi','AC','Washing machine','City view'], description:'Haebangchon studio with stunning city views.', available:true },
+  { id:'it-2', neighborhoodId:'itaewon', neighborhood:'Itaewon/Haebangchon', title:'Rooftop Studio in Itaewon', type:'Studio', priceUSD:900, rating:4.9, reviews:27, sqm:28, guests:2, image:'assets/images/listing-3.jpg', badge:'Foreigner-friendly', amenities:['WiFi','AC','Rooftop deck','Kitchen'], description:"Renovated studio with private rooftop access.", available:true },
+  { id:'it-3', neighborhoodId:'itaewon', neighborhood:'Itaewon/Haebangchon', title:'Co-living Space in the Heart of HBC', type:'Co-living', priceUSD:620, rating:4.7, reviews:84, sqm:20, guests:1, image:'assets/images/listing-1.jpg', badge:'Most popular', amenities:['WiFi','AC','Shared kitchen','Community','Laundry'], description:'International community. Weekly events and city walks included.', available:false },
+  // Seongsu
+  { id:'ss-1', neighborhoodId:'seongsu', neighborhood:'Seongsu-dong', title:'Industrial-Chic Studio in Seongsu', type:'Studio', priceUSD:880, rating:4.9, reviews:33, sqm:28, guests:2, image:'assets/images/listing-2.jpg', badge:'Design district', amenities:['WiFi','AC','Exposed brick','Kitchen','Laundry'], description:"Converted warehouse studio with exposed brick and designer furniture.", available:true },
+  { id:'ss-2', neighborhoodId:'seongsu', neighborhood:'Seongsu-dong', title:'Modern Officetel near Seoul Forest', type:'Officetel', priceUSD:1100, rating:4.8, reviews:28, sqm:35, guests:2, image:'assets/images/listing-3.jpg', badge:'Forest views', amenities:['WiFi','AC','Gym','Parking','Package room'], description:'Premium officetel close to Seoul Forest Park.', available:true },
+  { id:'ss-3', neighborhoodId:'seongsu', neighborhood:'Seongsu-dong', title:'Co-living Studio in Seongsu Collective', type:'Co-living', priceUSD:720, rating:4.7, reviews:41, sqm:19, guests:1, image:'assets/images/listing-1.jpg', badge:'Creative community', amenities:['WiFi','AC','Shared studio','Events','Rooftop'], description:"Creative community for designers and digital nomads.", available:true },
+  { id:'ss-4', neighborhoodId:'seongsu', neighborhood:'Seongsu-dong', title:'Luxury Serviced Apartment — Seongsu', type:'Serviced', priceUSD:1650, rating:4.9, reviews:14, sqm:45, guests:3, image:'assets/images/listing-2.jpg', badge:'Premium', amenities:['WiFi','AC','Daily cleaning','Concierge','Gym','Pool'], description:'Fully serviced luxury apartment with hotel amenities.', available:false },
+  // Gangnam
+  { id:'gn-1', neighborhoodId:'gangnam', neighborhood:'Gangnam', title:'Sleek Studio Near COEX', type:'Studio', priceUSD:950, rating:4.8, reviews:39, sqm:27, guests:2, image:'assets/images/listing-3.jpg', badge:'Business ready', amenities:['WiFi','AC','Kitchen','Gym access','Subway 2min'], description:'Modern studio steps from COEX Mall.', available:true },
+  { id:'gn-2', neighborhoodId:'gangnam', neighborhood:'Gangnam', title:'Executive Officetel — Yeoksam Station', type:'Officetel', priceUSD:1350, rating:4.9, reviews:22, sqm:38, guests:2, image:'assets/images/listing-1.jpg', badge:'Corporate favorite', amenities:['WiFi','AC','Business center','Gym','Concierge'], description:"Premium officetel in Seoul's business district.", available:true },
+  { id:'gn-3', neighborhoodId:'gangnam', neighborhood:'Gangnam', title:'Luxury Serviced Residence Gangnam', type:'Serviced', priceUSD:1900, rating:4.9, reviews:16, sqm:50, guests:3, image:'assets/images/listing-2.jpg', badge:'Premium', amenities:['WiFi','AC','Daily maid','Gym','Pool','Concierge'], description:'Five-star serviced residence in prime Gangnam.', available:true },
+  { id:'gn-4', neighborhoodId:'gangnam', neighborhood:'Gangnam', title:'Compact Studio near Apgujeong', type:'Studio', priceUSD:850, rating:4.7, reviews:31, sqm:22, guests:2, image:'assets/images/listing-3.jpg', badge:'K-beauty hub', amenities:['WiFi','AC','Kitchen','Clinics nearby'], description:'Stylish studio near Apgujeong Rodeo Street.', available:false },
+  // Jamsil
+  { id:'js-1', neighborhoodId:'jamsil', neighborhood:'Jamsil/Songpa', title:'Bright Studio near Lotte World', type:'Studio', priceUSD:820, rating:4.8, reviews:34, sqm:25, guests:2, image:'assets/images/listing-1.jpg', badge:'Family-friendly', amenities:['WiFi','AC','Kitchen','Park 5min'], description:'Sunny studio near Lotte World Tower and Olympic Park.', available:true },
+  { id:'js-2', neighborhoodId:'jamsil', neighborhood:'Jamsil/Songpa', title:'Spacious Officetel — Songpa', type:'Officetel', priceUSD:1050, rating:4.7, reviews:18, sqm:36, guests:2, image:'assets/images/listing-2.jpg', badge:'Quiet area', amenities:['WiFi','AC','Gym','Lake view','Parking'], description:'Spacious officetel with calming lake views.', available:true },
+  { id:'js-3', neighborhoodId:'jamsil', neighborhood:'Jamsil/Songpa', title:'Riverside Studio near Olympic Park', type:'Studio', priceUSD:760, rating:4.6, reviews:27, sqm:23, guests:2, image:'assets/images/listing-3.jpg', badge:'Expat-approved', amenities:['WiFi','AC','Kitchen','Bike rental'], description:'Morning jogs by the Han River, quiet evenings in Songpa.', available:false },
+  // Mapo
+  { id:'mp-1', neighborhoodId:'mapo', neighborhood:'Mapo/Mangwon', title:'Local Vibes Studio in Mangwon', type:'Studio', priceUSD:690, rating:4.8, reviews:43, sqm:22, guests:2, image:'assets/images/listing-2.jpg', badge:'Local favorite', amenities:['WiFi','AC','Kitchen','Market nearby'], description:'Studio steps from Mangwon Saturday Market.', available:true },
+  { id:'mp-2', neighborhoodId:'mapo', neighborhood:'Mapo/Mangwon', title:'Minimalist Officetel — Hapjeong', type:'Officetel', priceUSD:920, rating:4.7, reviews:29, sqm:30, guests:2, image:'assets/images/listing-3.jpg', badge:'Foreigner-friendly', amenities:['WiFi','AC','Gym','Café street nearby'], description:'Clean minimalist design in up-and-coming Hapjeong.', available:true },
+  { id:'mp-3', neighborhoodId:'mapo', neighborhood:'Mapo/Mangwon', title:'Cozy Co-living near Han River', type:'Co-living', priceUSD:600, rating:4.6, reviews:55, sqm:17, guests:1, image:'assets/images/listing-1.jpg', badge:'River access', amenities:['WiFi','AC','Shared kitchen','River view','Bike storage'], description:'Direct access to Han River parks and cycling paths.', available:false },
+  // Euljiro
+  { id:'ej-1', neighborhoodId:'euljiro', neighborhood:'Euljiro/Jongno', title:'Heritage Studio near Gyeongbokgung', type:'Studio', priceUSD:800, rating:4.8, reviews:36, sqm:24, guests:2, image:'assets/images/listing-3.jpg', badge:'Palace nearby', amenities:['WiFi','AC','Kitchen','Palace walk 10min'], description:"Tastefully renovated studio near Korea's historic palaces.", available:true },
+  { id:'ej-2', neighborhoodId:'euljiro', neighborhood:'Euljiro/Jongno', title:'Hip Studio in Euljiro Underground', type:'Studio', priceUSD:750, rating:4.9, reviews:24, sqm:20, guests:2, image:'assets/images/listing-1.jpg', badge:'Indie scene', amenities:['WiFi','AC','Kitchen','Bar alley nearby'], description:"At the epicenter of Seoul's coolest underground bar scene.", available:true },
+  { id:'ej-3', neighborhoodId:'euljiro', neighborhood:'Euljiro/Jongno', title:'Classic Officetel — Jongno 3-ga', type:'Officetel', priceUSD:880, rating:4.7, reviews:19, sqm:29, guests:2, image:'assets/images/listing-2.jpg', badge:'Historic district', amenities:['WiFi','AC','Security','Central'], description:'Well-positioned officetel in historic Jongno.', available:false },
+  // Yongsan
+  { id:'ys-1', neighborhoodId:'yongsan', neighborhood:'Yongsan', title:'Central Studio — Yongsan Station', type:'Studio', priceUSD:860, rating:4.8, reviews:41, sqm:26, guests:2, image:'assets/images/listing-1.jpg', badge:'Most central', amenities:['WiFi','AC','Kitchen','Airport express'], description:'Next to Yongsan Station with KTX and airport express trains.', available:true },
+  { id:'ys-2', neighborhoodId:'yongsan', neighborhood:'Yongsan', title:'Luxury Residence — Yongsan', type:'Serviced', priceUSD:1750, rating:4.9, reviews:12, sqm:48, guests:3, image:'assets/images/listing-2.jpg', badge:'Premium', amenities:['WiFi','AC','Concierge','Pool','Gym','Valet'], description:'Premium serviced residence near the National Museum.', available:true },
+  { id:'ys-3', neighborhoodId:'yongsan', neighborhood:'Yongsan', title:'Co-living in New Yongsan', type:'Co-living', priceUSD:680, rating:4.7, reviews:33, sqm:19, guests:1, image:'assets/images/listing-3.jpg', badge:'New development', amenities:['WiFi','AC','Shared spaces','Rooftop','Events'], description:"Modern co-living in Yongsan's rapidly developing new district.", available:true },
+  // Hannam
+  { id:'hn-1', neighborhoodId:'hannam', neighborhood:'Hannam-dong', title:'Gallery District Studio — Hannam', type:'Studio', priceUSD:980, rating:4.9, reviews:28, sqm:28, guests:2, image:'assets/images/listing-2.jpg', badge:'Upscale area', amenities:['WiFi','AC','Kitchen','Galleries nearby'], description:'Elegant studio surrounded by galleries, embassies, and fine dining.', available:true },
+  { id:'hn-2', neighborhoodId:'hannam', neighborhood:'Hannam-dong', title:'Spacious Officetel — Hannam Vibe', type:'Officetel', priceUSD:1250, rating:4.8, reviews:21, sqm:37, guests:2, image:'assets/images/listing-3.jpg', badge:'Embassy row', amenities:['WiFi','AC','Gym','Concierge','Smart home'], description:'Premium officetel in the quiet diplomatic district.', available:true },
+  { id:'hn-3', neighborhoodId:'hannam', neighborhood:'Hannam-dong', title:'Boutique Studio with Garden Access', type:'Studio', priceUSD:1100, rating:4.9, reviews:17, sqm:30, guests:2, image:'assets/images/listing-1.jpg', badge:'Boutique', amenities:['WiFi','AC','Private garden','Premium kitchen'], description:'Rare boutique studio with private garden terrace.', available:false },
 ];
 
 const PERIODS_USD = [
-  { key: '1w', label: '1 week', multiplier: 0.28 },
-  { key: '2w', label: '2 weeks', multiplier: 0.52 },
-  { key: '1mo', label: '1 month', multiplier: 1 },
-  { key: '2mo', label: '2 months', multiplier: 1.85 },
-  { key: '3mo', label: '3 months', multiplier: 2.7 },
+  { key:'1w',  label:'1 week',   multiplier:0.28 },
+  { key:'2w',  label:'2 weeks',  multiplier:0.52 },
+  { key:'1mo', label:'1 month',  multiplier:1 },
+  { key:'2mo', label:'2 months', multiplier:1.85 },
+  { key:'3mo', label:'3 months', multiplier:2.7 },
 ];
 
+const TYPE_COLORS = {
+  'Studio':   { color: T.accent,   bg: T.accentSubtle },
+  'Officetel':{ color: T.blue,     bg: T.blueBg },
+  'Co-living':{ color: T.success,  bg: T.successBg },
+  'Serviced': { color: T.n600,     bg: T.surface },
+};
+
 // ─── SHARED UI ────────────────────────────────────────────────────────────────
-const StarIcon = ({ size = 12 }) => (
+const StarIcon = ({ size=12 }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="#C4890A">
     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
   </svg>
 );
 
-const HeartBtn = ({ active, onClick }) => (
-  <button onClick={e => { e.stopPropagation(); onClick && onClick(); }}
-    style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.92)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'transform 0.15s' }}
-    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill={active ? '#C04035' : 'none'}>
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke={active ? '#C04035' : T.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>
-);
-
-const Badge = ({ children, color = T.accent, bg = T.accentSubtle, small }) => (
-  <span style={{ display: 'inline-flex', alignItems: 'center', height: small ? 18 : 22, padding: small ? '0 7px' : '0 10px', borderRadius: 100, background: bg, color, fontSize: small ? 10 : 11, fontWeight: 600, letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>
+const Badge = ({ children, color=T.accent, bg=T.accentSubtle, small }) => (
+  <span style={{ display:'inline-flex', alignItems:'center', height:small?18:22, padding:small?'0 7px':'0 10px', borderRadius:100, background:bg, color, fontSize:small?10:11, fontWeight:600, letterSpacing:'0.02em', whiteSpace:'nowrap' }}>
     {children}
   </span>
 );
 
 const Btn = ({ children, onClick, disabled, full, size='md', variant='primary', color=T.accent, colorHov=T.accentHov }) => {
   const [hov, setHov] = React.useState(false);
-  const h = { lg: 52, md: 44, sm: 36 }[size];
-  const fs = { lg: 16, md: 15, sm: 13 }[size];
-  const px = { lg: 28, md: 22, sm: 16 }[size];
-  const isGhost = variant === 'ghost';
+  const h = {lg:52,md:44,sm:36}[size];
+  const fs = {lg:16,md:15,sm:13}[size];
+  const px = {lg:28,md:22,sm:16}[size];
+  const isGhost = variant==='ghost';
   return (
     <button onClick={onClick} disabled={disabled}
-      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{
-        height: h, padding: `0 ${px}px`,
-        background: isGhost ? (hov ? T.surface : 'transparent') : disabled ? '#E8E0D5' : hov ? colorHov : color,
-        color: isGhost ? T.primary : disabled ? T.disabled : '#fff',
-        border: isGhost ? `1.5px solid ${T.border}` : 'none',
-        borderRadius: 8, fontSize: fs, fontWeight: 600,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily: 'Roboto, sans-serif', width: full ? '100%' : 'auto',
-        transition: 'all 0.15s', flexShrink: 0,
-      }}>
+      onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
+      style={{ height:h, padding:`0 ${px}px`, background:isGhost?(hov?T.surface:'transparent'):disabled?'#E8E0D5':hov?colorHov:color, color:isGhost?T.primary:disabled?T.disabled:'#fff', border:isGhost?`1.5px solid ${T.border}`:'none', borderRadius:8, fontSize:fs, fontWeight:600, cursor:disabled?'not-allowed':'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', width:full?'100%':'auto', transition:'all 0.15s', flexShrink:0 }}>
       {children}
     </button>
   );
 };
 
 const FormInput = ({ label, type='text', placeholder, value, onChange, hint }) => (
-  <div style={{ marginBottom: 16 }}>
-    {label && <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: T.primary, marginBottom: 5 }}>{label}</label>}
+  <div style={{ marginBottom:16 }}>
+    {label && <label style={{ display:'block', fontSize:13, fontWeight:600, color:T.primary, marginBottom:5 }}>{label}</label>}
     <input type={type} placeholder={placeholder} value={value} onChange={onChange}
-      style={{ width: '100%', height: 44, padding: '0 14px', border: `1.5px solid ${T.border}`, borderRadius: 8, fontSize: 14, color: T.primary, fontFamily: 'Roboto, sans-serif', outline: 'none', background: T.white, transition: 'border-color 0.15s' }}
-      onFocus={e => e.target.style.borderColor = T.accent}
-      onBlur={e => e.target.style.borderColor = T.border}
+      style={{ width:'100%', height:44, padding:'0 14px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:14, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', outline:'none', background:T.white, transition:'border-color 0.15s' }}
+      onFocus={e=>e.target.style.borderColor=T.accent}
+      onBlur={e=>e.target.style.borderColor=T.border}
     />
-    {hint && <div style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>{hint}</div>}
+    {hint && <div style={{ fontSize:12, color:T.muted, marginTop:4 }}>{hint}</div>}
   </div>
 );
 
 const ProgressBar = ({ step, total }) => (
-  <div style={{ height: 3, background: T.border, borderRadius: 100, overflow: 'hidden', marginBottom: 32 }}>
-    <div style={{ height: '100%', width: `${(step / total) * 100}%`, background: T.accent, borderRadius: 100, transition: 'width 0.4s ease' }} />
+  <div style={{ height:3, background:T.border, borderRadius:100, overflow:'hidden', marginBottom:32 }}>
+    <div style={{ height:'100%', width:`${(step/total)*100}%`, background:T.accent, borderRadius:100, transition:'width 0.4s ease' }}/>
   </div>
 );
 
-// ─── LANGUAGE SWITCHER ────────────────────────────────────────────────────────
-const LangSwitcher = ({ lang, setLang }) => {
-  const [open, setOpen] = React.useState(false);
-  const current = LANGS.find(l => l.code === lang);
-  return (
-    <div style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(!open)}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 12px', background: open ? T.surface : 'transparent', border: `1.5px solid ${open ? T.borderStrong : T.border}`, borderRadius: 8, cursor: 'pointer', fontFamily: 'Roboto, sans-serif', fontSize: 13, fontWeight: 500, color: T.primary, transition: 'all 0.15s' }}>
-        <span style={{ fontSize: 16 }}>{current.flag}</span>
-        <span>{current.label}</span>
-        <svg width="12" height="12" viewBox="0 0 20 20" fill="none" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-          <path d="M5 7.5l5 5 5-5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-      {open && (
-        <div className="fade-in" style={{ position: 'absolute', top: 42, right: 0, background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, padding: '6px', boxShadow: '0 8px 24px rgba(44,36,32,0.12)', zIndex: 200, minWidth: 160 }}>
-          {LANGS.map(l => (
-            <button key={l.code} onClick={() => { setLang(l.code); setOpen(false); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', background: l.code === lang ? T.accentSubtle : 'transparent', border: 'none', borderRadius: 6, cursor: 'pointer', fontFamily: 'Roboto, sans-serif', fontSize: 13, color: l.code === lang ? T.accent : T.primary, fontWeight: l.code === lang ? 600 : 400, transition: 'background 0.1s' }}
-              onMouseEnter={e => { if (l.code !== lang) e.currentTarget.style.background = T.surface; }}
-              onMouseLeave={e => { if (l.code !== lang) e.currentTarget.style.background = 'transparent'; }}>
-              <span style={{ fontSize: 18 }}>{l.flag}</span>
-              <span>{l.label}</span>
-              {l.code === lang && <svg style={{ marginLeft: 'auto' }} width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke={T.accent} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
-const NavBar = ({ lang, setLang, c, onQuickMatch, scrolled }) => (
-  <nav style={{
-    height: 64, background: T.white,
-    borderBottom: `1px solid ${scrolled ? T.border : 'transparent'}`,
-    display: 'flex', alignItems: 'center', padding: '0 32px',
-    justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 150,
-    boxShadow: scrolled ? '0 1px 8px rgba(44,36,32,0.06)' : 'none',
-    transition: 'all 0.2s',
-  }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-      <div style={{ width: 28, height: 28, background: T.accent, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>동</span>
+const NavBar = ({ onHome, onQuickMatch, scrolled }) => (
+  <nav style={{ height:64, background:T.white, borderBottom:`1px solid ${scrolled?T.border:'transparent'}`, display:'flex', alignItems:'center', padding:'0 32px', justifyContent:'space-between', position:'sticky', top:0, zIndex:150, boxShadow:scrolled?'0 1px 8px rgba(44,36,32,0.06)':'none', transition:'all 0.2s' }}>
+    <div onClick={onHome} style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
+      <div style={{ width:28, height:28, background:T.accent, borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <span style={{ color:'#fff', fontSize:14, fontWeight:700, fontFamily:'Noto Sans KR,sans-serif' }}>동</span>
       </div>
-      <span style={{ fontSize: 18, fontWeight: 700, color: T.primary, letterSpacing: '-0.3px' }}>
-        dongne<span style={{ color: T.accent }}>.</span>
+      <span style={{ fontSize:18, fontWeight:700, color:T.primary, letterSpacing:'-0.3px', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+        dongne<span style={{ color:T.accent }}>.</span>
       </span>
     </div>
-    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-      <LangSwitcher lang={lang} setLang={setLang} />
-      <div style={{ width: 1, height: 20, background: T.border }} />
-      <button onClick={() => {}} style={{ height: 36, padding: '0 14px', background: 'transparent', color: T.muted, border: 'none', cursor: 'pointer', fontFamily: 'Roboto, sans-serif', fontSize: 13, fontWeight: 500 }}>{c.login}</button>
-      <Btn onClick={onQuickMatch} size="sm">{c.navCta}</Btn>
+    <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+      <button style={{ height:36, padding:'0 14px', background:'transparent', color:T.muted, border:'none', cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:500 }}>Log in</button>
+      <Btn onClick={onQuickMatch} size="sm">Quick Match</Btn>
     </div>
   </nav>
 );
 
-// ─── STEP INDICATOR ───────────────────────────────────────────────────────────
-const StepBar = ({ step, steps, onStep }) => (
-  <div style={{ background: T.white, borderBottom: `1px solid ${T.border}`, padding: '0 32px', position: 'sticky', top: 64, zIndex: 140 }}>
-    <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', height: 48, gap: 0, overflowX: 'auto' }}>
-      {steps.map((label, i) => (
-        <React.Fragment key={i}>
-          <button onClick={() => i <= step && onStep(i)}
-            style={{ display: 'flex', alignItems: 'center', gap: 7, height: '100%', padding: '0 14px', background: 'none', border: 'none', borderBottom: `2px solid ${step === i ? T.accent : 'transparent'}`, cursor: i <= step ? 'pointer' : 'default', fontFamily: 'Roboto, sans-serif', flexShrink: 0, transition: 'border-color 0.15s' }}>
-            <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${step === i ? T.accent : i < step ? T.success : T.border}`, background: i < step ? T.success : step === i ? T.accent : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: i <= step ? '#fff' : T.muted, transition: 'all 0.2s', flexShrink: 0 }}>
-              {i < step ? '✓' : i + 1}
-            </div>
-            <span style={{ fontSize: 12, fontWeight: step === i ? 600 : 400, color: step === i ? T.primary : T.muted, whiteSpace: 'nowrap' }}>{label}</span>
-          </button>
-          {i < steps.length - 1 && (
-            <div style={{ width: 20, height: 1, background: i < step ? T.success : T.border, flexShrink: 0, transition: 'background 0.3s' }} />
-          )}
-        </React.Fragment>
-      ))}
-    </div>
-  </div>
-);
+// ─── NEIGHBORHOOD MAP ─────────────────────────────────────────────────────────
+const NeighborhoodMap = ({ onSelect }) => {
+  const [hoveredId, setHoveredId] = React.useState(null);
+  const [tooltip, setTooltip] = React.useState({ x:0, y:0 });
+  const svgRef = React.useRef(null);
+  const wrapRef = React.useRef(null);
 
-// ════════════════════════════════════════════════════════════════════════════
-// SCREEN 1 — Landing
-// ════════════════════════════════════════════════════════════════════════════
-const Screen1_Landing = ({ c, onNext, onDetail }) => {
-  const [search, setSearch] = React.useState('');
-  const [filter, setFilter] = React.useState('All');
-  const [wishlist, setWishlist] = React.useState(new Set());
-  const [searchFocus, setSearchFocus] = React.useState(false);
+  const hovered = NEIGHBORHOODS_DATA.find(n=>n.id===hoveredId);
 
-  const dongFilters = [c.filterAll, 'Yeonnam-dong', 'Seongsu-dong', 'Haebangchon', 'Gangnam-gu'];
-  const filtered = LISTINGS.filter(l => {
-    const matchDong = filter === 'All' || l.dong === filter;
-    const matchSearch = !search || l.title.toLowerCase().includes(search.toLowerCase()) || l.neighborhood.toLowerCase().includes(search.toLowerCase());
-    return matchDong && matchSearch;
-  });
+  const handlePinEnter = (n, e) => {
+    setHoveredId(n.id);
+    if (!svgRef.current || !wrapRef.current) return;
+    const svgRect = svgRef.current.getBoundingClientRect();
+    const wrapRect = wrapRef.current.getBoundingClientRect();
+    const sx = svgRect.width / 600;
+    const sy = svgRect.height / 440;
+    setTooltip({ x: n.mapX*sx + (svgRect.left-wrapRect.left), y: n.mapY*sy + (svgRect.top-wrapRect.top) });
+  };
 
   return (
-    <div className="animate-in">
-      {/* ── Hero ── */}
-      <div style={{ background: `linear-gradient(160deg, ${T.primary} 0%, ${T.n800} 55%, ${T.n700} 100%)`, padding: '60px 32px 52px', position: 'relative', overflow: 'hidden' }}>
-        {/* bg circles */}
-        {[['-80px', '-80px', 320, '0.07'], ['60%', '20%', 200, '0.05'], ['80%', '-40px', 140, '0.06']].map(([r, t, s, o], i) => (
-          <div key={i} style={{ position: 'absolute', right: r, top: t, width: s, height: s, borderRadius: '50%', background: `rgba(196,113,74,${o})`, pointerEvents: 'none' }} />
-        ))}
-        <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative' }}>
-          <div style={{ maxWidth: 580 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(196,113,74,0.18)', border: '1px solid rgba(196,113,74,0.35)', borderRadius: 100, padding: '5px 14px', marginBottom: 22 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, animation: 'pulse 2s infinite' }} />
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#E8A880', letterSpacing: '0.08em' }}>{c.heroTag}</span>
-            </div>
-            <h1 style={{ fontSize: 42, fontWeight: 700, color: '#FAF7F2', lineHeight: 1.18, marginBottom: 18, letterSpacing: '-0.5px' }}>
-              {c.heroH1[0]}<br />
-              <span style={{ color: T.accent }}>{c.heroH1[1]}</span><br />
-              {c.heroH1[2]}
-            </h1>
-            <p style={{ fontSize: 16, color: '#A8917E', marginBottom: 30, lineHeight: 1.65, maxWidth: 460 }}>{c.heroSub}</p>
-            {/* Search bar */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: 28, maxWidth: 520 }}>
-              <div style={{ flex: 1, height: 50, background: T.white, borderRadius: 10, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, border: `2px solid ${searchFocus ? T.accent : 'transparent'}`, transition: 'border-color 0.15s', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}>
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                  <path d="M17.5 17.5L13.875 13.875M15.833 9.167a6.667 6.667 0 11-13.333 0 6.667 6.667 0 0113.333 0z" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                <input value={search} onChange={e => setSearch(e.target.value)}
-                  placeholder={c.neighborhoods ? c.neighborhoods[0].name + '...' : 'Yeonnam...'}
-                  onFocus={() => setSearchFocus(true)} onBlur={() => setSearchFocus(false)}
-                  style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, color: T.primary, fontFamily: 'Roboto,sans-serif', background: 'transparent' }}
-                />
+    <section style={{ background:T.surface, padding:'72px 32px 80px' }}>
+      <div style={{ maxWidth:1100, margin:'0 auto' }}>
+        <div style={{ textAlign:'center', marginBottom:48 }}>
+          <Badge color={T.accent} bg={T.accentSubtle}>Explore Seoul</Badge>
+          <h2 style={{ fontFamily:'Fraunces,serif', fontSize:36, fontWeight:700, color:T.primary, marginTop:12, marginBottom:10, lineHeight:1.2 }}>
+            Choose your neighborhood
+          </h2>
+          <p style={{ fontSize:16, color:T.muted, maxWidth:480, margin:'0 auto' }}>
+            Hover to explore, click to browse stays.
+          </p>
+        </div>
+
+        <div ref={wrapRef} style={{ position:'relative', maxWidth:620, margin:'0 auto' }}>
+          <svg ref={svgRef} viewBox="0 0 600 440" style={{ width:'100%', height:'auto', display:'block' }}>
+            {/* Seoul outline */}
+            <path d="M 255,52 L 365,64 L 434,90 L 490,148 L 510,200 L 506,254 L 505,292 L 472,352 L 415,382 L 340,395 L 260,392 L 188,372 L 130,342 L 84,298 L 78,242 L 82,178 L 120,108 L 188,68 Z"
+              fill="#F0EBE3" stroke="#D8CFC5" strokeWidth="1.5"/>
+
+            {/* Han River */}
+            <path d="M 82,282 C 130,276 185,280 240,284 C 288,288 325,284 372,278 C 418,272 458,268 506,264"
+              fill="none" stroke={T.river} strokeWidth="13" strokeLinecap="round" opacity="0.9"/>
+            <text x="185" y="300" fontSize="9" fill={T.river} fontWeight="700" fontFamily="Plus Jakarta Sans,sans-serif" opacity="0.8">Han River · 한강</text>
+
+            {/* Landmark: Gyeongbokgung */}
+            <g opacity="0.6">
+              <rect x="270" y="144" width="20" height="14" rx="2" fill="none" stroke="#8B7355" strokeWidth="1.2"/>
+              <line x1="280" y1="144" x2="280" y2="140" stroke="#8B7355" strokeWidth="1"/>
+              <text x="293" y="154" fontSize="8.5" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">경복궁</text>
+            </g>
+
+            {/* Landmark: Seoul Station */}
+            <g opacity="0.6">
+              <circle cx="228" cy="256" r="5" fill="none" stroke="#8B7355" strokeWidth="1.2"/>
+              <text x="236" y="260" fontSize="8" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">Seoul Stn.</text>
+            </g>
+
+            {/* Landmark: Lotte Tower */}
+            <g opacity="0.6">
+              <polygon points="456,298 460,270 464,298" fill="none" stroke="#8B7355" strokeWidth="1.2"/>
+              <text x="447" y="310" fontSize="7.5" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">Lotte Twr</text>
+            </g>
+
+            {/* ICN Airport arrow */}
+            <g opacity="0.55">
+              <path d="M 90,268 L 70,268" stroke="#8B7355" strokeWidth="1.5" markerEnd="none"/>
+              <polygon points="70,265 62,268 70,271" fill="#8B7355"/>
+              <text x="64" y="280" fontSize="8" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">ICN</text>
+            </g>
+
+            {/* GMP Airport arrow */}
+            <g opacity="0.55">
+              <path d="M 90,214 L 72,202" stroke="#8B7355" strokeWidth="1.5"/>
+              <polygon points="72,199 64,204 69,210" fill="#8B7355"/>
+              <text x="58" y="198" fontSize="8" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">GMP</text>
+            </g>
+
+            {/* Neighborhood Pins */}
+            {NEIGHBORHOODS_DATA.map(n => {
+              const isHov = hoveredId === n.id;
+              return (
+                <g key={n.id} className="map-pin"
+                  onMouseEnter={e => handlePinEnter(n, e)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  onClick={() => onSelect(n.id)}>
+                  {/* Shadow */}
+                  <circle cx={n.mapX} cy={n.mapY+1} r={isHov?10:7} fill="rgba(44,36,32,0.15)" style={{transition:'all 0.2s ease'}}/>
+                  {/* Pin */}
+                  <circle cx={n.mapX} cy={n.mapY} r={isHov?9:6}
+                    fill={isHov?T.primary:T.accent}
+                    stroke={T.white} strokeWidth={isHov?2:1.5}
+                    style={{transition:'all 0.2s ease'}}/>
+                  {/* Pulse ring on hover */}
+                  {isHov && <circle cx={n.mapX} cy={n.mapY} r="16" fill="none" stroke={T.primary} strokeWidth="1" opacity="0.3"/>}
+                  {/* Label */}
+                  <text x={n.mapX} y={n.mapY+20}
+                    textAnchor="middle" fontSize={isHov?"10":"9"}
+                    fill={isHov?T.primary:T.n600}
+                    fontWeight={isHov?"700":"500"}
+                    fontFamily="Plus Jakarta Sans,sans-serif"
+                    style={{transition:'all 0.2s ease', pointerEvents:'none'}}>
+                    {n.name}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Tooltip */}
+          {hovered && (
+            <div className="fade-in" style={{
+              position:'absolute',
+              left: Math.min(tooltip.x + 14, wrapRef.current ? wrapRef.current.offsetWidth - 210 : 400),
+              top: tooltip.y - 110,
+              width:200, background:T.white, border:`1px solid ${T.border}`,
+              borderRadius:12, padding:'14px 16px',
+              boxShadow:'0 8px 24px rgba(44,36,32,0.14)', zIndex:10,
+              pointerEvents:'none',
+            }}>
+              <div style={{ display:'flex', alignItems:'baseline', gap:6, marginBottom:4 }}>
+                <span style={{ fontSize:13, fontWeight:700, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{hovered.name}</span>
+                <span style={{ fontSize:11, color:T.muted, fontFamily:'Noto Sans KR,sans-serif' }}>{hovered.ko}</span>
               </div>
-              <Btn onClick={onNext} size="lg">{c.heroCta.split(' →')[0]}</Btn>
+              <p style={{ fontSize:12, color:T.muted, lineHeight:1.55, marginBottom:10 }}>{hovered.desc}</p>
+              <span style={{ fontSize:12, fontWeight:600, color:T.accent }}>View stays →</span>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-              {c.trustItems.map(t => (
-                <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#8B7355' }}>
-                  <span style={{ color: T.accent, fontWeight: 700 }}>✓</span>
-                  {t.replace('✓ ', '')}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Listings ── */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px 60px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16 }}>
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 700, color: T.primary, marginBottom: 4 }}>{c.listingsTitle}</h2>
-            <p style={{ fontSize: 13, color: T.muted }}>{c.listingsSub}</p>
-          </div>
-          <button onClick={onNext} style={{ display: 'flex', alignItems: 'center', gap: 6, height: 40, padding: '0 16px', background: T.accentSubtle, color: T.accent, border: `1px solid ${T.accentLight}`, borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Roboto, sans-serif', flexShrink: 0 }}>
-            {c.quickMatchCta}
-          </button>
+          )}
         </div>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-          {dongFilters.map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              style={{ height: 34, padding: '0 16px', borderRadius: 100, border: `1.5px solid ${filter === f ? T.accent : T.border}`, background: filter === f ? T.accent : T.white, color: filter === f ? '#fff' : T.primary, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'Roboto, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}>
-              {f}
+        {/* Mobile list fallback */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:10, marginTop:36, maxWidth:700, margin:'36px auto 0' }}>
+          {NEIGHBORHOODS_DATA.map(n => (
+            <button key={n.id} onClick={()=>onSelect(n.id)}
+              style={{ background:T.white, border:`1.5px solid ${T.border}`, borderRadius:10, padding:'12px 14px', cursor:'pointer', textAlign:'left', transition:'all 0.2s', fontFamily:'Plus Jakarta Sans,sans-serif' }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=T.accent;e.currentTarget.style.background=T.accentSubtle;}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;e.currentTarget.style.background=T.white;}}>
+              <div style={{ fontSize:13, fontWeight:700, color:T.primary, marginBottom:2 }}>{n.name}</div>
+              <div style={{ fontSize:11, color:T.muted, fontFamily:'Noto Sans KR,sans-serif' }}>{n.ko}</div>
             </button>
           ))}
         </div>
+      </div>
+    </section>
+  );
+};
 
-        {/* Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
-          {filtered.map((l, idx) => (
-            <div key={l.id} className="animate-in" style={{ animationDelay: `${idx * 0.06}s` }}
-              onClick={() => onDetail(l)}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-              style={{ background: T.white, borderRadius: 12, border: `1px solid ${T.border}`, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 4px rgba(44,36,32,0.05)' }}>
-              <div style={{ position: 'relative', height: 186, background: T.border, overflow: 'hidden' }}>
-                <img src={l.image} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
-                  onMouseEnter={e => e.target.style.transform = 'scale(1.04)'}
-                  onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-                  onError={e => e.target.style.display = 'none'} />
-                <div style={{ position: 'absolute', top: 10, left: 10 }}>
-                  <Badge color={T.accent} bg="rgba(255,255,255,0.92)">{l.badge}</Badge>
-                </div>
-                <div style={{ position: 'absolute', top: 10, right: 10 }}>
-                  <HeartBtn active={wishlist.has(l.id)} onClick={() => setWishlist(prev => { const n = new Set(prev); n.has(l.id) ? n.delete(l.id) : n.add(l.id); return n; })} />
-                </div>
+// ─── HOW IT WORKS ─────────────────────────────────────────────────────────────
+const HowItWorks = ({ onStart }) => {
+  const steps = [
+    { n:'01', icon:'🗺️', title:'Pick your neighborhood', desc:'Explore our interactive Seoul map. Find the vibe that matches your lifestyle.' },
+    { n:'02', icon:'⚡', title:'Answer 5 quick questions', desc:'Arrival date, budget, visa type. Takes under 2 minutes.' },
+    { n:'03', icon:'🏠', title:'Get matched in 24 hours', desc:'Our concierge curates 3 vetted listings perfectly matched to you.' },
+    { n:'04', icon:'🇰🇷', title:'Move in with full support', desc:'eSIM, bank account, ARC help — we handle the Korea admin.' },
+  ];
+  return (
+    <section style={{ background:T.white, padding:'80px 32px' }}>
+      <div style={{ maxWidth:1100, margin:'0 auto' }}>
+        <div style={{ textAlign:'center', marginBottom:52 }}>
+          <Badge color={T.success} bg={T.successBg}>How it works</Badge>
+          <h2 style={{ fontFamily:'Fraunces,serif', fontSize:34, fontWeight:700, color:T.primary, marginTop:12, marginBottom:8 }}>From curious to moved in</h2>
+          <p style={{ fontSize:16, color:T.muted }}>The simplest path to long-term living in Seoul.</p>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:28, marginBottom:48 }}>
+          {steps.map((s,i) => (
+            <div key={i} style={{ position:'relative' }}>
+              <div style={{ fontSize:10, fontWeight:700, color:T.accent, letterSpacing:'0.1em', marginBottom:14 }}>{s.n}</div>
+              <div style={{ fontSize:28, marginBottom:12 }}>{s.icon}</div>
+              <h3 style={{ fontSize:17, fontWeight:700, color:T.primary, marginBottom:8, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{s.title}</h3>
+              <p style={{ fontSize:14, color:T.muted, lineHeight:1.65 }}>{s.desc}</p>
+              {i<steps.length-1 && <div style={{ display:'none' }}/>}
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign:'center' }}>
+          <Btn onClick={onStart} size="lg">Start Quick Match →</Btn>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ─── PRICING SECTION ──────────────────────────────────────────────────────────
+const PricingSection = ({ onStart }) => {
+  const plans = [
+    { name:'Stay Only', price:'$0', sub:'platform fee', highlight:false, items:['Vetted long-term rentals','English booking support','Foreigner-friendly hosts','24h response guarantee'] },
+    { name:'Stay + Setup', price:'$299', sub:'one-time', highlight:true, items:['Everything in Stay Only','eSIM + Korean phone number','Bank account opening guide','ARC & visa document help','Welcome kit delivery'] },
+    { name:'Stay + Concierge', price:'$49', sub:'/month', highlight:false, items:['Everything in Stay Only','24/7 KakaoTalk support','Weekly meetups & city walks','Booking & renewal assistance','Health insurance guidance'] },
+  ];
+  return (
+    <section style={{ background:T.surface, padding:'80px 32px' }}>
+      <div style={{ maxWidth:900, margin:'0 auto' }}>
+        <div style={{ textAlign:'center', marginBottom:48 }}>
+          <Badge color={T.muted} bg={T.border}>Pricing</Badge>
+          <h2 style={{ fontFamily:'Fraunces,serif', fontSize:34, fontWeight:700, color:T.primary, marginTop:12, marginBottom:8 }}>Simple, transparent pricing</h2>
+          <p style={{ fontSize:16, color:T.muted }}>No hidden fees. No deposit games. Just a home.</p>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))', gap:20 }}>
+          {plans.map(p => (
+            <div key={p.name} style={{ background:p.highlight?T.primary:T.white, border:`2px solid ${p.highlight?T.primary:T.border}`, borderRadius:16, padding:'28px 24px', position:'relative' }}>
+              {p.highlight && <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:T.accent, color:'#fff', fontSize:10, fontWeight:700, padding:'3px 14px', borderRadius:100, letterSpacing:'0.08em', whiteSpace:'nowrap' }}>MOST POPULAR</div>}
+              <div style={{ fontSize:20, fontWeight:700, color:p.highlight?T.accentLight:T.primary, marginBottom:4, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{p.name}</div>
+              <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:4 }}>
+                <span style={{ fontSize:32, fontWeight:700, color:p.highlight?'#fff':T.primary, fontFamily:'Fraunces,serif' }}>{p.price}</span>
+                <span style={{ fontSize:13, color:p.highlight?T.disabled:T.muted }}>{p.sub}</span>
               </div>
-              <div style={{ padding: '13px 15px' }}>
-                <div style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>{l.neighborhood}</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: T.primary, marginBottom: 3, lineHeight: 1.3 }}>{l.title}</div>
-                <div style={{ fontSize: 12, color: T.muted, marginBottom: 10 }}>{l.type} · {l.guests} guests</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
-                    <StarIcon />
-                    <span style={{ fontWeight: 600, color: T.primary }}>{l.rating}</span>
-                    <span style={{ color: T.muted }}>({l.reviews})</span>
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: T.primary }}>
-                    ${l.priceUSD}<span style={{ fontSize: 12, fontWeight: 400, color: T.muted }}>{c.nights}</span>
-                  </div>
+              <div style={{ height:1, background:p.highlight?T.n700:T.border, margin:'18px 0' }}/>
+              {p.items.map(item => (
+                <div key={item} style={{ display:'flex', gap:8, marginBottom:10 }}>
+                  <span style={{ color:p.highlight?T.accent:'#4A7C59', fontSize:13, flexShrink:0 }}>✓</span>
+                  <span style={{ fontSize:13, color:p.highlight?T.accentLight:T.n600, lineHeight:1.4 }}>{item}</span>
                 </div>
+              ))}
+              <div style={{ marginTop:20 }}>
+                <Btn onClick={onStart} full size="md" color={p.highlight?T.accent:T.primary} colorHov={p.highlight?T.accentHov:T.n800}>
+                  Get started →
+                </Btn>
               </div>
             </div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+};
 
-        {/* Banner CTA */}
-        <div style={{ background: `linear-gradient(135deg, ${T.primary} 0%, ${T.n700} 100%)`, borderRadius: 14, padding: '32px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: T.accent, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>{c.bannerTag}</div>
-            <h3 style={{ fontSize: 22, fontWeight: 700, color: '#FAF7F2', marginBottom: 5 }}>{c.bannerTitle}</h3>
-            <p style={{ fontSize: 13, color: '#8B7355', lineHeight: 1.5 }}>{c.bannerSub}</p>
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
+const Footer = () => (
+  <footer style={{ background:T.primary, padding:'48px 32px 32px' }}>
+    <div style={{ maxWidth:1100, margin:'0 auto' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:24 }}>
+        <div style={{ width:24, height:24, background:T.accent, borderRadius:5, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <span style={{ color:'#fff', fontSize:12, fontWeight:700, fontFamily:'Noto Sans KR,sans-serif' }}>동</span>
+        </div>
+        <span style={{ fontSize:16, fontWeight:700, color:'#FAF7F2' }}>dongne<span style={{ color:T.accent }}>.</span></span>
+      </div>
+      <p style={{ fontSize:13, color:T.muted, marginBottom:24, maxWidth:400, lineHeight:1.65 }}>Live in Korea like a local. Long-term stays for foreigners, with full concierge support.</p>
+      <div style={{ height:1, background:T.n800, marginBottom:20 }}/>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:12 }}>
+        <span style={{ fontSize:12, color:T.n600 }}>© 2026 Dongne. All rights reserved.</span>
+        <div style={{ display:'flex', gap:20 }}>
+          {['Privacy','Terms','Contact'].map(l => <a key={l} href="#" style={{ fontSize:12, color:T.n600, textDecoration:'none' }}>{l}</a>)}
+        </div>
+      </div>
+    </div>
+  </footer>
+);
+
+// ─── STAY CARD ────────────────────────────────────────────────────────────────
+const StayCard = ({ stay, onClick }) => {
+  const [wishlisted, setWishlisted] = React.useState(false);
+  const tc = TYPE_COLORS[stay.type] || TYPE_COLORS['Studio'];
+  return (
+    <div onClick={onClick} style={{ background:T.white, borderRadius:14, border:`1px solid ${T.border}`, overflow:'hidden', cursor:'pointer', transition:'all 0.2s', boxShadow:'0 1px 4px rgba(44,36,32,0.05)', opacity:stay.available?1:0.45, position:'relative' }}
+      onMouseEnter={e=>{if(stay.available){e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow='0 6px 20px rgba(44,36,32,0.1)';}}}
+      onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='0 1px 4px rgba(44,36,32,0.05)';}}>
+      <div style={{ position:'relative', height:192, background:T.border, overflow:'hidden' }}>
+        <img src={stay.image} alt={stay.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e=>e.target.style.background=T.border}/>
+        {!stay.available && (
+          <div style={{ position:'absolute', inset:0, background:'rgba(250,247,242,0.6)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <Badge color={T.n600} bg="rgba(255,255,255,0.9)">Unavailable</Badge>
           </div>
-          <Btn onClick={onNext} size="lg">{c.bannerCta}</Btn>
+        )}
+        <div style={{ position:'absolute', top:10, left:10 }}>
+          <Badge color={tc.color} bg="rgba(255,255,255,0.92)" small>{stay.badge}</Badge>
+        </div>
+        <button onClick={e=>{e.stopPropagation();setWishlisted(!wishlisted);}} style={{ position:'absolute', top:10, right:10, width:32, height:32, borderRadius:'50%', background:'rgba(255,255,255,0.92)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill={wishlisted?'#C04035':'none'}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke={wishlisted?'#C04035':T.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+      </div>
+      <div style={{ padding:'14px 16px' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:4 }}>
+          <div style={{ fontSize:11, color:T.muted }}>{stay.neighborhood}</div>
+          <Badge color={tc.color} bg={tc.bg} small>{stay.type}</Badge>
+        </div>
+        <div style={{ fontSize:15, fontWeight:700, color:T.primary, marginBottom:6, lineHeight:1.3, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{stay.title}</div>
+        <div style={{ fontSize:12, color:T.muted, marginBottom:10 }}>{stay.sqm}m² · up to {stay.guests} guests</div>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:3, fontSize:12 }}>
+            <StarIcon/><span style={{ fontWeight:600, color:T.primary }}>{stay.rating}</span>
+            <span style={{ color:T.muted }}>({stay.reviews})</span>
+            <Badge color={T.success} bg={T.successBg} small>🌐 Expat reviews</Badge>
+          </div>
+          <div style={{ fontSize:15, fontWeight:700, color:T.primary }}>
+            ${stay.priceUSD.toLocaleString()}<span style={{ fontSize:11, fontWeight:400, color:T.muted }}>/mo</span>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// ════════════════════════════════════════════════════════════════════════════
-// SCREEN 2 — Neighborhood Explore
-// ════════════════════════════════════════════════════════════════════════════
-const Screen2_Neighborhoods = ({ c, onNext, onBack }) => {
-  const [selected, setSelected] = React.useState(null);
-  const nhoods = c.neighborhoods;
-
+// ─── FILTER BAR ───────────────────────────────────────────────────────────────
+const FilterBar = ({ filters, onChange }) => {
+  const nHood = NEIGHBORHOODS_DATA.find(n=>n.id===filters.neighborhood);
   return (
-    <div className="animate-in" style={{ maxWidth: 920, margin: '0 auto', padding: '40px 24px' }}>
-      <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: T.muted, fontSize: 13, cursor: 'pointer', marginBottom: 28, fontFamily: 'Roboto, sans-serif' }}>
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        Back
-      </button>
-
-      <Badge color={T.accent} bg={T.accentSubtle}>Step 1 of 5</Badge>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: T.primary, marginTop: 12, marginBottom: 6 }}>{c.neighborhoodTitle}</h2>
-      <p style={{ fontSize: 14, color: T.muted, marginBottom: 32 }}>{c.neighborhoodSub}</p>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 32 }}>
-        {nhoods.map((n, i) => (
-          <div key={n.id} className="animate-in" style={{ animationDelay: `${i * 0.08}s` }}
-            onClick={() => setSelected(n.id)}
-            style={{ background: T.white, border: `2px solid ${selected === n.id ? n.color : T.border}`, borderRadius: 12, padding: '22px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: selected === n.id ? `0 4px 20px ${n.color}25` : '0 1px 4px rgba(44,36,32,0.05)', transform: selected === n.id ? 'translateY(-2px)' : 'none' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 20, fontWeight: 700, color: T.primary }}>{n.name}</span>
-                  <span style={{ fontSize: 12, color: T.muted }}>{n.ko}</span>
-                </div>
-                <Badge color={n.color} bg={n.color + '18'}>{n.vibe}</Badge>
-              </div>
-              <div style={{ textAlign: 'center', minWidth: 48 }}>
-                <div style={{ fontSize: 26, fontWeight: 800, color: n.color, lineHeight: 1 }}>{n.score}</div>
-                <div style={{ fontSize: 9, color: T.muted, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>match</div>
-              </div>
-            </div>
-            <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.65, marginBottom: 14 }}>{n.desc}</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-              {n.tags.map(t => <span key={t} style={{ fontSize: 11, color: T.muted, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 100, padding: '2px 9px', fontWeight: 500 }}>{t}</span>)}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: T.primary }}>{n.price}</span>
-              {selected === n.id && (
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: n.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Btn onClick={onNext} disabled={!selected} size="lg">
-          {selected ? `Explore ${nhoods.find(n => n.id === selected)?.name} →` : 'Select a neighborhood'}
-        </Btn>
+    <div style={{ background:T.white, borderBottom:`1px solid ${T.border}`, padding:'14px 32px', position:'sticky', top:64, zIndex:100 }}>
+      <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
+        {/* Neighborhood */}
+        <select value={filters.neighborhood||''} onChange={e=>onChange({...filters,neighborhood:e.target.value||null})}
+          style={{ height:40, padding:'0 12px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:13, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', background:T.white, cursor:'pointer' }}>
+          <option value="">All neighborhoods</option>
+          {NEIGHBORHOODS_DATA.map(n=><option key={n.id} value={n.id}>{n.name}</option>)}
+        </select>
+        {/* Arrival */}
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <label style={{ fontSize:12, color:T.muted, fontWeight:500 }}>Arrival</label>
+          <input type="date" value={filters.arrival||''} onChange={e=>onChange({...filters,arrival:e.target.value})}
+            style={{ height:40, padding:'0 12px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:13, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', background:T.white }}/>
+        </div>
+        {/* Guests */}
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <label style={{ fontSize:12, color:T.muted, fontWeight:500 }}>Guests</label>
+          <select value={filters.guests||1} onChange={e=>onChange({...filters,guests:+e.target.value})}
+            style={{ height:40, padding:'0 12px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:13, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', background:T.white }}>
+            {[1,2,3,4,5,6].map(n=><option key={n} value={n}>{n} guest{n>1?'s':''}</option>)}
+          </select>
+        </div>
+        {/* Duration */}
+        <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+          {[{k:'1w',l:'1 week'},{k:'2w',l:'2 weeks'},{k:'1mo',l:'1 month'},{k:'2mo',l:'2 months'},{k:'3mo',l:'3 months'}].map(d=>(
+            <button key={d.k} onClick={()=>onChange({...filters,duration:d.k})}
+              style={{ height:36, padding:'0 14px', borderRadius:100, border:`1.5px solid ${filters.duration===d.k?T.accent:T.border}`, background:filters.duration===d.k?T.accent:'transparent', color:filters.duration===d.k?'#fff':T.primary, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s', whiteSpace:'nowrap' }}>
+              {d.l}
+            </button>
+          ))}
+        </div>
+        {/* Type filter */}
+        <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+          {['All types','Studio','Officetel','Co-living','Serviced'].map(t=>(
+            <button key={t} onClick={()=>onChange({...filters,type:t==='All types'?null:t})}
+              style={{ height:36, padding:'0 12px', borderRadius:100, border:`1.5px solid ${(filters.type||null)===(t==='All types'?null:t)?T.primary:T.border}`, background:(filters.type||null)===(t==='All types'?null:t)?T.primary:'transparent', color:(filters.type||null)===(t==='All types'?null:t)?'#fff':T.muted, fontSize:12, fontWeight:500, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s' }}>
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
-// ════════════════════════════════════════════════════════════════════════════
-// SCREEN 3 — Listing Detail
-// ════════════════════════════════════════════════════════════════════════════
-const Screen3_Detail = ({ c, listing, onNext, onBack }) => {
-  const l = listing || LISTINGS[0];
-  const [period, setPeriod] = React.useState('1mo');
-  const [moveIn, setMoveIn] = React.useState('');
-  const [wishlisted, setWishlisted] = React.useState(false);
-  const [activeImage, setActiveImage] = React.useState(0);
-  const images = [l.image, LISTINGS[1].image, LISTINGS[2].image];
-  const price = Math.round(l.priceUSD * (PERIODS_USD.find(p => p.key === period)?.multiplier || 1));
+// ─── MAP PLACEHOLDER ─────────────────────────────────────────────────────────
+const MapPanel = ({ neighborhoodId }) => {
+  const n = NEIGHBORHOODS_DATA.find(x=>x.id===neighborhoodId);
+  return (
+    <div style={{ position:'sticky', top:120, height:'calc(100vh - 130px)', background:'#e8f0e8', borderRadius:14, overflow:'hidden', border:`1px solid ${T.border}` }}>
+      <iframe
+        src={`https://www.openstreetmap.org/export/embed.html?bbox=126.85,37.45,127.20,37.68&layer=mapnik`}
+        style={{ width:'100%', height:'100%', border:'none' }}
+        title="Seoul map"
+      />
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(250,247,242,0.95)', borderTop:`1px solid ${T.border}`, padding:'10px 16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <span style={{ fontSize:12, color:T.muted }}>📍 {n?n.name:'Seoul'} · Interactive Map</span>
+        <a href={`https://maps.google.com/?q=${n?n.name+',Seoul':'Seoul,Korea'}`} target="_blank" rel="noopener noreferrer"
+          style={{ fontSize:12, color:T.accent, fontWeight:600 }}>Open in Google Maps →</a>
+      </div>
+    </div>
+  );
+};
+
+// ─── STAYS PAGE ───────────────────────────────────────────────────────────────
+const StaysPage = ({ initialNeighborhood, onStayClick, onBack }) => {
+  const [filters, setFilters] = React.useState({ neighborhood:initialNeighborhood||null, arrival:'', guests:1, duration:'1mo', type:null });
+
+  const filtered = STAYS_DATA.filter(s => {
+    if (filters.neighborhood && s.neighborhoodId !== filters.neighborhood) return false;
+    if (filters.type && s.type !== filters.type) return false;
+    if (filters.guests && s.guests < filters.guests) return false;
+    return true;
+  }).sort((a,b) => b.available - a.available);
+
+  const available = filtered.filter(s=>s.available);
+  const unavailable = filtered.filter(s=>!s.available);
+  const sorted = [...available, ...unavailable];
+  const nHood = NEIGHBORHOODS_DATA.find(n=>n.id===filters.neighborhood);
 
   return (
     <div className="animate-in">
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px 60px' }}>
-        <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: T.muted, fontSize: 13, cursor: 'pointer', marginBottom: 20, fontFamily: 'Roboto, sans-serif' }}>
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          {c.detailBack}
-        </button>
-
-        {/* Image gallery */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 8, marginBottom: 28, height: 360 }}>
-          <div style={{ borderRadius: '12px 0 0 12px', overflow: 'hidden', background: T.border, cursor: 'pointer', position: 'relative' }}>
-            <img src={images[activeImage]} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }} onError={e => e.target.style.display = 'none'} />
-            <div style={{ position: 'absolute', bottom: 12, right: 12, display: 'flex', gap: 6 }}>
-              <button onClick={() => setWishlisted(!wishlisted)} style={{ display: 'flex', alignItems: 'center', gap: 5, height: 32, padding: '0 12px', background: 'rgba(255,255,255,0.92)', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600, color: wishlisted ? '#C04035' : T.primary, backdropFilter: 'blur(4px)' }}>
-                {wishlisted ? '♥' : '♡'} Save
-              </button>
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {images.slice(1).map((img, i) => (
-              <div key={i} onClick={() => setActiveImage(i + 1)} style={{ flex: 1, borderRadius: i === 0 ? '0 12px 0 0' : '0 0 12px 0', overflow: 'hidden', background: T.border, cursor: 'pointer', border: `2px solid ${activeImage === i + 1 ? T.accent : 'transparent'}`, transition: 'border-color 0.15s' }}>
-                <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 40, alignItems: 'start' }}>
-          {/* Left */}
+      <FilterBar filters={filters} onChange={setFilters}/>
+      <div style={{ maxWidth:1200, margin:'0 auto', padding:'28px 24px 60px' }}>
+        {/* Header */}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:20 }}>
           <div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>
-              <Badge color={T.accent} bg={T.accentSubtle}>{c.detailBadge1}</Badge>
-              <Badge color={T.success} bg={T.successBg}>{c.detailBadge2}</Badge>
-              <Badge color={T.blue} bg={T.blueBg}>{c.detailBadge3}</Badge>
-            </div>
-            <h1 style={{ fontSize: 28, fontWeight: 700, color: T.primary, marginBottom: 8, lineHeight: 1.25 }}>{l.title}</h1>
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 20, fontSize: 13, color: T.muted }}>
-              <span>{l.neighborhood}</span>
-              <span>·</span>
-              <span>{l.type} · {l.guests} guests</span>
-              <span>·</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <StarIcon size={13} /><span style={{ color: T.primary, fontWeight: 600 }}>{l.rating}</span>
-                <span>({l.reviews} {c.reviews})</span>
-              </span>
-            </div>
-            <div style={{ height: 1, background: T.border, marginBottom: 22 }} />
-
-            {/* Host */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22 }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: T.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: '#fff', flexShrink: 0 }}>K</div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: T.primary }}>{c.hostLabel}: Kim Jiwon</div>
-                <div style={{ fontSize: 12, color: T.muted }}>{c.superhost}</div>
-              </div>
-            </div>
-            <div style={{ height: 1, background: T.border, marginBottom: 22 }} />
-
-            {/* Feature pills */}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 22 }}>
-              {['WiFi 500Mbps', 'A/C', 'Washer', 'Fridge', 'Smart TV', 'Desk', 'Parking', 'Espresso'].map(a => (
-                <span key={a} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 30, padding: '0 12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: 100, fontSize: 12, color: T.muted, fontWeight: 500 }}>{a}</span>
-              ))}
-            </div>
-            <div style={{ height: 1, background: T.border, marginBottom: 22 }} />
-
-            {/* Reviews */}
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: T.primary, marginBottom: 16 }}>{c.reviewsTitle}</h3>
-            {[
-              { name: 'Jake M.', flag: '🇺🇸', text: 'The host speaks great English and helped me set up a bank account. Perfect for long stays!', date: 'Nov 2025' },
-              { name: 'Sophie L.', flag: '🇦🇺', text: 'Loved Yeonnam. The concierge sorted my ARC in 2 days. Highly recommend for first-timers.', date: 'Oct 2025' },
-              { name: 'Carlos R.', flag: '🇲🇽', text: 'Great location, super clean, host responded in minutes. Would stay again for sure.', date: 'Sep 2025' },
-            ].map((r, i) => (
-              <div key={i} style={{ padding: '14px 0', borderBottom: i < 2 ? `1px solid ${T.border}` : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
-                  <span style={{ fontSize: 18 }}>{r.flag}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: T.primary }}>{r.name}</span>
-                  <span style={{ fontSize: 11, color: T.muted, marginLeft: 2 }}>{r.date}</span>
-                  <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
-                    {[1,2,3,4,5].map(s => <StarIcon key={s} size={11} />)}
-                  </div>
-                </div>
-                <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.65 }}>{r.text}</p>
-              </div>
-            ))}
+            <h2 style={{ fontSize:22, fontWeight:700, color:T.primary, fontFamily:'Fraunces,serif' }}>
+              {nHood ? `Stays in ${nHood.name}` : 'All stays in Seoul'}
+            </h2>
+            <p style={{ fontSize:13, color:T.muted, marginTop:4 }}>
+              {available.length} available · {unavailable.length} unavailable
+              {nHood && <span style={{ fontFamily:'Noto Sans KR,sans-serif' }}> · {nHood.ko}</span>}
+            </p>
           </div>
+          <button onClick={onBack} style={{ fontSize:13, color:T.muted, background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:5, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round"/></svg>
+            Back
+          </button>
+        </div>
 
-          {/* Right — Booking widget */}
-          <div style={{ position: 'sticky', top: 120 }}>
-            <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 14, padding: '24px', boxShadow: '0 4px 24px rgba(44,36,32,0.08)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-                <div>
-                  <span style={{ fontSize: 28, fontWeight: 800, color: T.primary }}>${price}</span>
-                  <span style={{ fontSize: 13, color: T.muted }}> / {PERIODS_USD.find(p => p.key === period)?.label}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <StarIcon size={13} /><span style={{ fontSize: 13, fontWeight: 600, color: T.primary }}>{l.rating}</span>
-                </div>
+        <div style={{ display:'grid', gridTemplateColumns:'60% 40%', gap:24, alignItems:'start' }}>
+          {/* Left: Listing Grid */}
+          <div>
+            {sorted.length === 0 ? (
+              <div style={{ textAlign:'center', padding:'60px 24px' }}>
+                <div style={{ fontSize:32, marginBottom:12 }}>🏠</div>
+                <h3 style={{ fontSize:18, fontWeight:700, color:T.primary, marginBottom:8 }}>No stays found</h3>
+                <p style={{ fontSize:14, color:T.muted }}>Try adjusting your filters.</p>
               </div>
-
-              {/* Period selector */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{c.stayLength}</div>
-                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                  {PERIODS_USD.map(p => (
-                    <button key={p.key} onClick={() => setPeriod(p.key)}
-                      style={{ flex: '1 1 auto', minWidth: 44, height: 36, borderRadius: 7, border: `1.5px solid ${period === p.key ? T.accent : T.border}`, background: period === p.key ? T.accentSubtle : T.white, color: period === p.key ? T.accent : T.muted, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'Roboto, sans-serif', transition: 'all 0.15s' }}>
-                      {p.key}
-                    </button>
-                  ))}
-                </div>
+            ) : (
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:18 }}>
+                {sorted.map(s => (
+                  <StayCard key={s.id} stay={s} onClick={()=>s.available&&onStayClick(s)}/>
+                ))}
               </div>
-
-              {/* Move-in date */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: T.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{c.moveInDate}</div>
-                <input type="date" value={moveIn} onChange={e => setMoveIn(e.target.value)}
-                  style={{ width: '100%', height: 44, padding: '0 14px', border: `1.5px solid ${T.border}`, borderRadius: 8, fontSize: 14, color: T.primary, fontFamily: 'Roboto, sans-serif', outline: 'none', background: T.white, transition: 'border-color 0.15s' }}
-                  onFocus={e => e.target.style.borderColor = T.accent}
-                  onBlur={e => e.target.style.borderColor = T.border}
-                />
-              </div>
-
-              <Btn onClick={onNext} full size="lg">{c.reserveBtn}</Btn>
-              <p style={{ fontSize: 11, color: T.muted, textAlign: 'center', marginTop: 8, lineHeight: 1.5 }}>{c.reserveNote}</p>
-
-              <div style={{ borderTop: `1px solid ${T.border}`, marginTop: 18, paddingTop: 18 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: T.primary, marginBottom: 6 }}>{c.quickMatchWidget}</div>
-                <p style={{ fontSize: 12, color: T.muted, marginBottom: 10, lineHeight: 1.5 }}>{c.quickMatchWidgetSub}</p>
-                <button onClick={onNext}
-                  style={{ width: '100%', height: 38, background: T.accentSubtle, color: T.accent, border: `1px solid ${T.accentLight}`, borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Roboto, sans-serif', transition: 'background 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = T.accentLight}
-                  onMouseLeave={e => e.currentTarget.style.background = T.accentSubtle}>
-                  {c.quickMatchWidgetBtn}
-                </button>
-              </div>
-            </div>
+            )}
           </div>
+          {/* Right: Map */}
+          <MapPanel neighborhoodId={filters.neighborhood}/>
         </div>
       </div>
     </div>
   );
 };
 
-// ════════════════════════════════════════════════════════════════════════════
-// SCREEN 4 — Quick Match Wizard
-// ════════════════════════════════════════════════════════════════════════════
-const Screen4_QuickMatch = ({ c, onNext, onBack }) => {
-  const [qStep, setQStep] = React.useState(0);
-  const [answers, setAnswers] = React.useState({});
-  const [dateVal, setDateVal] = React.useState('');
+// ─── CONCIERGE MODAL ─────────────────────────────────────────────────────────
+const ConciergeModal = ({ stay, onClose }) => {
+  const [step, setStep] = React.useState(1);
+  const [plan, setPlan] = React.useState(null);
+  const [form, setForm] = React.useState({ nationality:'', visa:'', services:[], koreanLevel:'none', notes:'' });
+  const [booking, setBooking] = React.useState({ slot:null, channel:'video', name:'', email:'', phone:'' });
+  const [done, setDone] = React.useState(false);
 
-  const QUESTIONS = [
-    { key: 'arrival',  title: c.qmQ1, type: 'date' },
-    { key: 'duration', title: c.qmQ2, type: 'choice', options: c.qmDurations },
-    { key: 'visa',     title: c.qmQ3, type: 'choice', options: c.qmVisas },
-    { key: 'budget',   title: c.qmQ4, type: 'choice', options: c.qmBudgets },
-    { key: 'vibe',     title: c.qmQ5, type: 'choice', options: c.qmVibes },
+  const NATIONALITIES = ['American','British','Canadian','Australian','French','German','Japanese','Chinese','Singaporean','Other'];
+  const VISAS = [
+    { v:'f1d', l:'F-1-D Workation', s:'Up to 1 year, $66k+ income req.' },
+    { v:'d4',  l:'D-4 Student',     s:'Language school enrollment' },
+    { v:'b2',  l:'B-2 Tourist',     s:'Up to 90 days, visa-free' },
+    { v:'unsure', l:'Not sure yet', s:'Concierge will guide you' },
   ];
-
-  const q = QUESTIONS[qStep];
-  const currentAns = answers[q.key];
-
-  const pickChoice = (v) => {
-    const newAns = { ...answers, [q.key]: v };
-    setAnswers(newAns);
-    if (qStep < QUESTIONS.length - 1) setTimeout(() => setQStep(qStep + 1), 220);
-    else setTimeout(() => onNext(), 350);
-  };
-
-  const goBack = () => {
-    if (qStep === 0) onBack();
-    else setQStep(qStep - 1);
-  };
-
-  return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px 60px' }}>
-      <button onClick={goBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: T.muted, fontSize: 13, cursor: 'pointer', marginBottom: 28, fontFamily: 'Roboto, sans-serif' }}>
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        {qStep === 0 ? c.qmBackFirst : c.qmBack}
-      </button>
-
-      <ProgressBar step={qStep + 1} total={QUESTIONS.length} />
-
-      {/* Question */}
-      <div className="animate-in" key={qStep} style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: T.accentSubtle, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: T.accent }}>{qStep + 1}</span>
-          </div>
-          <span style={{ fontSize: 11, fontWeight: 600, color: T.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{c.qmTitle} · {qStep + 1} / {QUESTIONS.length}</span>
-        </div>
-        <h2 style={{ fontSize: 26, fontWeight: 700, color: T.primary, lineHeight: 1.3 }}>{q.title}</h2>
-      </div>
-
-      {/* Date picker */}
-      {q.type === 'date' && (
-        <div className="animate-in">
-          <input type="date" value={dateVal} onChange={e => setDateVal(e.target.value)}
-            style={{ width: '100%', height: 52, padding: '0 18px', border: `2px solid ${dateVal ? T.accent : T.border}`, borderRadius: 10, fontSize: 16, color: T.primary, fontFamily: 'Roboto, sans-serif', outline: 'none', marginBottom: 20, background: T.white, transition: 'border-color 0.15s' }}
-            onFocus={e => e.target.style.borderColor = T.accent}
-            onBlur={e => e.target.style.borderColor = dateVal ? T.accent : T.border}
-          />
-          <Btn onClick={() => { if (dateVal) { setAnswers({ ...answers, arrival: dateVal }); setQStep(1); }}} full size="lg" disabled={!dateVal}>{c.qmNext}</Btn>
-        </div>
-      )}
-
-      {/* Choice grid */}
-      {q.type === 'choice' && (
-        <div className="animate-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-          {q.options.map((o, i) => (
-            <div key={o.value} onClick={() => pickChoice(o.value)}
-              className="animate-in" style={{ animationDelay: `${i * 0.05}s` }}
-              onMouseEnter={e => { if (currentAns !== o.value) e.currentTarget.style.borderColor = T.accent; }}
-              onMouseLeave={e => { if (currentAns !== o.value) e.currentTarget.style.borderColor = T.border; }}
-              style={{ background: currentAns === o.value ? T.accentSubtle : T.white, border: `2px solid ${currentAns === o.value ? T.accent : T.border}`, borderRadius: 10, padding: '18px', cursor: 'pointer', transition: 'all 0.15s', position: 'relative' }}>
-              {o.icon && <div style={{ fontSize: 26, marginBottom: 8 }}>{o.icon}</div>}
-              <div style={{ fontSize: 15, fontWeight: 700, color: T.primary, marginBottom: 4 }}>{o.label}</div>
-              <div style={{ fontSize: 12, color: T.muted, lineHeight: 1.4 }}>{o.sub}</div>
-              {currentAns === o.value && (
-                <div style={{ position: 'absolute', top: 10, right: 10, width: 20, height: 20, borderRadius: '50%', background: T.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Answered summary */}
-      {Object.keys(answers).length > 0 && (
-        <div style={{ marginTop: 32, padding: '14px 16px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {QUESTIONS.slice(0, qStep).map((q, i) => answers[q.key] && (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px', background: T.white, border: `1px solid ${T.border}`, borderRadius: 100, fontSize: 11, color: T.muted }}>
-              <span style={{ color: T.success, fontWeight: 700 }}>✓</span>
-              <span>{q.type === 'date' ? answers[q.key] : q.options?.find(o => o.value === answers[q.key])?.label}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ════════════════════════════════════════════════════════════════════════════
-// SCREEN 5 — Concierge Call Booking
-// ════════════════════════════════════════════════════════════════════════════
-const Screen5_Concierge = ({ c, onBack }) => {
-  const [selectedSlot, setSelectedSlot] = React.useState(null);
-  const [name, setName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [submitted, setSubmitted] = React.useState(false);
-
+  const SERVICES = ['eSIM / Korean phone number','Bank account opening','Alien Registration Card (ARC)','Visa application guidance','Airport pickup','Korean language classes','Health insurance'];
   const SLOTS = [
-    { id: 1, day: c.today,    time: '3:00 PM', avail: true },
-    { id: 2, day: c.today,    time: '5:00 PM', avail: true },
-    { id: 3, day: c.tomorrow, time: '10:00 AM', avail: true },
-    { id: 4, day: c.tomorrow, time: '2:00 PM',  avail: false },
-    { id: 5, day: c.tomorrow, time: '4:00 PM',  avail: true },
-    { id: 6, day: c.dayAfter, time: '11:00 AM', avail: true },
-    { id: 7, day: c.dayAfter, time: '1:00 PM',  avail: true },
-    { id: 8, day: c.dayAfter, time: '3:00 PM',  avail: false },
+    { id:1, day:'Today',    time:'3:00 PM', avail:true },
+    { id:2, day:'Today',    time:'5:00 PM', avail:true },
+    { id:3, day:'Tomorrow', time:'10:00 AM', avail:true },
+    { id:4, day:'Tomorrow', time:'2:00 PM',  avail:false },
+    { id:5, day:'Tomorrow', time:'4:00 PM',  avail:true },
+    { id:6, day:'Day after', time:'11:00 AM', avail:true },
+    { id:7, day:'Day after', time:'1:00 PM',  avail:true },
   ];
-  const canSubmit = selectedSlot && name.trim() && email.trim() && email.includes('@');
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    setSubmitted(true);
-  };
+  const toggleService = (s) => setForm(f => ({
+    ...f, services: f.services.includes(s) ? f.services.filter(x=>x!==s) : [...f.services,s]
+  }));
 
-  if (submitted) {
+  const plans = [
+    { id:'stay', name:'Stay Only', price:'$0', sub:'platform fee', items:['Vetted home + English booking','Foreigner-verified listing','24h response guarantee'] },
+    { id:'setup', name:'Stay + Setup', price:'$299', sub:'one-time', highlight:true, items:['Everything in Stay Only','+eSIM + Korean phone number','+Bank account opening','+ARC & visa document guide','+Welcome kit delivery'] },
+    { id:'concierge', name:'Stay + Concierge', price:'$49', sub:'/month', items:['Everything in Stay Only','+24/7 KakaoTalk support','+Weekly meetups','+Booking assistance'] },
+  ];
+
+  if (done) {
     return (
-      <div className="animate-in" style={{ maxWidth: 540, margin: '80px auto', padding: '0 24px', textAlign: 'center' }}>
-        <div style={{ width: 80, height: 80, borderRadius: '50%', background: T.successBg, border: `2px solid ${T.success}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', fontSize: 36 }}>✓</div>
-        <Badge color={T.success} bg={T.successBg}>Confirmed!</Badge>
-        <h2 style={{ fontSize: 26, fontWeight: 700, color: T.primary, margin: '14px 0 10px' }}>{c.successTitle}</h2>
-        <p style={{ fontSize: 14, color: T.muted, lineHeight: 1.7, marginBottom: 28, whiteSpace: 'pre-line' }}>{c.successSub}</p>
-        <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 12, padding: '20px', textAlign: 'left', marginBottom: 28 }}>
-          {[
-            ['Booking ref', '#DNG-2026-' + Math.floor(1000 + Math.random() * 8999)],
-            ['Time', `${SLOTS.find(s => s.id === selectedSlot)?.day}, ${SLOTS.find(s => s.id === selectedSlot)?.time}`],
-            ['Duration', '15 minutes'],
-            ['Format', 'Google Meet (link sent to email)'],
-          ].map(([k, v]) => (
-            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: k !== 'Format' ? `1px solid ${T.border}` : 'none', fontSize: 13 }}>
-              <span style={{ color: T.muted }}>{k}</span>
-              <span style={{ color: T.primary, fontWeight: 500 }}>{v}</span>
-            </div>
-          ))}
+      <div style={{ position:'fixed', inset:0, background:'rgba(44,36,32,0.55)', zIndex:300, display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
+        <div className="animate-in" style={{ background:T.white, borderRadius:20, padding:'48px 40px', maxWidth:440, width:'100%', textAlign:'center' }}>
+          <div style={{ width:72, height:72, borderRadius:'50%', background:T.successBg, border:`2px solid ${T.success}30`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', fontSize:32 }}>✓</div>
+          <Badge color={T.success} bg={T.successBg}>Booked!</Badge>
+          <h2 style={{ fontFamily:'Fraunces,serif', fontSize:26, fontWeight:700, color:T.primary, margin:'16px 0 10px' }}>Consultation booked!</h2>
+          <p style={{ fontSize:14, color:T.muted, lineHeight:1.7, marginBottom:28 }}>A 15-min video call to finalize everything.<br/>Check your email for the Google Meet link.</p>
+          <Btn onClick={onClose} full>Back to listing</Btn>
         </div>
-        <Btn onClick={onBack} full size="lg" variant="ghost">Back to listings</Btn>
       </div>
     );
   }
 
   return (
-    <div className="animate-in" style={{ maxWidth: 820, margin: '0 auto', padding: '40px 24px 60px' }}>
-      <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: T.muted, fontSize: 13, cursor: 'pointer', marginBottom: 28, fontFamily: 'Roboto, sans-serif' }}>
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        Back
-      </button>
+    <div style={{ position:'fixed', inset:0, background:'rgba(44,36,32,0.55)', zIndex:300, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 16px', overflowY:'auto' }}>
+      <div className="animate-in" style={{ background:T.white, borderRadius:20, padding:'32px 36px', maxWidth:640, width:'100%', marginTop:20, position:'relative' }}>
+        <button onClick={onClose} style={{ position:'absolute', top:20, right:20, width:32, height:32, borderRadius:'50%', background:T.surface, border:'none', cursor:'pointer', fontSize:18, color:T.muted, display:'flex', alignItems:'center', justifyContent:'center' }}>×</button>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 36, alignItems: 'start' }}>
-        {/* Main form */}
-        <div>
-          <Badge color={T.accent} bg={T.accentSubtle}>Last step</Badge>
-          <h2 style={{ fontSize: 26, fontWeight: 700, color: T.primary, marginTop: 10, marginBottom: 6 }}>{c.conciergeTitle}</h2>
-          <p style={{ fontSize: 14, color: T.muted, marginBottom: 28, lineHeight: 1.65 }}>{c.conciergeSub}</p>
+        {/* Progress */}
+        <div style={{ display:'flex', gap:8, marginBottom:28, alignItems:'center' }}>
+          {[1,2,3].map(i=>(
+            <React.Fragment key={i}>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <div style={{ width:24, height:24, borderRadius:'50%', background:step>=i?(step>i?T.success:T.accent):T.border, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'#fff', transition:'all 0.2s', flexShrink:0 }}>
+                  {step>i?'✓':i}
+                </div>
+                <span style={{ fontSize:11, fontWeight:step===i?600:400, color:step>=i?T.primary:T.muted, whiteSpace:'nowrap' }}>
+                  {i===1?'Choose plan':i===2?'Your details':'Book call'}
+                </span>
+              </div>
+              {i<3 && <div style={{ flex:1, height:1, background:step>i?T.success:T.border, transition:'background 0.3s' }}/>}
+            </React.Fragment>
+          ))}
+        </div>
 
-          {/* Time slots */}
-          <div style={{ marginBottom: 26 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: T.primary, marginBottom: 12 }}>{c.selectTime}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-              {SLOTS.map(s => (
-                <button key={s.id} onClick={() => s.avail && setSelectedSlot(s.id)} disabled={!s.avail}
-                  style={{ padding: '10px 8px', borderRadius: 8, border: `2px solid ${selectedSlot === s.id ? T.accent : T.border}`, background: !s.avail ? T.surface : selectedSlot === s.id ? T.accentSubtle : T.white, cursor: s.avail ? 'pointer' : 'not-allowed', fontFamily: 'Roboto, sans-serif', opacity: s.avail ? 1 : 0.45, transition: 'all 0.15s' }}
-                  onMouseEnter={e => { if (s.avail && selectedSlot !== s.id) e.currentTarget.style.borderColor = T.accent; }}
-                  onMouseLeave={e => { if (selectedSlot !== s.id) e.currentTarget.style.borderColor = T.border; }}>
-                  <div style={{ fontSize: 10, color: T.muted, marginBottom: 3, fontWeight: 500 }}>{s.day}</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: selectedSlot === s.id ? T.accent : T.primary }}>{s.time}</div>
-                  {!s.avail && <div style={{ fontSize: 9, color: T.disabled, marginTop: 2 }}>{c.unavailable}</div>}
+        {/* Step 1: Plan selection */}
+        {step===1 && (
+          <div className="animate-in">
+            <h2 style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:700, color:T.primary, marginBottom:6 }}>Would you like our premium concierge service?</h2>
+            <p style={{ fontSize:13, color:T.muted, marginBottom:24, lineHeight:1.6 }}>
+              Booking: <strong style={{ color:T.primary }}>{stay?.title}</strong>
+            </p>
+            <div style={{ display:'flex', flexDirection:'column', gap:12, marginBottom:24 }}>
+              {plans.map(p => (
+                <div key={p.id} onClick={()=>setPlan(p.id)}
+                  style={{ border:`2px solid ${plan===p.id?T.accent:T.border}`, borderRadius:12, padding:'16px 18px', cursor:'pointer', background:plan===p.id?T.accentSubtle:T.white, transition:'all 0.15s' }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8 }}>
+                    <div>
+                      <span style={{ fontSize:15, fontWeight:700, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{p.name}</span>
+                      {p.highlight && <Badge color={T.accent} bg={T.accentLight} small style={{ marginLeft:8 }}>Popular</Badge>}
+                    </div>
+                    <div style={{ textAlign:'right' }}>
+                      <span style={{ fontSize:18, fontWeight:700, color:T.primary, fontFamily:'Fraunces,serif' }}>{p.price}</span>
+                      <span style={{ fontSize:11, color:T.muted }}> {p.sub}</span>
+                    </div>
+                  </div>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                    {p.items.map(item=><span key={item} style={{ fontSize:11, color:T.muted }}>{item}</span>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Btn onClick={()=>plan&&setStep(plan==='stay'?3:2)} disabled={!plan} full size="lg">
+              {plan ? (plan==='stay'?'Continue to booking →':'Next: Your details →') : 'Select a plan'}
+            </Btn>
+          </div>
+        )}
+
+        {/* Step 2: Details form */}
+        {step===2 && (
+          <div className="animate-in">
+            <h2 style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:700, color:T.primary, marginBottom:6 }}>Tell us about yourself</h2>
+            <p style={{ fontSize:13, color:T.muted, marginBottom:24 }}>Helps us prepare everything before your arrival.</p>
+
+            <div style={{ marginBottom:16 }}>
+              <label style={{ display:'block', fontSize:13, fontWeight:600, color:T.primary, marginBottom:6 }}>What's your nationality?</label>
+              <select value={form.nationality} onChange={e=>setForm({...form,nationality:e.target.value})}
+                style={{ width:'100%', height:44, padding:'0 14px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:14, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', background:T.white }}>
+                <option value="">Select nationality</option>
+                {NATIONALITIES.map(n=><option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+
+            <div style={{ marginBottom:16 }}>
+              <label style={{ display:'block', fontSize:13, fontWeight:600, color:T.primary, marginBottom:8 }}>What visa do you have or plan to get?</label>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {VISAS.map(v=>(
+                  <label key={v.v} style={{ display:'flex', alignItems:'flex-start', gap:10, padding:'10px 14px', border:`1.5px solid ${form.visa===v.v?T.accent:T.border}`, borderRadius:8, cursor:'pointer', background:form.visa===v.v?T.accentSubtle:T.white, transition:'all 0.15s' }}>
+                    <input type="radio" name="visa" value={v.v} checked={form.visa===v.v} onChange={()=>setForm({...form,visa:v.v})} style={{ marginTop:2, accentColor:T.accent }}/>
+                    <div>
+                      <div style={{ fontSize:13, fontWeight:600, color:T.primary }}>{v.l}</div>
+                      <div style={{ fontSize:11, color:T.muted }}>{v.s}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom:16 }}>
+              <label style={{ display:'block', fontSize:13, fontWeight:600, color:T.primary, marginBottom:8 }}>Do you need help with any of these?</label>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                {SERVICES.map(s=>(
+                  <label key={s} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:T.primary, cursor:'pointer', padding:'6px 0' }}>
+                    <input type="checkbox" checked={form.services.includes(s)} onChange={()=>toggleService(s)} style={{ accentColor:T.accent }}/>
+                    {s}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom:16 }}>
+              <label style={{ display:'block', fontSize:13, fontWeight:600, color:T.primary, marginBottom:8 }}>Korean language level?</label>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                {['None','Basic','Conversational','Fluent'].map(l=>(
+                  <button key={l} onClick={()=>setForm({...form,koreanLevel:l.toLowerCase()})}
+                    style={{ height:36, padding:'0 16px', borderRadius:100, border:`1.5px solid ${form.koreanLevel===l.toLowerCase()?T.accent:T.border}`, background:form.koreanLevel===l.toLowerCase()?T.accent:'transparent', color:form.koreanLevel===l.toLowerCase()?'#fff':T.primary, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s' }}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom:24 }}>
+              <label style={{ display:'block', fontSize:13, fontWeight:600, color:T.primary, marginBottom:6 }}>Anything specific you'd like help with?</label>
+              <textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} placeholder="Tell us anything that would help us prepare..." rows={3}
+                style={{ width:'100%', padding:'10px 14px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:14, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', outline:'none', resize:'vertical', background:T.white }}
+                onFocus={e=>e.target.style.borderColor=T.accent} onBlur={e=>e.target.style.borderColor=T.border}/>
+            </div>
+
+            <div style={{ display:'flex', gap:12 }}>
+              <Btn onClick={()=>setStep(1)} variant="ghost" size="md">← Back</Btn>
+              <Btn onClick={()=>setStep(3)} full size="lg">Next: Book call →</Btn>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Consultation booking */}
+        {step===3 && (
+          <div className="animate-in">
+            <h2 style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:700, color:T.primary, marginBottom:6 }}>Schedule a quick 15-min video call</h2>
+            <p style={{ fontSize:13, color:T.muted, marginBottom:24 }}>We'll finalize your stay and set everything up.</p>
+
+            <div style={{ marginBottom:20 }}>
+              <div style={{ fontSize:13, fontWeight:600, color:T.primary, marginBottom:10 }}>Select a time</div>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
+                {SLOTS.map(s=>(
+                  <button key={s.id} onClick={()=>s.avail&&setBooking({...booking,slot:s.id})} disabled={!s.avail}
+                    style={{ padding:'10px 8px', borderRadius:8, border:`2px solid ${booking.slot===s.id?T.accent:T.border}`, background:!s.avail?T.surface:booking.slot===s.id?T.accentSubtle:T.white, cursor:s.avail?'pointer':'not-allowed', fontFamily:'Plus Jakarta Sans,sans-serif', opacity:s.avail?1:0.4, transition:'all 0.15s' }}>
+                    <div style={{ fontSize:10, color:T.muted, marginBottom:2, fontWeight:500 }}>{s.day}</div>
+                    <div style={{ fontSize:13, fontWeight:700, color:booking.slot===s.id?T.accent:T.primary }}>{s.time}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display:'flex', gap:10, marginBottom:20 }}>
+              {[{k:'video',l:'📹 Video call'},{k:'whatsapp',l:'💬 WhatsApp'},{k:'kakao',l:'🟡 KakaoTalk'}].map(ch=>(
+                <button key={ch.k} onClick={()=>setBooking({...booking,channel:ch.k})}
+                  style={{ flex:1, height:40, borderRadius:8, border:`1.5px solid ${booking.channel===ch.k?T.accent:T.border}`, background:booking.channel===ch.k?T.accentSubtle:T.white, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', color:booking.channel===ch.k?T.accent:T.primary, transition:'all 0.15s' }}>
+                  {ch.l}
                 </button>
               ))}
             </div>
+
+            <FormInput label="Your name" placeholder="Jane Morrison" value={booking.name} onChange={e=>setBooking({...booking,name:e.target.value})}/>
+            <FormInput label="Email address" type="email" placeholder="jane@example.com" value={booking.email} onChange={e=>setBooking({...booking,email:e.target.value})} hint="We'll send a confirmation + Google Meet link"/>
+            <FormInput label="Phone / WhatsApp" placeholder="+1 555 000 0000" value={booking.phone} onChange={e=>setBooking({...booking,phone:e.target.value})}/>
+
+            <div style={{ display:'flex', gap:12, marginTop:8 }}>
+              <Btn onClick={()=>setStep(plan==='stay'?1:2)} variant="ghost" size="md">← Back</Btn>
+              <Btn onClick={()=>booking.slot&&booking.name&&booking.email&&setDone(true)}
+                disabled={!booking.slot||!booking.name||!booking.email} full size="lg">
+                {booking.slot&&booking.name&&booking.email?'Book my consultation →':'Fill in all fields'}
+              </Btn>
+            </div>
           </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
-          <FormInput label={c.yourName} placeholder={c.yourNameP} value={name} onChange={e => setName(e.target.value)} />
-          <FormInput label={c.yourEmail} type="email" placeholder={c.yourEmailP} value={email} onChange={e => setEmail(e.target.value)} hint={c.emailHint} />
+// ─── STAY DETAIL PAGE ────────────────────────────────────────────────────────
+const StayDetailPage = ({ stay, onBack }) => {
+  const [activeImg, setActiveImg] = React.useState(0);
+  const [period, setPeriod] = React.useState('1mo');
+  const [moveIn, setMoveIn] = React.useState('');
+  const [showModal, setShowModal] = React.useState(false);
+  const images = ['assets/images/listing-1.jpg','assets/images/listing-2.jpg','assets/images/listing-3.jpg'];
+  const price = Math.round(stay.priceUSD * (PERIODS_USD.find(p=>p.key===period)?.multiplier||1));
+  const tc = TYPE_COLORS[stay.type]||TYPE_COLORS['Studio'];
 
-          <Btn onClick={handleSubmit} full size="lg" disabled={!canSubmit}>
-            {canSubmit ? c.confirmBtn : c.confirmDisabled}
-          </Btn>
+  return (
+    <div className="animate-in">
+      {showModal && <ConciergeModal stay={stay} onClose={()=>setShowModal(false)}/>}
+      <div style={{ maxWidth:1100, margin:'0 auto', padding:'24px 24px 60px' }}>
+        <button onClick={onBack} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', marginBottom:20, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          Back to listings
+        </button>
+
+        {/* Image gallery */}
+        <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:8, marginBottom:32, height:380 }}>
+          <div style={{ borderRadius:'14px 0 0 14px', overflow:'hidden', background:T.border }}>
+            <img src={images[activeImg]} alt={stay.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e=>e.target.style.display='none'}/>
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {images.slice(1).map((img,i)=>(
+              <div key={i} onClick={()=>setActiveImg(i+1)} style={{ flex:1, borderRadius:i===0?'0 14px 0 0':'0 0 14px 0', overflow:'hidden', background:T.border, cursor:'pointer', border:`2px solid ${activeImg===i+1?T.accent:'transparent'}`, transition:'border-color 0.15s' }}>
+                <img src={img} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e=>e.target.style.display='none'}/>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Side info */}
-        <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 12, padding: '22px', position: 'sticky', top: 120 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: T.primary, marginBottom: 16 }}>{c.whatWeHelp}</div>
-          {c.callHelp.map(item => (
-            <div key={item.title} style={{ display: 'flex', gap: 11, marginBottom: 16 }}>
-              <span style={{ fontSize: 20, flexShrink: 0, lineHeight: 1.3 }}>{item.icon}</span>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: T.primary, marginBottom: 3 }}>{item.title}</div>
-                <div style={{ fontSize: 12, color: T.muted, lineHeight: 1.55 }}>{item.desc}</div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 340px', gap:44, alignItems:'start' }}>
+          {/* Left */}
+          <div>
+            <div style={{ display:'flex', gap:7, marginBottom:12, flexWrap:'wrap' }}>
+              <Badge color={tc.color} bg={tc.bg}>{stay.type}</Badge>
+              <Badge color={T.accent} bg={T.accentSubtle}>Foreigner-friendly</Badge>
+              <Badge color={T.success} bg={T.successBg}>English host</Badge>
+              <Badge color={T.blue} bg={T.blueBg}>Instant booking</Badge>
+            </div>
+            <h1 style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:700, color:T.primary, marginBottom:8, lineHeight:1.25 }}>{stay.title}</h1>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:20, fontSize:13, color:T.muted, flexWrap:'wrap' }}>
+              <span>{stay.neighborhood}</span><span>·</span>
+              <span>{stay.sqm}m² · {stay.guests} guests max</span><span>·</span>
+              <span style={{ display:'flex', alignItems:'center', gap:3 }}>
+                <StarIcon size={13}/><span style={{ color:T.primary, fontWeight:600 }}>{stay.rating}</span>
+                <span>({stay.reviews} reviews)</span>
+              </span>
+            </div>
+            <div style={{ height:1, background:T.border, marginBottom:22 }}/>
+            <p style={{ fontSize:15, color:T.n600, lineHeight:1.75, marginBottom:24 }}>{stay.description}</p>
+
+            <div style={{ marginBottom:24 }}>
+              <h3 style={{ fontSize:16, fontWeight:700, color:T.primary, marginBottom:14, fontFamily:'Plus Jakarta Sans,sans-serif' }}>Amenities</h3>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:10 }}>
+                {stay.amenities.map(a=>(
+                  <div key={a} style={{ display:'flex', alignItems:'center', gap:8, fontSize:13, color:T.n600 }}>
+                    <div style={{ width:6, height:6, borderRadius:'50%', background:T.accent, flexShrink:0 }}/>
+                    {a}
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-          <div style={{ marginTop: 6, padding: '12px 14px', background: T.accentSubtle, borderRadius: 8, border: `1px solid ${T.accentLight}` }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: T.accent, marginBottom: 3 }}>{c.itsFree}</div>
-            <div style={{ fontSize: 11, color: T.muted, lineHeight: 1.5 }}>{c.itsFreeNote}</div>
+
+            <div style={{ height:1, background:T.border, marginBottom:22 }}/>
+            <h3 style={{ fontSize:16, fontWeight:700, color:T.primary, marginBottom:14 }}>Guest reviews</h3>
+            {[
+              { name:'Marcus H.', country:'🇩🇪', text:'Perfect location, super responsive host. eSIM setup help was a lifesaver.', rating:5 },
+              { name:'Yuki T.',   country:'🇯🇵', text:'Clean, cozy, great for remote work. Would definitely book again.', rating:5 },
+              { name:'Sophie L.', country:'🇫🇷', text:'The neighborhood is everything. Walked everywhere.', rating:4 },
+            ].map(r=>(
+              <div key={r.name} style={{ background:T.surface, borderRadius:10, padding:'14px 16px', marginBottom:10 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
+                  <span style={{ fontSize:13, fontWeight:700, color:T.primary }}>{r.country} {r.name}</span>
+                  <div style={{ display:'flex', gap:2 }}>{Array.from({length:r.rating},(_,i)=><StarIcon key={i}/>)}</div>
+                </div>
+                <p style={{ fontSize:13, color:T.muted, lineHeight:1.6 }}>{r.text}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Right: Booking panel */}
+          <div style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:16, padding:'24px', position:'sticky', top:80, boxShadow:'0 4px 20px rgba(44,36,32,0.08)' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:16 }}>
+              <div>
+                <span style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:700, color:T.primary }}>${price.toLocaleString()}</span>
+                <span style={{ fontSize:13, color:T.muted }}> / {period}</span>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:4 }}><StarIcon size={13}/><span style={{ fontSize:13, fontWeight:600, color:T.primary }}>{stay.rating}</span></div>
+            </div>
+
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, fontWeight:600, color:T.muted, textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>Stay duration</div>
+              <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                {PERIODS_USD.map(p=>(
+                  <button key={p.key} onClick={()=>setPeriod(p.key)}
+                    style={{ flex:'1 1 auto', minWidth:38, height:34, borderRadius:7, border:`1.5px solid ${period===p.key?T.accent:T.border}`, background:period===p.key?T.accentSubtle:T.white, color:period===p.key?T.accent:T.muted, fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s' }}>
+                    {p.key}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:11, fontWeight:600, color:T.muted, textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>Move-in date</div>
+              <input type="date" value={moveIn} onChange={e=>setMoveIn(e.target.value)}
+                style={{ width:'100%', height:44, padding:'0 14px', border:`1.5px solid ${T.border}`, borderRadius:8, fontSize:14, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', outline:'none', background:T.white }}
+                onFocus={e=>e.target.style.borderColor=T.accent} onBlur={e=>e.target.style.borderColor=T.border}/>
+            </div>
+
+            <Btn onClick={()=>setShowModal(true)} full size="lg">Book this stay →</Btn>
+            <p style={{ fontSize:11, color:T.muted, textAlign:'center', marginTop:8, lineHeight:1.5 }}>
+              You won't be charged yet · Concierge confirms within 24h
+            </p>
+
+            <div style={{ borderTop:`1px solid ${T.border}`, marginTop:16, paddingTop:16 }}>
+              {[['💳','No security deposit games'],['✅','Licensed long-term rentals only'],['📞','24/7 English concierge']].map(([icon,text])=>(
+                <div key={text} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8, fontSize:12, color:T.muted }}>
+                  <span>{icon}</span>{text}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -1303,68 +951,280 @@ const Screen5_Concierge = ({ c, onBack }) => {
   );
 };
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
-const App = () => {
-  const [lang, setLang] = React.useState('en');
-  const [screen, setScreen] = React.useState(0);
-  const [selectedListing, setSelectedListing] = React.useState(LISTINGS[0]);
-  const [scrolled, setScrolled] = React.useState(false);
+// ─── QUICK MATCH WIZARD ───────────────────────────────────────────────────────
+const QuickMatch = ({ onDone, onBack }) => {
+  const [qStep, setQStep] = React.useState(0);
+  const [answers, setAnswers] = React.useState({});
+  const [dateVal, setDateVal] = React.useState('');
+  const [submitted, setSubmitted] = React.useState(false);
+  const [booking, setBooking] = React.useState({ slot:null, name:'', email:'' });
 
-  React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  const QUESTIONS = [
+    { key:'arrival',  title:"When are you arriving in Korea?", type:'date' },
+    { key:'duration', title:"How long are you planning to stay?", type:'choice', options:[
+      { value:'1mo', label:'~1 month',   sub:'30–45 days' },
+      { value:'2mo', label:'~2 months',  sub:'45–90 days' },
+      { value:'3mo', label:'3 months+',  sub:'90+ days' },
+      { value:'1yr', label:'1 year+',    sub:'F-1-D visa required' },
+    ]},
+    { key:'visa', title:"What's your visa status?", type:'choice', options:[
+      { value:'b2',    label:'B-2 Tourist',      sub:'Up to 90 days, visa-free' },
+      { value:'f1d',   label:'F-1-D Workcation', sub:'Up to 1 year, $66k+ income req.' },
+      { value:'d4',    label:'D-4 Student',       sub:'Language school enrollment' },
+      { value:'unsure',label:'Not sure yet',       sub:'Concierge will guide you' },
+    ]},
+    { key:'budget', title:"What's your monthly budget?", type:'choice', options:[
+      { value:'low',     label:'Under $800',   sub:'~₩1,000,000' },
+      { value:'mid',     label:'$800–1,200',   sub:'~₩1,000–1,500,000' },
+      { value:'high',    label:'$1,200–2,000', sub:'~₩1,500–2,500,000' },
+      { value:'premium', label:'$2,000+',      sub:'₩2,500,000+' },
+    ]},
+    { key:'vibe', title:"What kind of neighborhood vibe do you want?", type:'choice', options:[
+      { value:'creative', label:'Creative & Trendy', sub:'Yeonnam · Seongsu',   icon:'🎨' },
+      { value:'expat',    label:'Expat Hub',          sub:'Haebangchon · Itaewon', icon:'🌍' },
+      { value:'business', label:'Business Central',   sub:'Gangnam · Yeoksam',  icon:'💼' },
+      { value:'quiet',    label:'Quiet & Local',      sub:'Mangwon · Hapjeong', icon:'🌿' },
+    ]},
+  ];
 
-  const c = COPY[lang];
+  const SLOTS = [
+    { id:1, day:'Today',    time:'3:00 PM',  avail:true },
+    { id:2, day:'Today',    time:'5:00 PM',  avail:true },
+    { id:3, day:'Tomorrow', time:'10:00 AM', avail:true },
+    { id:4, day:'Tomorrow', time:'2:00 PM',  avail:false },
+    { id:5, day:'Tomorrow', time:'4:00 PM',  avail:true },
+    { id:6, day:'Day after', time:'11:00 AM', avail:true },
+    { id:7, day:'Day after', time:'1:00 PM',  avail:true },
+    { id:8, day:'Day after', time:'3:00 PM',  avail:false },
+  ];
 
-  const STEP_LABELS = {
-    en: ['Listings', 'Neighborhoods', 'Listing Detail', 'Quick Match', 'Concierge Call'],
-    zh: ['房源', '街区探索', '房源详情', '快速匹配', '礼宾电话'],
-    ja: ['物件一覧', 'エリア探索', '物件詳細', 'クイックマッチ', 'コンシェルジュ'],
-    es: ['Alojamientos', 'Barrios', 'Detalle', 'Matcheo Rápido', 'Conserje'],
-    de: ['Unterkünfte', 'Viertel', 'Details', 'Quick Match', 'Concierge'],
+  const q = QUESTIONS[qStep];
+  const pickChoice = v => {
+    const newAns = { ...answers, [q.key]: v };
+    setAnswers(newAns);
+    if (qStep < QUESTIONS.length-1) setTimeout(()=>setQStep(qStep+1), 220);
+    else setQStep(QUESTIONS.length);
   };
 
-  const steps = STEP_LABELS[lang] || STEP_LABELS.en;
+  if (submitted) return (
+    <div className="animate-in" style={{ maxWidth:520, margin:'80px auto', padding:'0 24px', textAlign:'center' }}>
+      <div style={{ width:72, height:72, borderRadius:'50%', background:T.successBg, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', fontSize:30 }}>✓</div>
+      <Badge color={T.success} bg={T.successBg}>Confirmed!</Badge>
+      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:26, fontWeight:700, color:T.primary, margin:'14px 0 10px' }}>Concierge call booked!</h2>
+      <p style={{ fontSize:14, color:T.muted, lineHeight:1.7, marginBottom:28 }}>A 15-min video call to find your perfect listings.<br/>Check your email for the Google Meet link.</p>
+      <Btn onClick={onBack} full>Back to home</Btn>
+    </div>
+  );
 
-  const nav = (s) => {
-    setScreen(s);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // Concierge booking step
+  if (qStep === QUESTIONS.length) return (
+    <div className="animate-in" style={{ maxWidth:680, margin:'0 auto', padding:'40px 24px 60px' }}>
+      <button onClick={()=>setQStep(QUESTIONS.length-1)} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', marginBottom:28, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round"/></svg>
+        Back
+      </button>
+      <Badge color={T.accent} bg={T.accentSubtle}>Last step</Badge>
+      <h2 style={{ fontFamily:'Fraunces,serif', fontSize:26, fontWeight:700, color:T.primary, margin:'12px 0 6px' }}>Book a free concierge call</h2>
+      <p style={{ fontSize:14, color:T.muted, marginBottom:28, lineHeight:1.65 }}>15-min video call — we'll curate 3 listings perfectly matched to your answers.</p>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:32, alignItems:'start' }}>
+        <div>
+          <div style={{ fontSize:13, fontWeight:600, color:T.primary, marginBottom:12 }}>Select a time</div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:24 }}>
+            {SLOTS.map(s=>(
+              <button key={s.id} onClick={()=>s.avail&&setBooking({...booking,slot:s.id})} disabled={!s.avail}
+                style={{ padding:'10px 8px', borderRadius:8, border:`2px solid ${booking.slot===s.id?T.accent:T.border}`, background:!s.avail?T.surface:booking.slot===s.id?T.accentSubtle:T.white, cursor:s.avail?'pointer':'not-allowed', fontFamily:'Plus Jakarta Sans,sans-serif', opacity:s.avail?1:0.4, transition:'all 0.15s' }}>
+                <div style={{ fontSize:10, color:T.muted, marginBottom:2, fontWeight:500 }}>{s.day}</div>
+                <div style={{ fontSize:13, fontWeight:700, color:booking.slot===s.id?T.accent:T.primary }}>{s.time}</div>
+              </button>
+            ))}
+          </div>
+          <FormInput label="Your name" placeholder="Jane Morrison" value={booking.name} onChange={e=>setBooking({...booking,name:e.target.value})}/>
+          <FormInput label="Email address" type="email" placeholder="jane@example.com" value={booking.email} onChange={e=>setBooking({...booking,email:e.target.value})} hint="We'll send a confirmation + Google Meet link"/>
+          <Btn onClick={()=>booking.slot&&booking.name&&booking.email&&setSubmitted(true)}
+            disabled={!booking.slot||!booking.name||!booking.email} full size="lg">
+            {booking.slot&&booking.name&&booking.email?'Confirm Concierge Call →':'Fill in all fields to continue'}
+          </Btn>
+        </div>
+        <div style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:12, padding:'20px' }}>
+          <div style={{ fontSize:14, fontWeight:700, color:T.primary, marginBottom:14 }}>What we cover in the call</div>
+          {[
+            { icon:'🏠', title:'Listing curation', desc:'3 hand-picked listings based on your answers' },
+            { icon:'📋', title:'Visa guidance', desc:'Document checklist tailored to your visa type' },
+            { icon:'📱', title:'eSIM + bank setup', desc:'Everything you need to know for Day 1' },
+            { icon:'💬', title:'24/7 KakaoTalk', desc:'Unlimited follow-up questions via chat' },
+          ].map(item=>(
+            <div key={item.title} style={{ display:'flex', gap:10, marginBottom:14 }}>
+              <span style={{ fontSize:18, flexShrink:0, lineHeight:1.3 }}>{item.icon}</span>
+              <div>
+                <div style={{ fontSize:13, fontWeight:600, color:T.primary, marginBottom:2 }}>{item.title}</div>
+                <div style={{ fontSize:12, color:T.muted, lineHeight:1.5 }}>{item.desc}</div>
+              </div>
+            </div>
+          ))}
+          <div style={{ background:T.accentSubtle, borderRadius:8, padding:'12px 14px', border:`1px solid ${T.accentLight}` }}>
+            <div style={{ fontSize:12, fontWeight:700, color:T.accent, marginBottom:2 }}>Completely free</div>
+            <div style={{ fontSize:11, color:T.muted }}>First call is free. Payment only after booking.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div style={{ minHeight: '100vh', background: T.surface }}>
-      <NavBar lang={lang} setLang={setLang} c={c} onQuickMatch={() => nav(3)} scrolled={scrolled} />
-      {screen > 0 && <StepBar step={screen - 1} steps={steps} onStep={i => nav(i + 1)} />}
+    <div style={{ maxWidth:600, margin:'0 auto', padding:'40px 24px 60px' }}>
+      <button onClick={()=>qStep===0?onBack():setQStep(qStep-1)} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', color:T.muted, fontSize:13, cursor:'pointer', marginBottom:28, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke={T.muted} strokeWidth="1.5" strokeLinecap="round"/></svg>
+        {qStep===0?'Back':'Previous'}
+      </button>
+      <ProgressBar step={qStep+1} total={QUESTIONS.length}/>
+      <div className="animate-in" key={qStep} style={{ marginBottom:28 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
+          <div style={{ width:32, height:32, borderRadius:'50%', background:T.accentSubtle, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <span style={{ fontSize:13, fontWeight:700, color:T.accent }}>{qStep+1}</span>
+          </div>
+          <span style={{ fontSize:11, fontWeight:600, color:T.muted, letterSpacing:'0.06em', textTransform:'uppercase' }}>Quick Match · {qStep+1}/{QUESTIONS.length}</span>
+        </div>
+        <h2 style={{ fontFamily:'Fraunces,serif', fontSize:26, fontWeight:700, color:T.primary, lineHeight:1.3 }}>{q.title}</h2>
+      </div>
+      {q.type==='date' && (
+        <div className="animate-in">
+          <input type="date" value={dateVal} onChange={e=>setDateVal(e.target.value)}
+            style={{ width:'100%', height:52, padding:'0 18px', border:`2px solid ${dateVal?T.accent:T.border}`, borderRadius:10, fontSize:16, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif', outline:'none', marginBottom:20, background:T.white, transition:'border-color 0.15s' }}
+            onFocus={e=>e.target.style.borderColor=T.accent} onBlur={e=>{if(!dateVal)e.target.style.borderColor=T.border;}}/>
+          <Btn onClick={()=>dateVal&&pickChoice(dateVal)} disabled={!dateVal} full size="lg">Next →</Btn>
+        </div>
+      )}
+      {q.type==='choice' && (
+        <div className="animate-in" style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          {q.options.map(opt=>(
+            <button key={opt.value} onClick={()=>pickChoice(opt.value)}
+              style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'16px 18px', border:`2px solid ${answers[q.key]===opt.value?T.accent:T.border}`, borderRadius:10, background:answers[q.key]===opt.value?T.accentSubtle:T.white, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s' }}
+              onMouseEnter={e=>{if(answers[q.key]!==opt.value)e.currentTarget.style.borderColor=T.accent;}}
+              onMouseLeave={e=>{if(answers[q.key]!==opt.value)e.currentTarget.style.borderColor=T.border;}}>
+              <div style={{ textAlign:'left' }}>
+                <div style={{ fontSize:15, fontWeight:600, color:T.primary }}>{opt.icon&&<span style={{ marginRight:8 }}>{opt.icon}</span>}{opt.label}</div>
+                <div style={{ fontSize:12, color:T.muted, marginTop:2 }}>{opt.sub}</div>
+              </div>
+              {answers[q.key]===opt.value && <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill={T.accent}/><path d="M6 10l3 3 5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
-      {screen === 0 && (
-        <Screen1_Landing c={c}
-          onNext={() => nav(1)}
-          onDetail={(l) => { setSelectedListing(l); nav(2); }}
+// ─── LANDING PAGE ─────────────────────────────────────────────────────────────
+const LandingPage = ({ onQuickMatch, onNeighborhood }) => (
+  <div className="animate-in">
+    {/* Hero */}
+    <div style={{ background:`linear-gradient(160deg,${T.primary} 0%,${T.n800} 55%,${T.n700} 100%)`, padding:'72px 32px 64px', position:'relative', overflow:'hidden' }}>
+      {[['-80px','-80px',320,'0.07'],['60%','20%',200,'0.05'],['80%','-40px',140,'0.06']].map(([r,t,s,o],i)=>(
+        <div key={i} style={{ position:'absolute', right:r, top:t, width:s, height:s, borderRadius:'50%', background:`rgba(196,113,74,${o})`, pointerEvents:'none' }}/>
+      ))}
+      <div style={{ maxWidth:700, margin:'0 auto', position:'relative', textAlign:'center' }}>
+        <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(196,113,74,0.18)', border:'1px solid rgba(196,113,74,0.35)', borderRadius:100, padding:'5px 16px', marginBottom:24 }}>
+          <div style={{ width:6, height:6, borderRadius:'50%', background:T.accent, animation:'pulse 2s infinite' }}/>
+          <span style={{ fontSize:11, fontWeight:600, color:'#E8A880', letterSpacing:'0.08em' }}>Seoul · 30-day+ stays · Foreigners only</span>
+        </div>
+        <h1 style={{ fontFamily:'Fraunces,serif', fontSize:'clamp(38px,6vw,58px)', fontWeight:700, color:'#FAF7F2', lineHeight:1.12, marginBottom:18, letterSpacing:'-0.5px' }}>
+          Live in Korea<br/><span style={{ color:T.accent }}>like a local.</span>
+        </h1>
+        <p style={{ fontSize:'clamp(15px,2vw,17px)', color:'#A8917E', marginBottom:36, lineHeight:1.7, maxWidth:520, margin:'0 auto 36px' }}>
+          From accommodation to visa, eSIM, bank account — everything you need to live like a local, all in one place.
+        </p>
+
+        {/* Primary CTA */}
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, marginBottom:28 }}>
+          <button onClick={onQuickMatch}
+            style={{ height:60, padding:'0 48px', background:T.accent, color:'#fff', border:'none', borderRadius:12, fontSize:18, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s', boxShadow:'0 8px 32px rgba(196,113,74,0.4)', letterSpacing:'-0.2px' }}
+            onMouseEnter={e=>{e.currentTarget.style.background=T.accentHov;e.currentTarget.style.transform='scale(1.02)';}}
+            onMouseLeave={e=>{e.currentTarget.style.background=T.accent;e.currentTarget.style.transform='scale(1)';}}>
+            Start Quick Match →
+          </button>
+          <p style={{ fontSize:13, color:'#8B7355', margin:0 }}>
+            Answer 5 quick questions. Get matched with your perfect stay in 24 hours.
+          </p>
+        </div>
+
+        {/* Trust strip */}
+        <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:20, marginTop:8 }}>
+          {['✓ Licensed long-term rentals only','✓ 24/7 English concierge','✓ No security deposit games'].map(t=>(
+            <div key={t} style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, color:'#8B7355', fontWeight:500 }}>
+              <span style={{ color:T.accent }}>{t.split(' ')[0]}</span>
+              {t.replace('✓ ','')}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {/* Neighborhood Map */}
+    <NeighborhoodMap onSelect={onNeighborhood}/>
+
+    {/* How it works */}
+    <HowItWorks onStart={onQuickMatch}/>
+
+    {/* Pricing */}
+    <PricingSection onStart={onQuickMatch}/>
+
+    {/* Footer */}
+    <Footer/>
+  </div>
+);
+
+// ─── APP ROUTER ───────────────────────────────────────────────────────────────
+const App = () => {
+  const [route, setRoute] = React.useState({ page:'landing' });
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(()=>{
+    const onScroll = ()=>setScrolled(window.scrollY>10);
+    window.addEventListener('scroll', onScroll);
+    return ()=>window.removeEventListener('scroll', onScroll);
+  },[]);
+
+  const navigate = (page, params={}) => {
+    setRoute({ page, ...params });
+    window.scrollTo({ top:0, behavior:'smooth' });
+  };
+
+  const selectedStay = route.stayId ? STAYS_DATA.find(s=>s.id===route.stayId) : null;
+
+  return (
+    <div style={{ minHeight:'100vh', background:T.surface }}>
+      <NavBar
+        onHome={()=>navigate('landing')}
+        onQuickMatch={()=>navigate('quick-match')}
+        scrolled={scrolled}
+      />
+
+      {route.page==='landing' && (
+        <LandingPage
+          onQuickMatch={()=>navigate('quick-match')}
+          onNeighborhood={id=>navigate('stays',{neighborhoodId:id})}
         />
       )}
-      {screen === 1 && (
-        <Screen2_Neighborhoods c={c}
-          onNext={() => nav(2)}
-          onBack={() => nav(0)}
+
+      {route.page==='stays' && (
+        <StaysPage
+          initialNeighborhood={route.neighborhoodId||null}
+          onStayClick={stay=>navigate('stay-detail',{stayId:stay.id})}
+          onBack={()=>navigate('landing')}
         />
       )}
-      {screen === 2 && (
-        <Screen3_Detail c={c} listing={selectedListing}
-          onNext={() => nav(3)}
-          onBack={() => nav(1)}
+
+      {route.page==='stay-detail' && selectedStay && (
+        <StayDetailPage
+          stay={selectedStay}
+          onBack={()=>navigate('stays',{neighborhoodId:selectedStay.neighborhoodId})}
         />
       )}
-      {screen === 3 && (
-        <Screen4_QuickMatch c={c}
-          onNext={() => nav(4)}
-          onBack={() => nav(2)}
-        />
-      )}
-      {screen === 4 && (
-        <Screen5_Concierge c={c}
-          onBack={() => nav(3)}
+
+      {route.page==='quick-match' && (
+        <QuickMatch
+          onDone={()=>navigate('landing')}
+          onBack={()=>navigate('landing')}
         />
       )}
     </div>
@@ -1372,7 +1232,8 @@ const App = () => {
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+root.render(<App/>);
+
 </script>
 </body>
 </html>
