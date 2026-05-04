@@ -15,6 +15,8 @@
 <meta name="twitter:description" content="The all-in-one platform for foreigners living in Seoul." />
 <link rel="canonical" href="https://localiseoul.com" />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
@@ -35,6 +37,11 @@
   .map-pin { cursor:pointer; transition: all 0.2s ease; }
   .map-pin:hover .pin-dot { r:9; fill:#2C2420; }
   .map-pin:hover .pin-label { font-weight:700; }
+  /* Mapbox GL overrides */
+  .mapboxgl-ctrl-logo { display:none !important; }
+  .mapboxgl-ctrl-attrib { font-size:10px !important; opacity:0.6; }
+  .mapboxgl-ctrl-group { border-radius:10px !important; box-shadow:0 2px 8px rgba(44,36,32,0.14) !important; }
+  .mapboxgl-ctrl button { border-radius:8px !important; }
 </style>
 </head>
 <body>
@@ -254,6 +261,73 @@ const CREW_DATA = {
   apgujeong: { crewMemberCount:35, crewLeadName:'Sua Choi',     crewLeadYears:'4 years in Apgujeong', crewLeadInterests:'K-beauty, fashion, K-pop industry', crewLeadBio:"Former K-beauty influencer, now runs a beauty brand consultancy. Has connections at every clinic on Cheongdam-ro.", crewLeadQuote:"Apgujeong looks intimidating. The Crew is your insider key. Once you're in, it's the most interesting neighborhood in Seoul.", weekendActivity:'beauty & brunch', nextEventDays:7, demographics:'Beauty-focused 22-38, 65% solo travelers, 21 nationalities', upcomingEvents:[{day:'TUE',date:'Mar 11',emoji:'🍲',title:'Crew Tuesday Dinner',detail:'Hanwoo Corner — premium Korean BBQ. Group rate.',attendees:12},{day:'SAT',date:'Mar 15',emoji:'💄',title:'K-Beauty Clinic Walk',detail:'Sua takes Crew to 2 vetted clinics. Free consultations.',attendees:9},{day:'FRI',date:'Mar 21',emoji:'🎤',title:'K-pop Industry Insider Talk',detail:'Guest speaker from SM Entertainment. RSVP required.',attendees:15}], perks:[{emoji:'💆',name:'Cheongdam Dermatology',benefit:'Priority booking + English consultation'},{emoji:'💄',name:'Missha Flagship',benefit:'20% Crew discount on full-size products'},{emoji:'☕',name:'Galleria Café',benefit:'Reserved table + VIP menu'},{emoji:'💅',name:'NAIL by Sua',benefit:'₩10,000 off full set'},{emoji:'🏋️',name:'Cheongdam Pilates',benefit:'2 free reformer classes'},{emoji:'🛍️',name:'Apgujeong Rodeo',benefit:'Sua personal shopping guide + store intros'}] },
 };
 
+// ─── TRIBES DATA ─────────────────────────────────────────────────────────────
+const TRIBES = {
+  kpop: {
+    name:'K-Pop & Fan Culture', emoji:'🎤',
+    tagline:'Get inside the world serious fans call home',
+    description:"Not just concerts — fan sites, music shows, idol cafés, group pre-orders, and the underground fan culture most tourists never see.",
+    color:'#C4714A', bgColor:'#FBF3EE', darkColor:'#7A3A1E', activeMembers:89,
+    hostName:'Eunji Song',
+    hostBio:'Dance instructor and K-pop event producer in Jamsil for 5 years. Has connections at KSPO Dome and gets group concert tickets at face value.',
+    hostQuote:"The K-pop world in Seoul moves fast. The Tribe is how you keep up — and actually get inside it.",
+    tags:['Concerts','Fan sites','Music shows','Idol cafés','Group orders'],
+    insiderPerks:[
+      { emoji:'🎤', name:'KSPO Dome Events', benefit:'Group tickets at face value through Eunji' },
+      { emoji:'💃', name:'Urban Dance Studio', benefit:'2 free K-pop dance drop-in classes' },
+      { emoji:'🎬', name:'Inkigayo / M Countdown', benefit:'Eunji applies for the group — free standing tickets' },
+      { emoji:'☕', name:'Idol Fan Cafés', benefit:'Pre-reservation for fan pop-up events' },
+      { emoji:'🛍️', name:'Lotte Dept Store', benefit:'Member shopping day — 8% extra discount' },
+    ]
+  },
+  language: {
+    name:'Korean Language & Culture', emoji:'🗣️',
+    tagline:'Learn Korean the way it actually sounds in Seoul',
+    description:"Daily conversation practice, language exchange meetups, hanok café study sessions, and cultural immersion — not just grammar drills.",
+    color:'#2C71F6', bgColor:'#F5F8FF', darkColor:'#1A3A7A', activeMembers:67,
+    hostName:'Jiyeon Oh',
+    hostBio:'Cultural heritage guide and TOPIK instructor in Jongno. Teaches Korean through stories, not textbooks — and knows every hanok tea house in the neighborhood.',
+    hostQuote:"Korean only clicks when you feel it. The Tribe creates the immersion a classroom can't.",
+    tags:['Conversation practice','Language exchange','TOPIK prep','Cultural context'],
+    insiderPerks:[
+      { emoji:'🏯', name:'Gyeongbokgung Walk', benefit:'Early 7AM entry before crowds — context makes words stick' },
+      { emoji:'🍵', name:'Insadong Tea House', benefit:'Free tea welcome + cultural storytelling session' },
+      { emoji:'🌍', name:'Language Exchange Events', benefit:'2x weekly — Korean + English, no entry fee' },
+      { emoji:'📝', name:'TOPIK Prep Kit', benefit:"Jiyeon's personal study materials shared with all Tribe members" },
+      { emoji:'🍜', name:'Tosokchon Samgyetang', benefit:'Reserved seating — no 2-hour queue' },
+    ]
+  },
+  wellness: {
+    name:'K-Beauty & Wellness', emoji:'🧘',
+    tagline:'The full Seoul wellness experience, with insider access',
+    description:"Dermatology clinics, Korean spas, pilates studios, K-beauty product labs, and wellness routines used by actual Seoulites.",
+    color:'#7A2C5C', bgColor:'#FAF0F5', darkColor:'#5A1A3C', activeMembers:54,
+    hostName:'Sua Choi',
+    hostBio:'Former K-beauty influencer, now beauty brand consultant in Apgujeong. Has connections at every clinic on Cheongdam-ro and knows what actually works.',
+    hostQuote:"K-beauty is a whole culture, not just skincare. The Tribe shows you what works and where to go.",
+    tags:['Dermatology clinics','Korean skincare','Spa rituals','Pilates & yoga'],
+    insiderPerks:[
+      { emoji:'💆', name:'Cheongdam Dermatology', benefit:'Priority booking + English consultation' },
+      { emoji:'💄', name:'Missha Flagship', benefit:'20% Tribe discount on full-size products' },
+      { emoji:'🧖', name:'Neighborhood Jjimjilbang', benefit:'First visit entry fee waived' },
+      { emoji:'🏋️', name:'Cheongdam Pilates Studio', benefit:'2 free reformer classes' },
+      { emoji:'☕', name:'Galleria Café', benefit:'Reserved table + post-treatment recovery menu' },
+    ]
+  }
+};
+
+// ─── THIS WEEK ACTIVITIES ─────────────────────────────────────────────────────
+const THIS_WEEK_ACTIVITIES = [
+  { id:'a1', tribeId:'kpop',     title:'Inkigayo Ticket Group Apply',     detail:'Eunji submits group application — highest success rate solo.',  day:'MON', date:'May 5',  time:'9 AM', going:12, capacity:15, emoji:'🎬', neighborhoodId:'jamsil' },
+  { id:'a2', tribeId:'language', title:'Language Exchange @ HBC Social',  detail:'Korean + English. Jiyeon facilitates. ₩5,000 entry.',           day:'WED', date:'May 7',  time:'7 PM', going:18, capacity:25, emoji:'🌍', neighborhoodId:'itaewon' },
+  { id:'a3', tribeId:'wellness', title:'K-Beauty Clinic Walk with Sua',   detail:'Sua takes group to 2 vetted Cheongdam clinics. Free consult.',  day:'SAT', date:'May 10', time:'2 PM', going:7,  capacity:10, emoji:'💆', neighborhoodId:'apgujeong' },
+  { id:'a4', tribeId:'kpop',     title:'K-Pop Dance Class',               detail:"Eunji's studio. 1 hour. All levels welcome. ₩10,000.",          day:'SAT', date:'May 10', time:'4 PM', going:14, capacity:20, emoji:'💃', neighborhoodId:'jamsil' },
+  { id:'a5', tribeId:'language', title:'Gyeongbokgung 7AM Cultural Walk', detail:"Jiyeon leads before the crowds. Stories no guide will tell you.", day:'SAT', date:'May 10', time:'7 AM', going:9,  capacity:12, emoji:'🏯', neighborhoodId:'jongno' },
+  { id:'a6', tribeId:'wellness', title:'Jjimjilbang Morning + Breakfast', detail:'Traditional Korean spa morning. Sua leads. Entry fee waived.',  day:'SUN', date:'May 11', time:'8 AM', going:6,  capacity:10, emoji:'🧖', neighborhoodId:'mangwon' },
+  { id:'a7', tribeId:'kpop',     title:'Fan Site Photography Workshop',   detail:'Learn to shoot like a fan site photographer. Limited seats.',   day:'TUE', date:'May 6',  time:'6 PM', going:8,  capacity:10, emoji:'📸', neighborhoodId:'hongdae' },
+  { id:'a8', tribeId:'language', title:'Hanok Café Korean Study Session', detail:'Jiyeon provides vocab sheets. Group study + convo practice.',   day:'THU', date:'May 8',  time:'3 PM', going:11, capacity:15, emoji:'☕', neighborhoodId:'jongno' },
+];
+
 // ─── MATCHING ALGORITHM ───────────────────────────────────────────────────────
 function calculateMatches(interests, travelStyle, stayLength) {
   const scores = {};
@@ -345,7 +419,7 @@ const ProgressBar = ({ step, total }) => (
 );
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
-const NavBar = ({ onHome, onQuickMatch, onCrew, scrolled }) => (
+const NavBar = ({ onHome, onQuickMatch, onTribes, scrolled }) => (
   <nav style={{ height:64, background:T.white, borderBottom:`1px solid ${scrolled?T.border:'transparent'}`, display:'flex', alignItems:'center', padding:'0 24px', justifyContent:'space-between', position:'sticky', top:0, zIndex:150, boxShadow:scrolled?'0 1px 8px rgba(44,36,32,0.06)':'none', transition:'all 0.2s' }}>
     <div onClick={onHome} style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
       <span style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:300, letterSpacing:'-0.5px', lineHeight:1 }}>
@@ -355,8 +429,8 @@ const NavBar = ({ onHome, onQuickMatch, onCrew, scrolled }) => (
     </div>
     <div style={{ display:'flex', gap:4, alignItems:'center' }}>
       <button onClick={onHome} style={{ height:36, padding:'0 12px', background:'transparent', color:T.muted, border:'none', cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:500 }}>Stays</button>
-      <button onClick={onCrew} style={{ height:36, padding:'0 12px', background:'transparent', color:T.accent, border:'none', cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, display:'flex', alignItems:'center', gap:4 }}>
-        Crew <span style={{ fontSize:10, background:T.accent, color:'#fff', padding:'1px 6px', borderRadius:100, fontWeight:700 }}>NEW</span>
+      <button onClick={onTribes} style={{ height:36, padding:'0 12px', background:'transparent', color:T.accent, border:'none', cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700 }}>
+        Tribes →
       </button>
       <button style={{ height:36, padding:'0 12px', background:'transparent', color:T.muted, border:'none', cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:500 }}>Log in</button>
       <Btn onClick={onQuickMatch} size="sm">Quick Match</Btn>
@@ -366,151 +440,295 @@ const NavBar = ({ onHome, onQuickMatch, onCrew, scrolled }) => (
 
 // ─── NEIGHBORHOOD MAP ─────────────────────────────────────────────────────────
 const NeighborhoodMap = ({ onSelect }) => {
-  const [hoveredId, setHoveredId] = React.useState(null);
-  const [tooltip, setTooltip] = React.useState({ x:0, y:0 });
-  const svgRef = React.useRef(null);
-  const wrapRef = React.useRef(null);
+  const mapContainerRef = React.useRef(null);
+  const mapRef = React.useRef(null);
+  const markersRef = React.useRef({});
+  const clickHandlerRef = React.useRef(null);
 
-  const hovered = NEIGHBORHOODS_DATA.find(n=>n.id===hoveredId);
+  const [selectedId, setSelectedId] = React.useState(null);
+  const [attractions, setAttractions] = React.useState([]);
+  const [loadingAttr, setLoadingAttr] = React.useState(false);
+  const [apiError, setApiError] = React.useState(false);
 
-  const handlePinEnter = (n, e) => {
-    setHoveredId(n.id);
-    if (!svgRef.current || !wrapRef.current) return;
-    const svgRect = svgRef.current.getBoundingClientRect();
-    const wrapRect = wrapRef.current.getBoundingClientRect();
-    const sx = svgRect.width / 600;
-    const sy = svgRect.height / 440;
-    setTooltip({ x: n.mapX*sx + (svgRect.left-wrapRect.left), y: n.mapY*sy + (svgRect.top-wrapRect.top) });
+  const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2ltdW55YW5nIiwiYSI6ImNtb3B0YmlpZzFydWQyb3MxMHhmamVqb2gifQ.ctcBunXgJFV7ShY5T5SWkg';
+  const VISITSEOUL_KEY = 'a01953d6-5b2b-4f7c-b265-e220e18ffe42';
+
+  const MAP_NBHDS = [
+    { id:'yeonnam', name:'Yeonnam-dong',       ko:'연남동',        tagline:'Indie cafés & park life',   lat:37.5665, lng:126.9240, color:'#C4714A', gu:'마포구'  },
+    { id:'hongdae', name:'Hongdae',             ko:'홍대',          tagline:'Music & street art',        lat:37.5570, lng:126.9245, color:'#E07B50', gu:'마포구'  },
+    { id:'mapo',    name:'Mangwon · Mapo',      ko:'망원동',        tagline:'Local market life',         lat:37.5566, lng:126.9030, color:'#4A7C59', gu:'마포구'  },
+    { id:'itaewon', name:'Itaewon · HBC',       ko:'이태원·해방촌', tagline:'International vibes',       lat:37.5340, lng:126.9940, color:'#1A3A7A', gu:'용산구'  },
+    { id:'yongsan', name:'Yongsan',             ko:'용산',          tagline:'Central & connected',       lat:37.5320, lng:126.9650, color:'#7A4A8A', gu:'용산구'  },
+    { id:'hannam',  name:'Hannam-dong',         ko:'한남동',        tagline:'Galleries & quiet luxury',  lat:37.5340, lng:127.0080, color:'#993556', gu:'용산구'  },
+    { id:'euljiro', name:'Euljiro · Jongno',    ko:'을지로·종로',   tagline:'Hidden bars & history',     lat:37.5660, lng:126.9980, color:'#8B7355', gu:'중구'    },
+    { id:'seongsu', name:'Seongsu-dong',        ko:'성수동',        tagline:'Brooklyn of Seoul',         lat:37.5450, lng:127.0560, color:'#6B4226', gu:'성동구'  },
+    { id:'gangnam', name:'Gangnam',             ko:'강남',          tagline:'Business & K-beauty',       lat:37.4980, lng:127.0280, color:'#185FA5', gu:'강남구'  },
+    { id:'jamsil',  name:'Jamsil · Songpa',     ko:'잠실·송파',     tagline:'Lotte Tower & lakeside',    lat:37.5130, lng:127.1000, color:'#0F6E56', gu:'송파구'  },
+  ];
+
+  const resetMarkers = () => {
+    Object.values(markersRef.current).forEach(({ el, data }) => {
+      el.style.background = data.color;
+      el.style.transform = 'scale(1)';
+      el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.22)';
+    });
+  };
+
+  const handleNeighborhoodClick = async (nbhd) => {
+    resetMarkers();
+    const m = markersRef.current[nbhd.id];
+    if (m) {
+      m.el.style.background = '#2C2420';
+      m.el.style.transform = 'scale(1.3)';
+      m.el.style.boxShadow = '0 4px 18px rgba(44,36,32,0.4)';
+    }
+
+    setSelectedId(nbhd.id);
+    setLoadingAttr(true);
+    setAttractions([]);
+    setApiError(false);
+
+    if (mapRef.current) {
+      mapRef.current.flyTo({ center:[nbhd.lng, nbhd.lat], zoom:13.5, speed:1.2, curve:1.4 });
+    }
+
+    try {
+      const params = new URLSearchParams({
+        apiKey: VISITSEOUL_KEY,
+        lang_code: 'en',
+        pageNo: '1',
+        numOfRows: '8',
+        addr: nbhd.gu,
+      });
+      const res = await fetch(
+        `https://api.visitseoul.net/api/contents/standard/list?${params}`,
+        { headers:{ 'Accept':'application/json' } }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const raw = data.items || data.list || data.body?.items?.item || [];
+      const items = (Array.isArray(raw) ? raw : [raw]).map(item => ({
+        id: item.contentsid || item.contentid || String(Math.random()),
+        name: item.title || '',
+        category: item.com_ctgry_nm || item.contenttypeid || '',
+        thumbnail: item.firstimage || item.thumbnail || null,
+        description: (item.overview || item.description || '').replace(/<[^>]+>/g,'').substring(0, 130),
+      })).filter(i => i.name);
+      setAttractions(items);
+    } catch (err) {
+      console.warn('Visit Seoul API:', err.message);
+      setApiError(true);
+    } finally {
+      setLoadingAttr(false);
+    }
+  };
+
+  clickHandlerRef.current = handleNeighborhoodClick;
+
+  React.useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+    if (typeof mapboxgl === 'undefined') { console.warn('Mapbox GL not loaded'); return; }
+
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [126.978, 37.566],
+      zoom: 11.2,
+      minZoom: 9.5,
+      maxZoom: 16,
+    });
+
+    map.addControl(new mapboxgl.NavigationControl({ showCompass:false }), 'top-right');
+
+    MAP_NBHDS.forEach(nbhd => {
+      const el = document.createElement('div');
+      Object.assign(el.style, {
+        width:'34px', height:'34px', borderRadius:'50%',
+        background: nbhd.color,
+        border:'2.5px solid white',
+        boxShadow:'0 2px 8px rgba(0,0,0,0.22)',
+        display:'flex', alignItems:'center', justifyContent:'center',
+        cursor:'pointer', transition:'all 0.2s ease',
+        fontFamily:"'Plus Jakarta Sans',sans-serif",
+        fontSize:'11px', fontWeight:'800', color:'white',
+        userSelect:'none', lineHeight:'1',
+      });
+      el.textContent = 'L';
+
+      el.addEventListener('mouseenter', () => {
+        if (el.dataset.selected !== '1') {
+          el.style.transform = 'scale(1.15)';
+          el.style.boxShadow = '0 4px 14px rgba(0,0,0,0.32)';
+        }
+      });
+      el.addEventListener('mouseleave', () => {
+        if (el.dataset.selected !== '1') {
+          el.style.transform = 'scale(1)';
+          el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.22)';
+        }
+      });
+      el.addEventListener('click', () => {
+        Object.values(markersRef.current).forEach(({ el:e }) => { e.dataset.selected = ''; });
+        el.dataset.selected = '1';
+        clickHandlerRef.current(nbhd);
+      });
+
+      const marker = new mapboxgl.Marker({ element:el, anchor:'center' })
+        .setLngLat([nbhd.lng, nbhd.lat])
+        .addTo(map);
+
+      markersRef.current[nbhd.id] = { marker, el, data:nbhd };
+    });
+
+    mapRef.current = map;
+    return () => { map.remove(); mapRef.current = null; markersRef.current = {}; };
+  }, []);
+
+  const selectedNbhd = MAP_NBHDS.find(n => n.id === selectedId);
+
+  const handleClose = () => {
+    setSelectedId(null);
+    setAttractions([]);
+    setApiError(false);
+    resetMarkers();
+    Object.values(markersRef.current).forEach(({ el }) => { el.dataset.selected = ''; });
+    if (mapRef.current) mapRef.current.flyTo({ center:[126.978, 37.566], zoom:11.2, speed:1.1 });
   };
 
   return (
     <section style={{ background:T.surface, padding:'72px 32px 80px' }}>
       <div style={{ maxWidth:1100, margin:'0 auto' }}>
-        <div style={{ textAlign:'center', marginBottom:48 }}>
+
+        {/* Header */}
+        <div style={{ textAlign:'center', marginBottom:40 }}>
           <Badge color={T.accent} bg={T.accentSubtle}>Explore Seoul</Badge>
           <h2 style={{ fontFamily:'Fraunces,serif', fontSize:36, fontWeight:700, color:T.primary, marginTop:12, marginBottom:10, lineHeight:1.2 }}>
             Choose your neighborhood
           </h2>
-          <p style={{ fontSize:16, color:T.muted, maxWidth:480, margin:'0 auto' }}>
-            Hover to explore, click to browse stays.
+          <p style={{ fontSize:15, color:T.muted, maxWidth:480, margin:'0 auto' }}>
+            Click a pin to explore real places — powered by Visit Seoul
           </p>
         </div>
 
-        <div ref={wrapRef} style={{ position:'relative', maxWidth:620, margin:'0 auto' }}>
-          <svg ref={svgRef} viewBox="0 0 600 440" style={{ width:'100%', height:'auto', display:'block' }}>
-            {/* Seoul outline */}
-            <path d="M 255,52 L 365,64 L 434,90 L 490,148 L 510,200 L 506,254 L 505,292 L 472,352 L 415,382 L 340,395 L 260,392 L 188,372 L 130,342 L 84,298 L 78,242 L 82,178 L 120,108 L 188,68 Z"
-              fill="#F0EBE3" stroke="#D8CFC5" strokeWidth="1.5"/>
-
-            {/* Han River */}
-            <path d="M 82,282 C 130,276 185,280 240,284 C 288,288 325,284 372,278 C 418,272 458,268 506,264"
-              fill="none" stroke={T.river} strokeWidth="13" strokeLinecap="round" opacity="0.9"/>
-            <text x="185" y="300" fontSize="9" fill={T.river} fontWeight="700" fontFamily="Plus Jakarta Sans,sans-serif" opacity="0.8">Han River · 한강</text>
-
-            {/* Landmark: Gyeongbokgung */}
-            <g opacity="0.6">
-              <rect x="270" y="144" width="20" height="14" rx="2" fill="none" stroke="#8B7355" strokeWidth="1.2"/>
-              <line x1="280" y1="144" x2="280" y2="140" stroke="#8B7355" strokeWidth="1"/>
-              <text x="293" y="154" fontSize="8.5" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">경복궁</text>
-            </g>
-
-            {/* Landmark: Seoul Station */}
-            <g opacity="0.6">
-              <circle cx="228" cy="256" r="5" fill="none" stroke="#8B7355" strokeWidth="1.2"/>
-              <text x="236" y="260" fontSize="8" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">Seoul Stn.</text>
-            </g>
-
-            {/* Landmark: Lotte Tower */}
-            <g opacity="0.6">
-              <polygon points="456,298 460,270 464,298" fill="none" stroke="#8B7355" strokeWidth="1.2"/>
-              <text x="447" y="310" fontSize="7.5" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">Lotte Twr</text>
-            </g>
-
-            {/* ICN Airport arrow */}
-            <g opacity="0.55">
-              <path d="M 90,268 L 70,268" stroke="#8B7355" strokeWidth="1.5" markerEnd="none"/>
-              <polygon points="70,265 62,268 70,271" fill="#8B7355"/>
-              <text x="64" y="280" fontSize="8" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">ICN</text>
-            </g>
-
-            {/* GMP Airport arrow */}
-            <g opacity="0.55">
-              <path d="M 90,214 L 72,202" stroke="#8B7355" strokeWidth="1.5"/>
-              <polygon points="72,199 64,204 69,210" fill="#8B7355"/>
-              <text x="58" y="198" fontSize="8" fill={T.muted} fontFamily="Plus Jakarta Sans,sans-serif">GMP</text>
-            </g>
-
-            {/* Neighborhood Pins */}
-            {NEIGHBORHOODS_DATA.map(n => {
-              const isHov = hoveredId === n.id;
-              return (
-                <g key={n.id} className="map-pin"
-                  onMouseEnter={e => handlePinEnter(n, e)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  onClick={() => onSelect(n.id)}>
-                  {/* Shadow */}
-                  <circle cx={n.mapX} cy={n.mapY+1} r={isHov?10:7} fill="rgba(44,36,32,0.15)" style={{transition:'all 0.2s ease'}}/>
-                  {/* Pin */}
-                  <circle cx={n.mapX} cy={n.mapY} r={isHov?9:6}
-                    fill={isHov?T.primary:T.accent}
-                    stroke={T.white} strokeWidth={isHov?2:1.5}
-                    style={{transition:'all 0.2s ease'}}/>
-                  {/* Pulse ring on hover */}
-                  {isHov && <circle cx={n.mapX} cy={n.mapY} r="16" fill="none" stroke={T.primary} strokeWidth="1" opacity="0.3"/>}
-                  {/* Label */}
-                  <text x={n.mapX} y={n.mapY+20}
-                    textAnchor="middle" fontSize={isHov?"10":"9"}
-                    fill={isHov?T.primary:T.n600}
-                    fontWeight={isHov?"700":"500"}
-                    fontFamily="Plus Jakarta Sans,sans-serif"
-                    style={{transition:'all 0.2s ease', pointerEvents:'none'}}>
-                    {n.name}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Tooltip */}
-          {hovered && (
-            <div className="fade-in" style={{
-              position:'absolute',
-              left: Math.min(tooltip.x + 14, wrapRef.current ? wrapRef.current.offsetWidth - 210 : 400),
-              top: tooltip.y - 110,
-              width:200, background:T.white, border:`1px solid ${T.border}`,
-              borderRadius:12, padding:'14px 16px',
-              boxShadow:'0 8px 24px rgba(44,36,32,0.14)', zIndex:10,
-              pointerEvents:'none',
-            }}>
-              <div style={{ display:'flex', alignItems:'baseline', gap:6, marginBottom:4 }}>
-                <span style={{ fontSize:13, fontWeight:700, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{hovered.name}</span>
-                <span style={{ fontSize:11, color:T.muted, fontFamily:'Noto Sans KR,sans-serif' }}>{hovered.ko}</span>
-              </div>
-              <p style={{ fontSize:12, color:T.muted, lineHeight:1.55, marginBottom:10 }}>{hovered.desc}</p>
-              <span style={{ fontSize:12, fontWeight:600, color:T.accent }}>View stays →</span>
-            </div>
-          )}
+        {/* Mapbox container */}
+        <div style={{ borderRadius:20, overflow:'hidden', border:`2px solid ${T.border}`, height:540, position:'relative' }}>
+          <div ref={mapContainerRef} style={{ width:'100%', height:'100%' }}/>
         </div>
 
-        {/* Mobile list fallback */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:10, marginTop:36, maxWidth:700, margin:'36px auto 0' }}>
-          {NEIGHBORHOODS_DATA.map(n => (
-            <button key={n.id} onClick={()=>onSelect(n.id)}
-              style={{ background:T.white, border:`1.5px solid ${T.border}`, borderRadius:10, padding:'12px 14px', cursor:'pointer', textAlign:'left', transition:'all 0.2s', fontFamily:'Plus Jakarta Sans,sans-serif' }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=T.accent;e.currentTarget.style.background=T.accentSubtle;}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;e.currentTarget.style.background=T.white;}}>
-              <div style={{ fontSize:13, fontWeight:700, color:T.primary, marginBottom:2 }}>{n.name}</div>
-              <div style={{ fontSize:11, color:T.muted, fontFamily:'Noto Sans KR,sans-serif' }}>{n.ko}</div>
+        {/* Neighborhood quick-select grid */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8, marginTop:14 }}>
+          {MAP_NBHDS.map(n => (
+            <button key={n.id}
+              onClick={() => {
+                Object.values(markersRef.current).forEach(({ el }) => { el.dataset.selected = ''; });
+                if (markersRef.current[n.id]) markersRef.current[n.id].el.dataset.selected = '1';
+                clickHandlerRef.current(n);
+              }}
+              style={{
+                textAlign:'left', padding:'10px 12px', borderRadius:12, cursor:'pointer',
+                border:`1.5px solid ${selectedId===n.id ? T.primary : T.border}`,
+                background: selectedId===n.id ? T.primary : T.white,
+                transition:'all 0.2s', fontFamily:'Plus Jakarta Sans,sans-serif',
+              }}
+              onMouseEnter={e => { if (selectedId!==n.id) { e.currentTarget.style.borderColor=T.accent; e.currentTarget.style.background=T.accentSubtle; } }}
+              onMouseLeave={e => { if (selectedId!==n.id) { e.currentTarget.style.borderColor=T.border; e.currentTarget.style.background=T.white; } }}
+            >
+              <div style={{ fontSize:12, fontWeight:700, color:selectedId===n.id?T.white:T.primary, lineHeight:1.2, marginBottom:2 }}>{n.name}</div>
+              <div style={{ fontSize:10, color:selectedId===n.id?'rgba(255,255,255,0.6)':T.muted }}>{n.tagline}</div>
             </button>
           ))}
         </div>
+
+        {/* Attractions panel — shown when a neighborhood is selected */}
+        {selectedId && (
+          <div className="animate-in" style={{ marginTop:24 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+              <div>
+                <span style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:T.primary }}>{selectedNbhd?.name}</span>
+                <span style={{ fontFamily:'Noto Sans KR,sans-serif', fontSize:15, color:T.muted, marginLeft:8 }}>{selectedNbhd?.ko}</span>
+              </div>
+              <div style={{ display:'flex', gap:10 }}>
+                <button onClick={() => onSelect(selectedId)}
+                  style={{ padding:'8px 18px', background:T.primary, color:T.white, borderRadius:8, border:'none', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'background 0.18s' }}
+                  onMouseEnter={e=>e.currentTarget.style.background=T.accent}
+                  onMouseLeave={e=>e.currentTarget.style.background=T.primary}
+                >View stays →</button>
+                <button onClick={handleClose}
+                  style={{ padding:'8px 12px', background:'transparent', color:T.muted, borderRadius:8, border:`1px solid ${T.border}`, fontSize:14, cursor:'pointer' }}
+                >✕</button>
+              </div>
+            </div>
+
+            {/* Loading skeletons */}
+            {loadingAttr && (
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
+                {[0,1,2,3].map(i => (
+                  <div key={i} style={{ background:T.border, borderRadius:12, height:160, animation:'pulse 1.5s ease infinite', animationDelay:`${i*0.1}s` }}/>
+                ))}
+              </div>
+            )}
+
+            {/* API error fallback */}
+            {apiError && !loadingAttr && (
+              <div style={{ textAlign:'center', padding:'32px 16px', background:T.white, borderRadius:14, border:`1px solid ${T.border}` }}>
+                <p style={{ color:T.muted, fontSize:14, marginBottom:12 }}>Visit Seoul API data unavailable right now.</p>
+                <button onClick={() => onSelect(selectedId)}
+                  style={{ padding:'9px 22px', background:T.accent, color:T.white, borderRadius:8, border:'none', cursor:'pointer', fontSize:13, fontWeight:600, fontFamily:'Plus Jakarta Sans,sans-serif' }}
+                >Browse stays in {selectedNbhd?.name} →</button>
+              </div>
+            )}
+
+            {/* Attraction cards */}
+            {!loadingAttr && !apiError && attractions.length > 0 && (
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
+                {attractions.map(attr => (
+                  <div key={attr.id}
+                    style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:12, overflow:'hidden', transition:'border-color 0.18s, box-shadow 0.18s', cursor:'default' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor=T.accent; e.currentTarget.style.boxShadow='0 4px 14px rgba(196,113,74,0.14)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor=T.border; e.currentTarget.style.boxShadow='none'; }}
+                  >
+                    {attr.thumbnail ? (
+                      <div style={{ height:108, overflow:'hidden' }}>
+                        <img src={attr.thumbnail} alt={attr.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} loading="lazy"/>
+                      </div>
+                    ) : (
+                      <div style={{ height:108, background:`linear-gradient(135deg,${T.accentSubtle},${T.border})`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <span style={{ fontSize:28 }}>📍</span>
+                      </div>
+                    )}
+                    <div style={{ padding:'10px 12px' }}>
+                      {attr.category && <div style={{ fontSize:10, fontWeight:600, color:T.accent, marginBottom:3, textTransform:'uppercase', letterSpacing:'0.05em' }}>{attr.category}</div>}
+                      <div style={{ fontSize:12, fontWeight:700, color:T.primary, lineHeight:1.35, marginBottom:4, fontFamily:'Plus Jakarta Sans,sans-serif', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{attr.name}</div>
+                      {attr.description && <div style={{ fontSize:11, color:T.muted, lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{attr.description}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!loadingAttr && !apiError && attractions.length === 0 && (
+              <div style={{ textAlign:'center', padding:'28px', color:T.muted, fontSize:14, background:T.white, borderRadius:12, border:`1px solid ${T.border}` }}>
+                No tourism listings found for this area.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Visit Seoul attribution (API terms of service) */}
+        <p style={{ textAlign:'center', fontSize:11, color:'#B0A090', marginTop:20 }}>
+          Tourism data provided by{' '}
+          <a href="https://api.visitseoul.net" target="_blank" rel="noopener noreferrer"
+            style={{ color:T.accent, textDecoration:'none' }}>Visit Seoul API</a>
+          {' '}· Seoul Tourism Organization
+        </p>
       </div>
     </section>
   );
 };
 
 // ─── HOW IT WORKS ─────────────────────────────────────────────────────────────
-const HowItWorks = ({ onStart, onCrew }) => (
+const HowItWorks = ({ onStart, onTribes }) => (
   <section style={{ background:T.white, padding:'80px 32px' }}>
     <div style={{ maxWidth:900, margin:'0 auto' }}>
       <div style={{ textAlign:'center', marginBottom:48 }}>
@@ -549,13 +767,13 @@ const HowItWorks = ({ onStart, onCrew }) => (
           <div style={{ position:'absolute', top:0, right:0, background:T.accent, color:'#fff', fontSize:9, fontWeight:700, letterSpacing:'0.08em', padding:'5px 14px', borderRadius:'0 16px 0 10px' }}>THE LOCALI DIFFERENCE</div>
           <div style={{ width:52, height:52, borderRadius:'50%', background:T.accent, display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, fontWeight:700, color:'#fff', flexShrink:0 }}>03</div>
           <div>
-            <div style={{ fontSize:10, fontWeight:700, color:T.accent, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 }}>Your Seoul Life · ongoing</div>
-            <h3 style={{ fontFamily:'Fraunces,serif', fontSize:20, fontWeight:400, color:'#F8E8D8', marginBottom:6 }}>Join your Crew</h3>
-            <p style={{ fontSize:14, color:'#D0B898', lineHeight:1.65 }}>Your neighborhood Crew is 30–100 members + a Korean Crew Lead. Weekly meetups, daily KakaoTalk chat, 1:1 Local Mentor, Insider Pass. The closest you get to actually living here.</p>
+            <div style={{ fontSize:10, fontWeight:700, color:T.accent, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 }}>Your Seoul Tribe · 1 week – 2 months</div>
+            <h3 style={{ fontFamily:'Fraunces,serif', fontSize:20, fontWeight:400, color:'#F8E8D8', marginBottom:6 }}>Find your tribe</h3>
+            <p style={{ fontSize:14, color:'#D0B898', lineHeight:1.65 }}>Activity-based tribes led by local hosts — K-pop, language immersion, K-beauty & wellness. Curated activities, insider access, and a KakaoTalk community. From $79. No subscription.</p>
           </div>
-          <button onClick={onCrew} style={{ fontSize:12, fontWeight:700, background:T.accent, color:'#fff', padding:'10px 18px', borderRadius:8, border:'none', cursor:'pointer', whiteSpace:'nowrap', flexShrink:0, fontFamily:'Plus Jakarta Sans,sans-serif', transition:'background 0.15s' }}
+          <button onClick={onTribes} style={{ fontSize:12, fontWeight:700, background:T.accent, color:'#fff', padding:'10px 18px', borderRadius:8, border:'none', cursor:'pointer', whiteSpace:'nowrap', flexShrink:0, fontFamily:'Plus Jakarta Sans,sans-serif', transition:'background 0.15s' }}
             onMouseEnter={e=>e.currentTarget.style.background=T.accentHov} onMouseLeave={e=>e.currentTarget.style.background=T.accent}>
-            See Crew →
+            See Tribes →
           </button>
         </div>
 
@@ -565,87 +783,136 @@ const HowItWorks = ({ onStart, onCrew }) => (
 );
 
 // ─── PRICING SECTION ──────────────────────────────────────────────────────────
-const PricingSection = ({ onStart, onCrew }) => (
-  <section id="pricing" style={{ background:T.surface, padding:'80px 32px' }}>
-    <div style={{ maxWidth:960, margin:'0 auto' }}>
-      <div style={{ textAlign:'center', marginBottom:48 }}>
-        <div style={{ fontSize:11, fontWeight:600, color:T.accent, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Pricing</div>
-        <h2 style={{ fontFamily:'Fraunces,serif', fontSize:34, fontWeight:400, color:T.primary, marginBottom:10, lineHeight:1.25 }}>Start free. Belong for $99.</h2>
-        <p style={{ fontSize:15, color:T.muted, maxWidth:460, margin:'0 auto' }}>Find a stay for free. Add Setup for the logistics. Join the Crew to actually live here.</p>
+const TRIBE_PASS_TIERS = [
+  { key:'1w',  label:'1 week',   price:79,  activities:2 },
+  { key:'2w',  label:'2 weeks',  price:149, activities:4, featured:true },
+  { key:'1mo', label:'1 month',  price:249, activities:8 },
+  { key:'2mo', label:'2 months', price:399, activities:null },
+];
+
+const PricingSection = ({ onStart, onTribes }) => {
+  const [selectedDuration, setSelectedDuration] = React.useState('2w');
+  const selected = TRIBE_PASS_TIERS.find(t=>t.key===selectedDuration);
+
+  return (
+    <section id="pricing" style={{ background:T.surface, padding:'80px 32px' }}>
+      <div style={{ maxWidth:1020, margin:'0 auto' }}>
+        <div style={{ textAlign:'center', marginBottom:48 }}>
+          <div style={{ fontSize:11, fontWeight:600, color:T.accent, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Pricing</div>
+          <h2 style={{ fontFamily:'Fraunces,serif', fontSize:34, fontWeight:400, color:T.primary, marginBottom:10, lineHeight:1.25 }}>From $79. No subscription.</h2>
+          <p style={{ fontSize:15, color:T.muted, maxWidth:480, margin:'0 auto' }}>Match for free. Book a stay. Add a Tribe Pass for the full Seoul experience.</p>
+        </div>
+
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:16 }}>
+
+          {/* Tier 1 — Explore */}
+          <div style={{ background:T.white, border:`1.5px solid ${T.border}`, borderRadius:16, padding:'28px 24px' }}>
+            <div style={{ fontSize:10, fontWeight:700, color:T.muted, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Tier 1</div>
+            <div style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:T.primary, marginBottom:4 }}>Explore</div>
+            <div style={{ fontSize:13, color:T.muted, marginBottom:20, lineHeight:1.5 }}>Find your Seoul neighborhood</div>
+            <div style={{ marginBottom:20, paddingBottom:20, borderBottom:`1px solid ${T.border}` }}>
+              <span style={{ fontFamily:'Fraunces,serif', fontSize:36, fontWeight:300, color:T.primary }}>Free</span>
+              <div style={{ fontSize:11, color:T.placeholder, marginTop:2 }}>No platform fee</div>
+            </div>
+            {['Quick Match neighborhood quiz','Vetted long-term rentals','English booking & support','Neighborhood guides'].map(item=>(
+              <div key={item} style={{ display:'flex', gap:8, marginBottom:10 }}>
+                <span style={{ color:T.success, fontSize:13, flexShrink:0 }}>✓</span>
+                <span style={{ fontSize:13, color:T.n600, lineHeight:1.4 }}>{item}</span>
+              </div>
+            ))}
+            <div style={{ marginTop:20 }}>
+              <Btn onClick={onStart} full size="md" color={T.primary} colorHov={T.n800}>Start matching</Btn>
+            </div>
+          </div>
+
+          {/* Tier 2 — Stay + Setup */}
+          <div style={{ background:T.white, border:`1.5px solid ${T.border}`, borderRadius:16, padding:'28px 24px' }}>
+            <div style={{ fontSize:10, fontWeight:700, color:'#1A3A7A', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Tier 2 · One-time</div>
+            <div style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:T.primary, marginBottom:4 }}>Stay + Setup</div>
+            <div style={{ fontSize:13, color:T.muted, marginBottom:20, lineHeight:1.5 }}>Logistics handled for you</div>
+            <div style={{ marginBottom:20, paddingBottom:20, borderBottom:`1px solid ${T.border}` }}>
+              <span style={{ fontFamily:'Fraunces,serif', fontSize:36, fontWeight:300, color:T.primary }}>$49</span>
+              <span style={{ fontSize:13, color:T.muted }}> one-time</span>
+              <div style={{ fontSize:11, color:T.placeholder, marginTop:2 }}>Pay once when you book</div>
+            </div>
+            {['Everything in Explore','Visa & ARC guidance','Korean bank account setup','eSIM activation kit','Welcome meeting on arrival'].map(item=>(
+              <div key={item} style={{ display:'flex', gap:8, marginBottom:10 }}>
+                <span style={{ color:T.success, fontSize:13, flexShrink:0 }}>✓</span>
+                <span style={{ fontSize:13, color:T.n600, lineHeight:1.4 }}>{item}</span>
+              </div>
+            ))}
+            <div style={{ marginTop:20 }}>
+              <Btn onClick={onStart} full size="md" color={T.primary} colorHov={T.n800}>Add Setup at booking</Btn>
+            </div>
+          </div>
+
+          {/* Tier 3 — Tribe Pass (featured) */}
+          <div style={{ background:'#1F1814', border:`2px solid ${T.accent}`, borderRadius:16, padding:'28px 24px', position:'relative' }}>
+            <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:T.accent, color:'#fff', fontSize:10, fontWeight:700, padding:'4px 16px', borderRadius:100, whiteSpace:'nowrap', letterSpacing:'0.06em' }}>THE FULL LOCALI EXPERIENCE</div>
+            <div style={{ fontSize:10, fontWeight:700, color:T.accent, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Tier 3 · One-time</div>
+            <div style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:'#F8E8D8', marginBottom:4 }}>Tribe Pass</div>
+            <div style={{ fontSize:13, color:'#D0B898', marginBottom:16, lineHeight:1.5 }}>Activities + community, no subscription</div>
+
+            {/* Duration selector */}
+            <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:16 }}>
+              {TRIBE_PASS_TIERS.map(t=>(
+                <button key={t.key} onClick={()=>setSelectedDuration(t.key)}
+                  style={{ height:30, padding:'0 12px', borderRadius:100, border:`1.5px solid ${selectedDuration===t.key?T.accent:'#3A2A1E'}`, background:selectedDuration===t.key?T.accent:'transparent', color:selectedDuration===t.key?'#fff':'#A89880', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s' }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ marginBottom:16, paddingBottom:16, borderBottom:'1px solid #3A2A1E' }}>
+              <span style={{ fontFamily:'Fraunces,serif', fontSize:36, fontWeight:300, color:'#F8E8D8' }}>${selected.price}</span>
+              <span style={{ fontSize:13, color:'#D0B898' }}> one-time</span>
+              <div style={{ fontSize:11, color:'#7A6050', marginTop:2 }}>
+                {selected.activities ? `${selected.activities} curated activities included` : 'Unlimited activities included'}
+              </div>
+            </div>
+
+            {['Setup bundle ($49 value) included',`${selected.activities||'Unlimited'} curated tribe activities`,'Local tribe host via KakaoTalk','Insider Pass perks at neighborhood spots','Activity community group chat'].map(item=>(
+              <div key={item} style={{ display:'flex', gap:8, marginBottom:10 }}>
+                <span style={{ color:T.accent, fontSize:13, flexShrink:0 }}>✓</span>
+                <span style={{ fontSize:13, color:'#E0D0BC', lineHeight:1.4 }}>{item}</span>
+              </div>
+            ))}
+            <div style={{ marginTop:20 }}>
+              <Btn onClick={onTribes} full size="md" color={T.accent} colorHov={T.accentHov}>See all Tribes →</Btn>
+            </div>
+          </div>
+
+          {/* Tier 4 — Crew (Coming Soon) */}
+          <div style={{ background:T.white, border:`1.5px dashed ${T.borderStrong}`, borderRadius:16, padding:'28px 24px', opacity:0.75 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8 }}>
+              <div style={{ fontSize:10, fontWeight:700, color:T.muted, letterSpacing:'0.08em', textTransform:'uppercase' }}>Tier 4</div>
+              <span style={{ fontSize:10, fontWeight:700, background:T.warningBg, color:T.warning, padding:'2px 8px', borderRadius:100 }}>Q3 2026</span>
+            </div>
+            <div style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:T.primary, marginBottom:4 }}>Crew</div>
+            <div style={{ fontSize:13, color:T.muted, marginBottom:20, lineHeight:1.5 }}>For 3+ month stays</div>
+            <div style={{ marginBottom:20, paddingBottom:20, borderBottom:`1px solid ${T.border}` }}>
+              <span style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:300, color:T.disabled }}>Coming soon</span>
+              <div style={{ fontSize:11, color:T.placeholder, marginTop:2 }}>Neighborhood-based memberships</div>
+            </div>
+            {['Neighborhood Crew (30–100 members)','1:1 Korean Local Mentor','Daily Concierge (24/7 KakaoTalk)','Insider Pass (30+ member spots)','Pause anytime'].map(item=>(
+              <div key={item} style={{ display:'flex', gap:8, marginBottom:10 }}>
+                <span style={{ color:T.disabled, fontSize:13, flexShrink:0 }}>○</span>
+                <span style={{ fontSize:13, color:T.disabled, lineHeight:1.4 }}>{item}</span>
+              </div>
+            ))}
+            <div style={{ marginTop:20 }}>
+              <Btn full size="md" color={T.disabled} colorHov={T.disabled} disabled>Notify me</Btn>
+            </div>
+          </div>
+
+        </div>
+        <p style={{ textAlign:'center', fontSize:13, color:T.muted, marginTop:24 }}>
+          Tribe Pass is one-time · no recurring charges · Setup bundle ($49 value) included in every pass
+        </p>
       </div>
-
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))', gap:16 }}>
-
-        {/* Tier 1 — Free */}
-        <div style={{ background:T.white, border:`1.5px solid ${T.border}`, borderRadius:16, padding:'28px 24px' }}>
-          <div style={{ fontSize:10, fontWeight:700, color:T.muted, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Tier 1</div>
-          <div style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:T.primary, marginBottom:4 }}>Stay</div>
-          <div style={{ fontSize:13, color:T.muted, marginBottom:20, lineHeight:1.5 }}>Find your Seoul neighborhood</div>
-          <div style={{ marginBottom:20, paddingBottom:20, borderBottom:`1px solid ${T.border}` }}>
-            <span style={{ fontFamily:'Fraunces,serif', fontSize:36, fontWeight:300, color:T.primary }}>Free</span>
-            <div style={{ fontSize:11, color:T.placeholder, marginTop:2 }}>No platform fee</div>
-          </div>
-          {['Quick Match neighborhood quiz','Vetted long-term rentals','English booking & support','Neighborhood guides'].map(item=>(
-            <div key={item} style={{ display:'flex', gap:8, marginBottom:10 }}>
-              <span style={{ color:T.success, fontSize:13, flexShrink:0 }}>✓</span>
-              <span style={{ fontSize:13, color:T.n600, lineHeight:1.4 }}>{item}</span>
-            </div>
-          ))}
-          <div style={{ marginTop:20 }}>
-            <Btn onClick={onStart} full size="md" color={T.primary} colorHov={T.n800}>Start matching</Btn>
-          </div>
-        </div>
-
-        {/* Tier 2 — Setup */}
-        <div style={{ background:T.white, border:`1.5px solid ${T.border}`, borderRadius:16, padding:'28px 24px' }}>
-          <div style={{ fontSize:10, fontWeight:700, color:'#1A3A7A', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Tier 2 · One-time</div>
-          <div style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:T.primary, marginBottom:4 }}>Stay + Setup</div>
-          <div style={{ fontSize:13, color:T.muted, marginBottom:20, lineHeight:1.5 }}>Logistics handled for you</div>
-          <div style={{ marginBottom:20, paddingBottom:20, borderBottom:`1px solid ${T.border}` }}>
-            <span style={{ fontFamily:'Fraunces,serif', fontSize:36, fontWeight:300, color:T.primary }}>$49</span>
-            <span style={{ fontSize:13, color:T.muted }}> one-time</span>
-            <div style={{ fontSize:11, color:T.placeholder, marginTop:2 }}>Pay once when you book</div>
-          </div>
-          {['Everything in Stay','Visa & ARC guidance','Korean bank account setup','eSIM activation kit','Welcome meeting on arrival'].map(item=>(
-            <div key={item} style={{ display:'flex', gap:8, marginBottom:10 }}>
-              <span style={{ color:T.success, fontSize:13, flexShrink:0 }}>✓</span>
-              <span style={{ fontSize:13, color:T.n600, lineHeight:1.4 }}>{item}</span>
-            </div>
-          ))}
-          <div style={{ marginTop:20 }}>
-            <Btn onClick={onStart} full size="md" color={T.primary} colorHov={T.n800}>Add Setup at booking</Btn>
-          </div>
-        </div>
-
-        {/* Tier 3 — Crew */}
-        <div style={{ background:'#1F1814', border:`2px solid ${T.accent}`, borderRadius:16, padding:'28px 24px', position:'relative' }}>
-          <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:T.accent, color:'#fff', fontSize:10, fontWeight:700, padding:'4px 16px', borderRadius:100, whiteSpace:'nowrap', letterSpacing:'0.06em' }}>THE FULL LOCALI EXPERIENCE</div>
-          <div style={{ fontSize:10, fontWeight:700, color:T.accent, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Tier 3 · Membership</div>
-          <div style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:'#F8E8D8', marginBottom:4 }}>Stay + Crew</div>
-          <div style={{ fontSize:13, color:'#D0B898', marginBottom:20, lineHeight:1.5 }}>Belong from day one</div>
-          <div style={{ marginBottom:20, paddingBottom:20, borderBottom:'1px solid #3A2A1E' }}>
-            <span style={{ fontFamily:'Fraunces,serif', fontSize:36, fontWeight:300, color:'#F8E8D8' }}>$99</span>
-            <span style={{ fontSize:13, color:'#D0B898' }}> /month</span>
-            <div style={{ fontSize:11, color:T.muted, marginTop:2 }}>Cancel anytime</div>
-          </div>
-          {['Everything in Stay + Setup','Your neighborhood Crew (KakaoTalk + weekly events)','1:1 Local Mentor','Daily Concierge (24/7 KakaoTalk)','Insider Pass (30+ member-only spots)'].map(item=>(
-            <div key={item} style={{ display:'flex', gap:8, marginBottom:10 }}>
-              <span style={{ color:T.accent, fontSize:13, flexShrink:0 }}>✓</span>
-              <span style={{ fontSize:13, color:'#E0D0BC', lineHeight:1.4 }}>{item}</span>
-            </div>
-          ))}
-          <div style={{ marginTop:20 }}>
-            <Btn onClick={onCrew} full size="md" color={T.accent} colorHov={T.accentHov}>See what's in the Crew →</Btn>
-          </div>
-        </div>
-
-      </div>
-      <p style={{ textAlign:'center', fontSize:13, color:T.muted, marginTop:24 }}>
-        Crew membership starts when you arrive in Seoul · Pause it anytime when you leave
-      </p>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 const Footer = () => (
@@ -1361,10 +1628,10 @@ const MatchWizard = ({ onResults, onBack }) => {
   );
 };
 
-const NeighborhoodMatchCard = ({ match, rank, onViewStays, onViewCrew }) => {
+const NeighborhoodMatchCard = ({ match, rank, onViewStays, onViewTribes }) => {
   const { neighborhood:n, matchPercentage, matchReasons } = match;
   const isFeatured = rank === 0;
-  const crew = CREW_DATA[n.id] || CREW_DATA[n.staysId] || {};
+  const localActivities = THIS_WEEK_ACTIVITIES.filter(a=>a.neighborhoodId===n.id||a.neighborhoodId===n.staysId).slice(0,2);
   return (
     <div style={{ border:`${isFeatured?2:1.5}px solid ${isFeatured?T.accent:T.border}`, borderRadius:isFeatured?16:12, padding:isFeatured?'28px':'20px', background:isFeatured?`linear-gradient(135deg,${T.white} 0%,${T.accentSubtle} 100%)`:T.white, position:'relative', overflow:'hidden', boxShadow:isFeatured?'0 8px 32px rgba(196,113,74,0.15)':'none', transition:'box-shadow 0.2s' }}>
       {isFeatured && (
@@ -1392,32 +1659,33 @@ const NeighborhoodMatchCard = ({ match, rank, onViewStays, onViewCrew }) => {
           </div>
         ))}
       </div>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginBottom:crew.crewMemberCount?12:0 }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginBottom:localActivities.length>0?12:0 }}>
         <div style={{ fontSize:isFeatured?13:12, color:T.muted }}>
           <span style={{ fontWeight:700, color:T.primary }}>${n.avgPrice.min.toLocaleString()}–${n.avgPrice.max.toLocaleString()}</span>
           <span> / month</span>
         </div>
         <Btn onClick={()=>onViewStays(n.staysId)} size={isFeatured?'md':'sm'}>View stays →</Btn>
       </div>
-      {crew.crewMemberCount && (
-        <div style={{ background:'#1F1814', borderRadius:10, padding:'12px 14px', display:'flex', alignItems:'center', gap:12, cursor:'pointer' }} onClick={()=>onViewCrew&&onViewCrew(n.id)}>
-          <div style={{ display:'flex' }}>
-            {['M','S','J'].map((l,i)=>(
-              <div key={i} style={{ width:26, height:26, borderRadius:'50%', background:`linear-gradient(135deg,${T.accent},#7A3A1E)`, border:'2px solid #1F1814', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'#fff', marginLeft:i?-8:0 }}>{l}</div>
-            ))}
-          </div>
-          <div style={{ flex:1 }}>
-            <div style={{ fontSize:11, fontWeight:700, color:'#E89B70' }}>{crew.crewMemberCount} members in the {n.name.split('·')[0].trim()} Crew</div>
-            <div style={{ fontSize:10, color:'#A89880' }}>Next event in {crew.nextEventDays} day{crew.nextEventDays!==1?'s':''} · Led by {crew.crewLeadName}</div>
-          </div>
-          <span style={{ fontSize:11, color:'#E89B70', fontWeight:600, flexShrink:0 }}>Visit →</span>
+      {localActivities.length > 0 && (
+        <div style={{ background:'#F3F6FD', borderRadius:10, padding:'12px 14px', cursor:'pointer' }} onClick={()=>onViewTribes&&onViewTribes()}>
+          <div style={{ fontSize:10, fontWeight:700, color:'#1A3A7A', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:8 }}>This week's activities nearby</div>
+          {localActivities.map((a,i)=>(
+            <div key={a.id} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:i===localActivities.length-1?0:6 }}>
+              <span style={{ fontSize:16, flexShrink:0 }}>{a.emoji}</span>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:11, fontWeight:700, color:T.primary, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{a.title}</div>
+                <div style={{ fontSize:10, color:T.muted }}>{a.day} {a.date} · {a.going}/{a.capacity} going</div>
+              </div>
+            </div>
+          ))}
+          <div style={{ fontSize:10, color:'#2C71F6', fontWeight:600, marginTop:8 }}>See all tribe activities →</div>
         </div>
       )}
     </div>
   );
 };
 
-const MatchResults = ({ data, onViewStays, onViewCrew, onRetake, onBack }) => {
+const MatchResults = ({ data, onViewStays, onViewTribes, onRetake, onBack }) => {
   const { results, interests } = data;
   if (!results || results.length === 0) return (
     <div style={{ maxWidth:520, margin:'80px auto', padding:'0 24px', textAlign:'center' }}>
@@ -1453,13 +1721,13 @@ const MatchResults = ({ data, onViewStays, onViewCrew, onRetake, onBack }) => {
         )}
       </div>
       <div style={{ marginBottom:32 }}>
-        <NeighborhoodMatchCard match={top} rank={0} onViewStays={onViewStays} onViewCrew={onViewCrew}/>
+        <NeighborhoodMatchCard match={top} rank={0} onViewStays={onViewStays} onViewTribes={onViewTribes}/>
       </div>
       {rest.length > 0 && (
         <div>
           <div style={{ fontSize:12, fontWeight:700, color:T.muted, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:16 }}>Also a great fit</div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))', gap:14 }}>
-            {rest.map((m,i)=><NeighborhoodMatchCard key={m.neighborhood.id} match={m} rank={i+1} onViewStays={onViewStays} onViewCrew={onViewCrew}/>)}
+            {rest.map((m,i)=><NeighborhoodMatchCard key={m.neighborhood.id} match={m} rank={i+1} onViewStays={onViewStays} onViewTribes={onViewTribes}/>)}
           </div>
         </div>
       )}
@@ -1914,7 +2182,7 @@ const CrewDetailPage = ({ neighborhoodId, onQuickMatch, onBack }) => {
 };
 
 // ─── LANDING PAGE ─────────────────────────────────────────────────────────────
-const LandingPage = ({ onQuickMatch, onNeighborhood, onCrew }) => (
+const LandingPage = ({ onQuickMatch, onNeighborhood, onTribes }) => (
   <div className="animate-in">
     {/* Hero */}
     <div style={{ background:`linear-gradient(160deg,${T.primary} 0%,${T.n800} 55%,${T.n700} 100%)`, padding:'80px 32px 72px', position:'relative', overflow:'hidden' }}>
@@ -1926,16 +2194,16 @@ const LandingPage = ({ onQuickMatch, onNeighborhood, onCrew }) => (
       <div style={{ maxWidth:700, margin:'0 auto', position:'relative', textAlign:'center' }}>
         <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(196,113,74,0.18)', border:'1px solid rgba(196,113,74,0.35)', borderRadius:100, padding:'5px 16px', marginBottom:28 }}>
           <div style={{ width:6, height:6, borderRadius:'50%', background:T.accent, animation:'pulse 2s infinite' }}/>
-          <span style={{ fontSize:11, fontWeight:600, color:'#E8A880', letterSpacing:'0.08em' }}>Now in 10 Seoul neighborhoods</span>
+          <span style={{ fontSize:11, fontWeight:600, color:'#E8A880', letterSpacing:'0.08em' }}>3 active tribes · Seoul</span>
         </div>
         <h1 style={{ fontFamily:'Fraunces,serif', fontSize:'clamp(36px,6vw,60px)', fontWeight:300, color:'#FAF7F2', lineHeight:1.1, marginBottom:20, letterSpacing:'-1px' }}>
-          A neighborhood.<br/>A crew.<br/><em style={{ color:T.accent, fontStyle:'italic' }}>A life in Seoul.</em>
+          An interest.<br/>A tribe.<br/><em style={{ color:T.accent, fontStyle:'italic' }}>A Seoul that fits.</em>
         </h1>
         <p style={{ fontSize:'clamp(16px,2vw,19px)', color:'#C8A88A', marginBottom:8, lineHeight:1.55, maxWidth:500, margin:'0 auto 8px', fontWeight:500 }}>
-          Don't just stay in Seoul. <strong style={{ color:'#FAF7F2', fontWeight:600 }}>Belong here.</strong>
+          Don't just pass through Seoul. <strong style={{ color:'#FAF7F2', fontWeight:600 }}>Find your tribe.</strong>
         </p>
         <p style={{ fontSize:'clamp(14px,1.5vw,16px)', color:'#A8917E', marginBottom:36, lineHeight:1.65, maxWidth:520, margin:'0 auto 36px' }}>
-          Find your neighborhood, settle in, and meet your crew.
+          Find your neighborhood, book a stay, and join a tribe of people who share your interests.
         </p>
 
         {/* CTAs */}
@@ -1946,18 +2214,18 @@ const LandingPage = ({ onQuickMatch, onNeighborhood, onCrew }) => (
             onMouseLeave={e=>{e.currentTarget.style.background='#2C2420';e.currentTarget.style.transform='scale(1)';}}>
             Start Quick Match →
           </button>
-          <button onClick={onCrew}
+          <button onClick={onTribes}
             style={{ height:56, padding:'0 28px', background:'transparent', color:'#E0D0BC', border:'1px solid rgba(196,113,74,0.4)', borderRadius:10, fontSize:15, fontWeight:500, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s' }}
             onMouseEnter={e=>e.currentTarget.style.background='rgba(196,113,74,0.12)'}
             onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-            See how the Crew works
+            See the Tribes →
           </button>
         </div>
         <p style={{ fontSize:13, color:'#6B5345', marginBottom:28 }}>60-second match · Free to explore</p>
 
         {/* Trust strip */}
         <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:20 }}>
-          {['500+ members across 10 neighborhoods','Korean crew leads who actually live there','First day, you already have friends'].map(t=>(
+          {['200+ members across 3 active tribes','Affordable stays from $650/month','Pay once — no monthly subscription'].map(t=>(
             <div key={t} style={{ display:'flex', alignItems:'center', gap:6, fontSize:12, color:'#8B7355', fontWeight:500 }}>
               <span style={{ color:T.success, fontWeight:700 }}>✓</span>{t}
             </div>
@@ -1970,10 +2238,10 @@ const LandingPage = ({ onQuickMatch, onNeighborhood, onCrew }) => (
     <NeighborhoodMap onSelect={onNeighborhood}/>
 
     {/* How it works */}
-    <HowItWorks onStart={onQuickMatch} onCrew={onCrew}/>
+    <HowItWorks onStart={onQuickMatch} onTribes={onTribes}/>
 
     {/* Pricing */}
-    <PricingSection onStart={onQuickMatch} onCrew={onCrew}/>
+    <PricingSection onStart={onQuickMatch} onTribes={onTribes}/>
 
     {/* Footer */}
     <Footer/>
