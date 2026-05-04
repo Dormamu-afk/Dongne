@@ -575,6 +575,84 @@ const NBHD_PROFILES = {
   },
 };
 
+// Seoul administrative boundary — simplified clockwise ring (used as hole in the world mask)
+const SEOUL_MASK_COORDS = [
+  [126.7760, 37.6800],
+  [126.8200, 37.6940],
+  [126.8750, 37.7000],
+  [126.9300, 37.7050],
+  [126.9800, 37.7000],
+  [127.0200, 37.6900],
+  [127.0800, 37.6600],
+  [127.1400, 37.6350],
+  [127.1830, 37.6100],
+  [127.1830, 37.5600],
+  [127.1600, 37.5100],
+  [127.1400, 37.4700],
+  [127.1100, 37.4350],
+  [127.0600, 37.4150],
+  [127.0000, 37.4100],
+  [126.9400, 37.4100],
+  [126.8900, 37.4200],
+  [126.8200, 37.4500],
+  [126.7760, 37.4800],
+  [126.7640, 37.5300],
+  [126.7640, 37.5900],
+  [126.7760, 37.6800],
+];
+
+function addSeoulMask(map) {
+  if (map.getSource('seoul-mask')) return;
+
+  // World fill with Seoul-shaped hole → dims everything outside Seoul
+  map.addSource('seoul-mask', {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [[-180,-90],[-180,90],[180,90],[180,-90],[-180,-90]], // outer world ring (CCW)
+          SEOUL_MASK_COORDS,                                     // Seoul hole (CW)
+        ],
+      },
+    },
+  });
+
+  // Separate Seoul polygon for the boundary line
+  map.addSource('seoul-outline', {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: { type: 'Polygon', coordinates: [SEOUL_MASK_COORDS] },
+    },
+  });
+
+  // Insert dim fill below label layers so labels still render on top
+  const insertBefore = ['road-label','settlement-label','place-label','country-label']
+    .find(id => map.getLayer(id));
+
+  map.addLayer({
+    id: 'outside-seoul-dim',
+    type: 'fill',
+    source: 'seoul-mask',
+    paint: { 'fill-color': '#F5F0E8', 'fill-opacity': 0.72 },
+  }, insertBefore);
+
+  // Subtle dashed boundary around Seoul
+  map.addLayer({
+    id: 'seoul-boundary-line',
+    type: 'line',
+    source: 'seoul-outline',
+    paint: {
+      'line-color': '#C4714A',
+      'line-width': 1.5,
+      'line-opacity': 0.40,
+      'line-dasharray': [4, 3],
+    },
+  });
+}
+
 const CAT_COLOR = {
   palace:'#8B4513', museum:'#5A4030', market:'#C4714A', food:'#D85A30',
   shopping:'#993556', entertainment:'#7A2C5C', nature:'#4A7C59', experience:'#185FA5',
@@ -929,6 +1007,8 @@ const NeighborhoodMap = ({ onSelect }) => {
 
     // Show static landmarks immediately, then try to upgrade with real API data
     map.on('load', async () => {
+      addSeoulMask(map);
+
       // 1. Always show static landmarks first (instant, no API needed)
       addLandmarkMarkers(STATIC_LANDMARKS);
       setLandmarks(STATIC_LANDMARKS);
@@ -1564,6 +1644,8 @@ const StaysMapPanel = ({ neighborhoodId, onNeighborhoodChange }) => {
 
       markersRef.current[nbhd.id] = { inner, label };
     });
+
+    map.on('load', () => addSeoulMask(map));
 
     return () => { map.remove(); mapRef.current = null; };
   }, []);
