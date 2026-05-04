@@ -491,6 +491,43 @@ function mapCategory(vsName) {
   return 'experience';
 }
 
+// CORS proxy wrapper — Visit Seoul API blocks browser direct fetch
+async function visitSeoulFetch(params) {
+  const direct = `https://api.visitseoul.net/api/contents/standard/list?${params}`;
+  const proxied = `https://corsproxy.io/?${encodeURIComponent(direct)}`;
+  // Try direct first (works if server adds CORS headers in future)
+  for (const url of [direct, proxied]) {
+    try {
+      const r = await fetch(url, { headers:{ 'Accept':'application/json' } });
+      if (r.ok) {
+        const data = await r.json();
+        // corsproxy.io wraps in { contents, status } for some configs
+        return data.contents ? JSON.parse(data.contents) : data;
+      }
+    } catch(e) { /* try next */ }
+  }
+  throw new Error('all fetch attempts failed');
+}
+
+// Static fallback landmarks — always shown; real API data shown on top when available
+const STATIC_LANDMARKS = [
+  { id:'sl-gyeongbok', name:'Gyeongbokgung Palace',         category:'palace',        lat:37.5796, lng:126.9770, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Gyeongbokgung_Palace_in_Seoul_Morning.jpg/480px-Gyeongbokgung_Palace_in_Seoul_Morning.jpg',        description:'Main royal palace of the Joseon Dynasty (1395). Guard ceremony at 10 AM & 2 PM daily.' },
+  { id:'sl-changdeok',  name:'Changdeokgung Palace',         category:'palace',        lat:37.5794, lng:126.9910, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Changdeokgung_03.jpg/480px-Changdeokgung_03.jpg',                                                         description:'UNESCO World Heritage Site. Famous for its Secret Garden (Huwon).' },
+  { id:'sl-deoksugung', name:'Deoksugung Palace',            category:'palace',        lat:37.5659, lng:126.9752, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Deoksugung.jpg/480px-Deoksugung.jpg',                                                                       description:'Royal palace in the heart of modern Seoul, surrounded by skyscrapers.' },
+  { id:'sl-bukchon',    name:'Bukchon Hanok Village',        category:'experience',    lat:37.5822, lng:126.9836, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Bukchon_Hanok_Village_Seoul.jpg/480px-Bukchon_Hanok_Village_Seoul.jpg',                                     description:'900 traditional hanok houses on a hillside with views of two palaces.' },
+  { id:'sl-insadong',   name:'Insadong',                     category:'experience',    lat:37.5742, lng:126.9860, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Insadong_alley.jpg/480px-Insadong_alley.jpg',                                                               description:'Arts district with tea houses, galleries, traditional crafts and Ssamziegil.' },
+  { id:'sl-ddp',        name:'Dongdaemun Design Plaza',      category:'experience',    lat:37.5665, lng:127.0093, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Dongdaemun_Design_Plaza_2014.jpg/480px-Dongdaemun_Design_Plaza_2014.jpg',                                   description:"Zaha Hadid's futuristic landmark (2013). 24-hour fashion district surrounds it." },
+  { id:'sl-nseoul',     name:'N Seoul Tower',                category:'entertainment', lat:37.5512, lng:126.9882, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/N_Seoul_Tower_2.jpg/480px-N_Seoul_Tower_2.jpg',                                                             description:'Iconic tower on Namsan Mountain with 360° panoramic views of Seoul.' },
+  { id:'sl-lotte',      name:'Lotte World Tower',            category:'entertainment', lat:37.5126, lng:127.1021, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Lotte_World_Tower_20170601.jpg/480px-Lotte_World_Tower_20170601.jpg',                                       description:"World's 5th tallest building. Sky deck on floors 117–123." },
+  { id:'sl-natmuseum',  name:'National Museum of Korea',     category:'museum',        lat:37.5239, lng:126.9805, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/National_Museum_of_Korea_2009.jpg/480px-National_Museum_of_Korea_2009.jpg',                                  description:"Korea's largest museum with 220,000 artifacts. Free entry to permanent galleries." },
+  { id:'sl-leeum',      name:'Leeum, Samsung Museum of Art', category:'museum',        lat:37.5367, lng:127.0039, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Leeum%2C_Samsung_Museum_of_Art_%288%29.jpg/480px-Leeum%2C_Samsung_Museum_of_Art_%288%29.jpg',               description:'World-class art museum in Hannam. Designed by Koolhaas, Nouvel & Botta.' },
+  { id:'sl-gwangjang',  name:'Gwangjang Market',             category:'market',        lat:37.5699, lng:126.9996, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Gwangjang_Market%2C_Seoul_%2814367694079%29.jpg/480px-Gwangjang_Market%2C_Seoul_%2814367694079%29.jpg',     description:"One of Seoul's oldest traditional markets. Famous for bindaetteok and mayak kimbap." },
+  { id:'sl-namdaemun',  name:'Namdaemun Market',             category:'market',        lat:37.5599, lng:126.9763, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Namdaemun_Market_Seoul.jpg/480px-Namdaemun_Market_Seoul.jpg',                                               description:"Korea's largest traditional market. Open 24 hours." },
+  { id:'sl-seoulforest',name:'Seoul Forest',                  category:'nature',        lat:37.5447, lng:127.0374, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Seoul_Forest_2.jpg/480px-Seoul_Forest_2.jpg',                                                               description:'Large urban park in Seongsu-dong. Great for cycling and picnics.' },
+  { id:'sl-cheonggyecheon', name:'Cheonggyecheon Stream',    category:'nature',        lat:37.5699, lng:126.9779, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Cheonggyecheon_Seoul.jpg/480px-Cheonggyecheon_Seoul.jpg',                                                   description:'5.8 km urban stream running through central Seoul, perfect for evening walks.' },
+  { id:'sl-coex',       name:'COEX & Starfield Library',     category:'shopping',      lat:37.5113, lng:127.0586, thumbnail:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/COEX_Mall_Seoul.jpg/480px-COEX_Mall_Seoul.jpg',                                                             description:'Underground mega-complex with the iconic Starfield bookstore.' },
+];
+
 const NeighborhoodMap = ({ onSelect }) => {
   const mapContainerRef = React.useRef(null);
   const mapRef = React.useRef(null);
@@ -538,20 +575,36 @@ const NeighborhoodMap = ({ onSelect }) => {
     </div>`;
 
   // Builds the HTML for a landmark hover popup
-  const lmCardHTML = (lm) => `
-    <div style="width:210px;background:white;border-radius:12px;overflow:hidden;
-      box-shadow:0 8px 22px rgba(0,0,0,0.16);border:1px solid #E8E0D5;
-      font-family:'Plus Jakarta Sans',sans-serif;pointer-events:none;">
-      ${lm.thumbnail ? `<div style="height:90px;background:url('${lm.thumbnail}') center/cover;"></div>` :
-        `<div style="height:56px;background:linear-gradient(135deg,#FBF3EE,#E8E0D5);
-          display:flex;align-items:center;justify-content:center;font-size:24px;">${CAT_ICON[lm.category]||'📍'}</div>`}
-      <div style="padding:10px 12px;">
-        <div style="font-size:9px;font-weight:700;color:${CAT_COLOR[lm.category]||'#8B7355'};
-          text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">${lm.category}</div>
-        <div style="font-size:12px;font-weight:700;color:#2C2420;line-height:1.3;margin-bottom:4px;">${lm.name}</div>
-        ${lm.description ? `<div style="font-size:10.5px;color:#8B7355;line-height:1.45;">${lm.description.substring(0,80)}…</div>` : ''}
-      </div>
-    </div>`;
+  const lmCardHTML = (lm) => {
+    const color = CAT_COLOR[lm.category] || '#8B7355';
+    const icon  = CAT_ICON[lm.category]  || '📍';
+    const imgHtml = lm.thumbnail
+      ? `<div style="height:120px;overflow:hidden;position:relative;">
+           <img src="${lm.thumbnail}" alt="${lm.name}"
+             style="width:100%;height:100%;object-fit:cover;display:block;"
+             onerror="this.parentNode.innerHTML='<div style=&quot;height:120px;background:linear-gradient(135deg,${color}22,${color}44);display:flex;align-items:center;justify-content:center;font-size:32px;&quot;>${icon}</div>'"
+           />
+           <div style="position:absolute;top:8px;left:8px;background:white;border-radius:20px;
+             padding:2px 8px;font-size:9px;font-weight:700;color:${color};
+             text-transform:uppercase;letter-spacing:0.05em;">${lm.category}</div>
+         </div>`
+      : `<div style="height:72px;background:linear-gradient(135deg,${color}22,${color}44);
+           display:flex;align-items:center;justify-content:center;font-size:30px;
+           border-bottom:1px solid ${color}33;">${icon}
+           <span style="margin-left:8px;font-size:9px;font-weight:700;color:${color};
+             text-transform:uppercase;letter-spacing:0.05em;">${lm.category}</span>
+         </div>`;
+    return `
+      <div style="width:230px;background:white;border-radius:12px;overflow:hidden;
+        box-shadow:0 10px 28px rgba(0,0,0,0.18);border:1px solid #E8E0D5;
+        font-family:'Plus Jakarta Sans',sans-serif;pointer-events:none;">
+        ${imgHtml}
+        <div style="padding:10px 13px 12px;">
+          <div style="font-size:12.5px;font-weight:700;color:#2C2420;line-height:1.3;margin-bottom:5px;">${lm.name}</div>
+          ${lm.description ? `<div style="font-size:10.5px;color:#8B7355;line-height:1.5;">${lm.description.substring(0,90)}…</div>` : ''}
+        </div>
+      </div>`;
+  };
 
   // Main neighborhood click handler
   const handleNeighborhoodClick = async (nbhd) => {
@@ -570,9 +623,7 @@ const NeighborhoodMap = ({ onSelect }) => {
     if (mapRef.current) mapRef.current.flyTo({ center:[nbhd.lng, nbhd.lat], zoom:13.5, speed:1.2, curve:1.4 });
     try {
       const params = new URLSearchParams({ apiKey:VISITSEOUL_KEY, lang_code:'en', pageNo:'1', numOfRows:'8', addr:nbhd.gu });
-      const res = await fetch(`https://api.visitseoul.net/api/contents/standard/list?${params}`, { headers:{'Accept':'application/json'} });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await visitSeoulFetch(params);
       const raw = data.items || data.list || [];
       const items = (Array.isArray(raw) ? raw : [raw]).map(item => ({
         id: item.contentsid || item.contentid || String(Math.random()),
@@ -673,18 +724,58 @@ const NeighborhoodMap = ({ onSelect }) => {
     map.on('zoom', () => setMapZoom(map.getZoom()));
 
     // ── Landmark layer ────────────────────────────────────
-    // Fetch once on map load; add markers; toggle visibility by zoom
+    const addLandmarkMarkers = (items) => {
+      items.forEach(lm => {
+        const cat   = lm.category;
+        const color = CAT_COLOR[cat] || '#8B7355';
+        const icon  = CAT_ICON[cat]  || '📍';
+
+        const outer = document.createElement('div');
+        outer.className = 'locali-lm-wrap';
+        outer.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center;';
+
+        const inner = document.createElement('div');
+        inner.className = 'locali-lm-inner';
+        inner.style.cssText = [
+          'width:28px','height:28px','border-radius:50%',
+          'background:white', `border:2.5px solid ${color}`,
+          'display:flex','align-items:center','justify-content:center',
+          'box-shadow:0 2px 6px rgba(0,0,0,0.18)',
+          'font-size:13px','line-height:1',
+        ].join(';');
+        inner.textContent = icon;
+        outer.appendChild(inner);
+
+        outer.addEventListener('mouseenter', () => {
+          lmPopupRef.current.setLngLat([lm.lng, lm.lat]).setHTML(lmCardHTML(lm)).addTo(map);
+        });
+        outer.addEventListener('mouseleave', () => lmPopupRef.current.remove());
+
+        new mapboxgl.Marker({ element:outer, anchor:'center' })
+          .setLngLat([lm.lng, lm.lat]).addTo(map);
+
+        outer.style.display = map.getZoom() >= 12 ? 'flex' : 'none';
+        lmMarkersRef.current.push({ outer });
+      });
+    };
+
+    // Show static landmarks immediately, then try to upgrade with real API data
     map.on('load', async () => {
+      // 1. Always show static landmarks first (instant, no API needed)
+      addLandmarkMarkers(STATIC_LANDMARKS);
+      setLandmarks(STATIC_LANDMARKS);
+
+      // 2. Try Visit Seoul API via CORS proxy to get real data + real images
       try {
-        const params = new URLSearchParams({ apiKey:VISITSEOUL_KEY, lang_code:'en', pageNo:'1', numOfRows:'30' });
-        const res = await fetch(`https://api.visitseoul.net/api/contents/standard/list?${params}`, { headers:{'Accept':'application/json'} });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const params = new URLSearchParams({
+          apiKey:VISITSEOUL_KEY, lang_code:'en', pageNo:'1', numOfRows:'40',
+        });
+        const data = await visitSeoulFetch(params);
         const raw = data.items || data.list || [];
-        const items = (Array.isArray(raw) ? raw : [raw])
+        const apiItems = (Array.isArray(raw) ? raw : [raw])
           .filter(item => item.mapx && item.mapy && item.title)
           .map(item => ({
-            id: item.contentsid || item.contentid,
+            id: 'api-' + (item.contentsid || item.contentid),
             name: item.title,
             category: mapCategory(item.com_ctgry_nm || ''),
             thumbnail: item.firstimage || null,
@@ -692,45 +783,18 @@ const NeighborhoodMap = ({ onSelect }) => {
             lat: parseFloat(item.mapy),
             lng: parseFloat(item.mapx),
           }))
-          .filter(i => !isNaN(i.lat) && !isNaN(i.lng));
+          .filter(i => !isNaN(i.lat) && !isNaN(i.lng) && i.thumbnail);
 
-        setLandmarks(items);
-
-        items.forEach(lm => {
-          const cat = lm.category;
-          const color = CAT_COLOR[cat] || '#8B7355';
-          const icon  = CAT_ICON[cat]  || '📍';
-
-          const outer = document.createElement('div');
-          outer.className = 'locali-lm-wrap';
-          outer.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center;';
-
-          const inner = document.createElement('div');
-          inner.className = 'locali-lm-inner';
-          inner.style.cssText = [
-            'width:26px','height:26px','border-radius:50%',
-            'background:white', `border:2px solid ${color}`,
-            'display:flex','align-items:center','justify-content:center',
-            'box-shadow:0 1px 5px rgba(0,0,0,0.16)',
-            'font-size:12px','line-height:1',
-          ].join(';');
-          inner.textContent = icon;
-          outer.appendChild(inner);
-
-          outer.addEventListener('mouseenter', () => {
-            lmPopupRef.current.setLngLat([lm.lng, lm.lat]).setHTML(lmCardHTML(lm)).addTo(map);
-          });
-          outer.addEventListener('mouseleave', () => lmPopupRef.current.remove());
-
-          const marker = new mapboxgl.Marker({ element:outer, anchor:'center' })
-            .setLngLat([lm.lng, lm.lat]).addTo(map);
-
-          // start hidden; zoom handler shows/hides
-          outer.style.display = map.getZoom() >= 12.5 ? 'flex' : 'none';
-          lmMarkersRef.current.push({ outer, marker });
-        });
+        if (apiItems.length > 0) {
+          // Clear static markers and replace with real API markers (have images)
+          lmMarkersRef.current.forEach(({ outer }) => outer.remove());
+          lmMarkersRef.current = [];
+          addLandmarkMarkers(apiItems);
+          setLandmarks(apiItems);
+          console.log(`Visit Seoul API: ${apiItems.length} landmarks with images loaded`);
+        }
       } catch(err) {
-        console.warn('Visit Seoul API (landmarks):', err.message);
+        console.info('Visit Seoul API unavailable, using static landmarks:', err.message);
       }
     });
 
