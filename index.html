@@ -2402,6 +2402,203 @@ const CrewDetailPage = ({ neighborhoodId, onQuickMatch, onBack }) => {
   );
 };
 
+// ─── TRIBES PAGE ─────────────────────────────────────────────────────────────
+const TribesPage = ({ onQuickMatch, onBack }) => {
+  const [activeTribe, setActiveTribe] = React.useState(null);
+
+  const tribeList = [
+    { id:'kpop',     ...TRIBES.kpop },
+    { id:'language', ...TRIBES.language },
+    { id:'wellness', ...TRIBES.wellness },
+  ];
+
+  const TRIBE_LABELS = { kpop:'K-Pop', language:'Language', wellness:'Wellness' };
+
+  const visibleActivities = activeTribe
+    ? THIS_WEEK_ACTIVITIES.filter(a => a.tribeId === activeTribe)
+    : THIS_WEEK_ACTIVITIES;
+
+  return (
+    <div className="animate-in">
+
+      {/* Hero */}
+      <div style={{ background:'#1F1814', padding:'80px 32px 72px', position:'relative', overflow:'hidden', textAlign:'center' }}>
+        <div style={{ position:'absolute', inset:0, opacity:0.08, backgroundImage:'radial-gradient(circle, #C4714A 1px, transparent 1px)', backgroundSize:'24px 24px', pointerEvents:'none' }}/>
+        <div style={{ maxWidth:720, margin:'0 auto', position:'relative' }}>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(196,113,74,0.18)', border:'1px solid rgba(196,113,74,0.35)', borderRadius:100, padding:'5px 18px', marginBottom:24, fontSize:12, fontWeight:600, color:'#E8A880', letterSpacing:'0.06em' }}>
+            <div style={{ width:6, height:6, borderRadius:'50%', background:T.accent, animation:'pulse 2s infinite' }}/>
+            Interest-based communities · Seoul
+          </div>
+          <h1 style={{ fontFamily:'Fraunces,serif', fontSize:'clamp(36px,6vw,60px)', fontWeight:300, color:'#FAF7F2', lineHeight:1.1, marginBottom:20, letterSpacing:'-1px' }}>
+            Seoul has tribes.<br/><em style={{ color:'#E89B70', fontStyle:'italic' }}>Find yours.</em>
+          </h1>
+          <p style={{ fontSize:'clamp(15px,2vw,18px)', color:'#D0B898', maxWidth:540, margin:'0 auto 32px', lineHeight:1.65 }}>
+            Tribes connect you to people who share your obsessions — not just your neighborhood. Join one and your whole Seoul experience changes.
+          </p>
+
+          {/* Tribe pills */}
+          <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:10, marginBottom:36 }}>
+            {tribeList.map(t => (
+              <div key={t.id} style={{ background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:100, padding:'8px 20px', display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}
+                onClick={() => { const el = document.getElementById('tribe-'+t.id); if(el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }}>
+                <span style={{ fontSize:18 }}>{t.emoji}</span>
+                <span style={{ fontSize:13, fontWeight:600, color:'#E0D0BC' }}>{t.name}</span>
+                <span style={{ fontSize:11, color:'#8B7B6B', background:'rgba(255,255,255,0.1)', borderRadius:100, padding:'2px 8px' }}>{t.activeMembers} members</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display:'flex', flexWrap:'wrap', gap:12, justifyContent:'center' }}>
+            <button onClick={onQuickMatch}
+              style={{ height:48, padding:'0 32px', background:T.accent, color:'#fff', border:'none', borderRadius:10, fontSize:15, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'background 0.2s' }}
+              onMouseEnter={e=>e.currentTarget.style.background=T.accentHov}
+              onMouseLeave={e=>e.currentTarget.style.background=T.accent}>
+              Find my tribe →
+            </button>
+            <button onClick={onBack}
+              style={{ height:48, padding:'0 24px', background:'transparent', color:'#A89880', border:'1px solid rgba(255,255,255,0.15)', borderRadius:10, fontSize:14, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+              ← Back to home
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Tribe Cards */}
+      {tribeList.map((t, idx) => (
+        <section id={`tribe-${t.id}`} key={t.id} style={{ background: idx % 2 === 0 ? T.surface : T.white, padding:'72px 32px' }}>
+          <div style={{ maxWidth:900, margin:'0 auto' }}>
+            {/* Header */}
+            <div style={{ display:'flex', alignItems:'flex-start', gap:20, marginBottom:28, flexWrap:'wrap' }}>
+              <div style={{ width:72, height:72, borderRadius:18, background:t.bgColor, border:`1.5px solid ${t.color}22`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:32, flexShrink:0 }}>
+                {t.emoji}
+              </div>
+              <div style={{ flex:1, minWidth:200 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6, flexWrap:'wrap' }}>
+                  <h2 style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:400, color:T.primary, lineHeight:1.2 }}>{t.name}</h2>
+                  <span style={{ background:t.bgColor, color:t.color, borderRadius:100, padding:'3px 12px', fontSize:11, fontWeight:700, border:`1px solid ${t.color}33` }}>
+                    {t.activeMembers} active members
+                  </span>
+                </div>
+                <p style={{ fontSize:15, color:t.color, fontWeight:600, marginBottom:8 }}>{t.tagline}</p>
+                <p style={{ fontSize:14, color:T.n600, lineHeight:1.65, maxWidth:620 }}>{t.description}</p>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:32 }}>
+              {t.tags.map(tag => (
+                <span key={tag} style={{ background:t.bgColor, color:t.darkColor, borderRadius:100, padding:'5px 14px', fontSize:12, fontWeight:600 }}>{tag}</span>
+              ))}
+            </div>
+
+            {/* Host + Perks grid */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:20 }}>
+              {/* Host card */}
+              <div style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:16, padding:28 }}>
+                <div style={{ fontSize:10, fontWeight:700, color:t.color, textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:16 }}>Tribe Host</div>
+                <div style={{ display:'flex', gap:14, alignItems:'center', marginBottom:14 }}>
+                  <div style={{ width:52, height:52, borderRadius:'50%', background:`linear-gradient(135deg,${t.color},${t.darkColor})`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, fontWeight:700, color:'#fff', flexShrink:0 }}>
+                    {t.hostName.split(' ')[0][0]}
+                  </div>
+                  <div style={{ fontFamily:'Fraunces,serif', fontSize:18, fontWeight:400, color:T.primary }}>{t.hostName}</div>
+                </div>
+                <p style={{ fontSize:13, color:T.n600, lineHeight:1.65, marginBottom:14 }}>{t.hostBio}</p>
+                <p style={{ fontStyle:'italic', fontSize:13, color:T.n700, borderLeft:`3px solid ${t.color}`, paddingLeft:12, lineHeight:1.6 }}>"{t.hostQuote}"</p>
+              </div>
+
+              {/* Insider perks */}
+              <div style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:16, padding:28 }}>
+                <div style={{ fontSize:10, fontWeight:700, color:t.color, textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:16 }}>Insider Perks</div>
+                <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                  {t.insiderPerks.map((p, pi) => (
+                    <div key={pi} style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+                      <span style={{ fontSize:18, width:28, flexShrink:0 }}>{p.emoji}</span>
+                      <div>
+                        <div style={{ fontSize:13, fontWeight:600, color:T.primary }}>{p.name}</div>
+                        <div style={{ fontSize:12, color:T.muted, lineHeight:1.5 }}>{p.benefit}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ))}
+
+      {/* This Week */}
+      <section style={{ background:T.surface, padding:'72px 32px' }}>
+        <div style={{ maxWidth:900, margin:'0 auto' }}>
+          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:32, flexWrap:'wrap', gap:16 }}>
+            <div>
+              <div style={{ fontSize:11, fontWeight:600, color:T.accent, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>This week</div>
+              <h2 style={{ fontFamily:'Fraunces,serif', fontSize:28, fontWeight:400, color:T.primary }}>What's happening across all Tribes</h2>
+            </div>
+            <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+              <button onClick={()=>setActiveTribe(null)}
+                style={{ height:32, padding:'0 14px', borderRadius:100, border:`1px solid ${activeTribe===null?T.accent:T.border}`, background:activeTribe===null?T.accentSubtle:'transparent', color:activeTribe===null?T.accent:T.muted, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s' }}>
+                All
+              </button>
+              {tribeList.map(t => (
+                <button key={t.id} onClick={()=>setActiveTribe(activeTribe===t.id?null:t.id)}
+                  style={{ height:32, padding:'0 14px', borderRadius:100, border:`1px solid ${activeTribe===t.id?t.color:T.border}`, background:activeTribe===t.id?t.bgColor:'transparent', color:activeTribe===t.id?t.color:T.muted, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.15s' }}>
+                  {t.emoji} {TRIBE_LABELS[t.id]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(270px,1fr))', gap:14 }}>
+            {visibleActivities.map(a => {
+              const tribe = TRIBES[a.tribeId];
+              return (
+                <div key={a.id} style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:14, padding:'20px 22px', borderLeft:`3px solid ${tribe.color}` }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <span style={{ fontSize:20 }}>{a.emoji}</span>
+                      <div>
+                        <div style={{ fontSize:10, fontWeight:700, color:tribe.color, textTransform:'uppercase', letterSpacing:'0.06em' }}>{a.day} · {a.date}</div>
+                        <div style={{ fontSize:11, color:T.muted }}>{a.time}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize:11, color:T.muted, background:T.surface, border:`1px solid ${T.border}`, borderRadius:100, padding:'3px 10px', whiteSpace:'nowrap', flexShrink:0 }}>
+                      {a.going}/{a.capacity} going
+                    </div>
+                  </div>
+                  <div style={{ fontFamily:'Fraunces,serif', fontSize:15, fontWeight:400, color:T.primary, marginBottom:6, lineHeight:1.35 }}>{a.title}</div>
+                  <p style={{ fontSize:12, color:T.n600, lineHeight:1.6 }}>{a.detail}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section style={{ background:'#1F1814', padding:'72px 32px', textAlign:'center', position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', inset:0, opacity:0.06, backgroundImage:'radial-gradient(circle, #C4714A 1px, transparent 1px)', backgroundSize:'24px 24px', pointerEvents:'none' }}/>
+        <div style={{ maxWidth:560, margin:'0 auto', position:'relative' }}>
+          <h2 style={{ fontFamily:'Fraunces,serif', fontSize:'clamp(28px,4vw,40px)', fontWeight:300, color:'#FAF7F2', marginBottom:16, lineHeight:1.15 }}>
+            Ready to find<br/><em style={{ color:'#E89B70', fontStyle:'italic' }}>your people?</em>
+          </h2>
+          <p style={{ fontSize:16, color:'#D0B898', marginBottom:32, lineHeight:1.65 }}>
+            Take the Quick Match quiz and we'll find your neighborhood and tribe in 60 seconds.
+          </p>
+          <button onClick={onQuickMatch}
+            style={{ height:52, padding:'0 36px', background:T.accent, color:'#fff', border:'none', borderRadius:10, fontSize:16, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'background 0.2s' }}
+            onMouseEnter={e=>e.currentTarget.style.background=T.accentHov}
+            onMouseLeave={e=>e.currentTarget.style.background=T.accent}>
+            Start Quick Match →
+          </button>
+          <p style={{ fontSize:13, color:'#A89880', marginTop:16 }}>Free to explore · 60 seconds</p>
+        </div>
+      </section>
+
+      <Footer/>
+    </div>
+  );
+};
+
 // ─── LANDING PAGE ─────────────────────────────────────────────────────────────
 const LandingPage = ({ onQuickMatch, onNeighborhood, onTribes }) => (
   <div className="animate-in">
@@ -2492,7 +2689,7 @@ const App = () => {
       <NavBar
         onHome={()=>navigate('landing')}
         onQuickMatch={()=>navigate('match')}
-        onCrew={()=>navigate('crew')}
+        onTribes={()=>navigate('tribes')}
         scrolled={scrolled}
       />
 
@@ -2500,7 +2697,7 @@ const App = () => {
         <LandingPage
           onQuickMatch={()=>navigate('match')}
           onNeighborhood={id=>navigate('stays',{neighborhoodId:id})}
-          onCrew={()=>navigate('crew')}
+          onTribes={()=>navigate('tribes')}
         />
       )}
 
@@ -2530,8 +2727,15 @@ const App = () => {
         <MatchResults
           data={route.matchData}
           onViewStays={nbhdId=>navigate('stays',{neighborhoodId:nbhdId})}
-          onViewCrew={nbhdId=>navigate('crew-detail',{crewNeighborhoodId:nbhdId})}
+          onViewTribes={()=>navigate('tribes')}
           onRetake={()=>navigate('match')}
+          onBack={()=>navigate('landing')}
+        />
+      )}
+
+      {route.page==='tribes' && (
+        <TribesPage
+          onQuickMatch={()=>navigate('match')}
           onBack={()=>navigate('landing')}
         />
       )}
