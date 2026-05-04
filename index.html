@@ -457,16 +457,20 @@ const MAPBOX_TOKEN  = 'pk.eyJ1Ijoic2ltdW55YW5nIiwiYSI6ImNtb3B0YmlpZzFydWQyb3MxMH
 const VISITSEOUL_KEY = 'a01953d6-5b2b-4f7c-b265-e220e18ffe42';
 
 const MAP_NBHDS = [
-  { id:'yeonnam', name:'Yeonnam-dong',    ko:'연남동',        tagline:'Indie cafés & park life',       desc:'Tree-lined alleys, indie cafés, record stores, and the best people-watching from Yeontral Park.',    lat:37.5665, lng:126.9240, color:'#C4714A', gu:'마포구',  priceMin:800 },
-  { id:'hongdae', name:'Hongdae',         ko:'홍대',          tagline:'Music & street art',             desc:'Live indie music every night, street performers, vintage shops — energy that never sleeps.',           lat:37.5570, lng:126.9245, color:'#E07B50', gu:'마포구',  priceMin:700 },
-  { id:'mapo',    name:'Mangwon · Mapo',  ko:'망원동',        tagline:'Local market life',              desc:'Authentic local market, riverside picnics, absolutely no tourists. Seoul life, unfiltered.',           lat:37.5566, lng:126.9030, color:'#4A7C59', gu:'마포구',  priceMin:690 },
-  { id:'itaewon', name:'Itaewon · HBC',   ko:'이태원·해방촌', tagline:'International vibes',            desc:'Rooftop bars with N Seoul Tower views, food from every continent, the most diverse crowd in Korea.',   lat:37.5340, lng:126.9940, color:'#1A3A7A', gu:'용산구',  priceMin:750 },
-  { id:'yongsan', name:'Yongsan',         ko:'용산',          tagline:'Central & connected',            desc:'Next to the National Museum of Korea and the new cultural heart of the city.',                         lat:37.5320, lng:126.9650, color:'#7A4A8A', gu:'용산구',  priceMin:680 },
-  { id:'hannam',  name:'Hannam-dong',     ko:'한남동',        tagline:'Galleries & quiet luxury',       desc:'Tree-lined streets, embassies, the best contemporary art galleries in Korea.',                        lat:37.5340, lng:127.0080, color:'#993556', gu:'용산구',  priceMin:980 },
-  { id:'euljiro', name:'Euljiro · Jongno',ko:'을지로·종로',   tagline:'Hidden bars & history',          desc:'Old meets new: hidden bars in 1970s alleys, palace walks, underground vinyl bars.',                    lat:37.5660, lng:126.9980, color:'#8B7355', gu:'중구',    priceMin:750 },
-  { id:'seongsu', name:'Seongsu-dong',    ko:'성수동',        tagline:'Brooklyn of Seoul',              desc:'Old shoe factories turned design studios, specialty coffee labs, pop-up flagships from every brand.',  lat:37.5450, lng:127.0560, color:'#6B4226', gu:'성동구',  priceMin:880 },
-  { id:'gangnam', name:'Gangnam',         ko:'강남',          tagline:'Business & K-beauty',            desc:'Sleek skyscrapers, premium K-beauty clinics, COEX underground city, clubs that go till sunrise.',      lat:37.4980, lng:127.0280, color:'#185FA5', gu:'강남구',  priceMin:950 },
-  { id:'jamsil',  name:'Jamsil · Songpa', ko:'잠실·송파',     tagline:'Lotte Tower & lakeside',         desc:'Lotte World Tower views, Olympic Park concerts, Seokchon Lake walks.',                                lat:37.5130, lng:127.1000, color:'#0F6E56', gu:'송파구',  priceMin:820 },
+  { id:'yeonnam',    name:'Yeonnam-dong',      ko:'연남동',        tagline:'Indie cafés & park life',       desc:'Tree-lined alleys, indie cafés, record stores, and the best people-watching from Yeontral Park.',          lat:37.5665, lng:126.9240, color:'#C4714A', gu:'마포구',  priceMin:800 },
+  { id:'hongdae',    name:'Hongdae',           ko:'홍대',          tagline:'Music & street art',             desc:'Live indie music every night, street performers, vintage shops — energy that never sleeps.',                 lat:37.5570, lng:126.9245, color:'#E07B50', gu:'마포구',  priceMin:700 },
+  { id:'mapo',       name:'Mangwon · Mapo',    ko:'망원동',        tagline:'Local market life',              desc:'Authentic local market, riverside picnics, absolutely no tourists. Seoul life, unfiltered.',                 lat:37.5566, lng:126.9030, color:'#4A7C59', gu:'마포구',  priceMin:690 },
+  { id:'myeongdong', name:'Myeongdong',        ko:'명동',          tagline:'Shopping & street food',         desc:'Seoul\'s most iconic shopping district. Cosmetics flagships, street food, and nonstop energy 24/7.',         lat:37.5636, lng:126.9830, color:'#D44280', gu:'중구',    priceMin:900 },
+  { id:'euljiro',    name:'Euljiro · Jongno',  ko:'을지로·종로',   tagline:'Hidden bars & history',          desc:'Old meets new: hidden bars in 1970s alleys, palace walks, underground vinyl bars.',                          lat:37.5660, lng:126.9980, color:'#8B7355', gu:'중구',    priceMin:750 },
+  { id:'dongdaemun', name:'Dongdaemun',        ko:'동대문',        tagline:'Fashion & 24h markets',          desc:'Fashion wholesale mecca open until 5AM. DDP\'s futuristic architecture and Dongdaemun Market.',             lat:37.5713, lng:127.0100, color:'#C4490A', gu:'중구',    priceMin:720 },
+  { id:'itaewon',    name:'Itaewon · HBC',     ko:'이태원·해방촌', tagline:'International vibes',            desc:'Rooftop bars with N Seoul Tower views, food from every continent, the most diverse crowd in Korea.',         lat:37.5340, lng:126.9940, color:'#1A3A7A', gu:'용산구',  priceMin:750 },
+  { id:'yongsan',    name:'Yongsan',           ko:'용산',          tagline:'Central & connected',            desc:'Next to the National Museum of Korea and the new cultural heart of the city.',                               lat:37.5320, lng:126.9650, color:'#7A4A8A', gu:'용산구',  priceMin:680 },
+  { id:'hannam',     name:'Hannam-dong',       ko:'한남동',        tagline:'Galleries & quiet luxury',       desc:'Tree-lined streets, embassies, the best contemporary art galleries in Korea.',                              lat:37.5340, lng:127.0080, color:'#993556', gu:'용산구',  priceMin:980 },
+  { id:'seongsu',    name:'Seongsu-dong',      ko:'성수동',        tagline:'Brooklyn of Seoul',              desc:'Old shoe factories turned design studios, specialty coffee labs, pop-up flagships from every brand.',        lat:37.5450, lng:127.0560, color:'#6B4226', gu:'성동구',  priceMin:880 },
+  { id:'cheongnyangni', name:'Cheongnyangni',  ko:'청량리',        tagline:'Local hub & transport node',     desc:'A real Seoulite neighbourhood. Traditional markets, local restaurants, and a major transit hub.',             lat:37.5802, lng:127.0454, color:'#2C7A5A', gu:'동대문구', priceMin:640 },
+  { id:'apgujeong',  name:'Apgujeong',         ko:'압구정',        tagline:'K-beauty & luxury flagships',    desc:'Home to SM, JYP, HYBE HQ. Top dermatology clinics, K-beauty flagships, where K-pop idols actually live.',   lat:37.5272, lng:127.0286, color:'#7A1A5C', gu:'강남구',  priceMin:1200 },
+  { id:'gangnam',    name:'Gangnam',           ko:'강남',          tagline:'Business & K-beauty',            desc:'Sleek skyscrapers, premium K-beauty clinics, COEX underground city, clubs that go till sunrise.',            lat:37.4980, lng:127.0280, color:'#185FA5', gu:'강남구',  priceMin:950 },
+  { id:'jamsil',     name:'Jamsil · Songpa',   ko:'잠실·송파',     tagline:'Lotte Tower & lakeside',         desc:'Lotte World Tower views, Olympic Park concerts, Seokchon Lake walks.',                                      lat:37.5130, lng:127.1000, color:'#0F6E56', gu:'송파구',  priceMin:820 },
 ];
 
 const CAT_ICON = {
@@ -542,7 +546,6 @@ const NeighborhoodMap = ({ onSelect }) => {
   const [loadingAttr, setLoadingAttr] = React.useState(false);
   const [apiError, setApiError] = React.useState(false);
   const [landmarks, setLandmarks] = React.useState([]);
-  const [mapZoom, setMapZoom] = React.useState(11.2);
 
   // ── helpers ────────────────────────────────────────────────
   const resetNbhdMarkers = () => {
@@ -720,9 +723,6 @@ const NeighborhoodMap = ({ onSelect }) => {
       markersRef.current[nbhd.id] = { outer, inner, data:nbhd };
     });
 
-    // Track zoom for landmark visibility
-    map.on('zoom', () => setMapZoom(map.getZoom()));
-
     // ── Landmark layer ────────────────────────────────────
     const addLandmarkMarkers = (items) => {
       items.forEach(lm => {
@@ -754,7 +754,7 @@ const NeighborhoodMap = ({ onSelect }) => {
         new mapboxgl.Marker({ element:outer, anchor:'center' })
           .setLngLat([lm.lng, lm.lat]).addTo(map);
 
-        outer.style.display = map.getZoom() >= 12 ? 'flex' : 'none';
+        outer.style.display = 'flex';
         lmMarkersRef.current.push({ outer });
       });
     };
@@ -798,13 +798,7 @@ const NeighborhoodMap = ({ onSelect }) => {
       }
     });
 
-    // Show/hide landmark markers based on zoom
-    map.on('zoom', () => {
-      const visible = map.getZoom() >= 12.5;
-      lmMarkersRef.current.forEach(({ outer }) => {
-        outer.style.display = visible ? 'flex' : 'none';
-      });
-    });
+    // Landmarks always visible at all zoom levels
 
     mapRef.current = map;
     return () => {
@@ -847,20 +841,18 @@ const NeighborhoodMap = ({ onSelect }) => {
           <div ref={mapContainerRef} style={{ width:'100%', height:'100%' }}/>
         </div>
 
-        {/* Category legend — visible when zoomed in */}
-        {mapZoom >= 12.5 && (
-          <div className="fade-in" style={{ display:'flex', flexWrap:'wrap', gap:10, justifyContent:'center', marginTop:10 }}>
-            {Object.entries(CAT_ICON).map(([cat, icon]) => (
-              <div key={cat} style={{ display:'flex', alignItems:'center', gap:5, fontSize:11, color:T.n600, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-                <span style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${CAT_COLOR[cat]}`, background:'white', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:9 }}>{icon}</span>
-                <span style={{ textTransform:'capitalize' }}>{cat}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Category legend */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:10, justifyContent:'center', marginTop:10 }}>
+          {Object.entries(CAT_ICON).map(([cat, icon]) => (
+            <div key={cat} style={{ display:'flex', alignItems:'center', gap:5, fontSize:11, color:T.n600, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+              <span style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${CAT_COLOR[cat]}`, background:'white', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:9 }}>{icon}</span>
+              <span style={{ textTransform:'capitalize' }}>{cat}</span>
+            </div>
+          ))}
+        </div>
 
-        {/* Neighborhood grid */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8, marginTop:14 }}>
+        {/* Neighborhood grid — 7 columns for 14 items */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:8, marginTop:14 }}>
           {MAP_NBHDS.map(n => (
             <button key={n.id}
               onClick={() => {
