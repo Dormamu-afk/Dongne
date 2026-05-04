@@ -689,6 +689,7 @@ const NeighborhoodMap = ({ onSelect }) => {
     });
 
     // ── Neighborhood markers ─────────────────────────────
+    let hoveredNbhdId = null;
     MAP_NBHDS.forEach(nbhd => {
       // outer: Mapbox positions this with its own transform — DO NOT set transform on outer
       const outer = document.createElement('div');
@@ -734,16 +735,18 @@ const NeighborhoodMap = ({ onSelect }) => {
       outer.appendChild(label);
 
       outer.addEventListener('mouseenter', () => {
+        hoveredNbhdId = nbhd.id;
         if (inner.dataset.selected !== '1') {
           nbhdPopupRef.current.setLngLat([nbhd.lng, nbhd.lat]).setHTML(nbhdCardHTML(nbhd)).addTo(map);
         }
         // Dim landmark markers while hovering a neighborhood
-        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '0.12'; });
+        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '0.2'; });
       });
       outer.addEventListener('mouseleave', () => {
+        hoveredNbhdId = null;
         if (inner.dataset.selected !== '1') nbhdPopupRef.current.remove();
         // Restore landmark markers to their default muted opacity
-        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '0.5'; });
+        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '0.7'; });
       });
       outer.addEventListener('click', () => {
         Object.values(markersRef.current).forEach(({ inner:i }) => { i.dataset.selected = ''; });
@@ -758,27 +761,38 @@ const NeighborhoodMap = ({ onSelect }) => {
       markersRef.current[nbhd.id] = { outer, inner, imgEl, data:nbhd };
     });
 
-    // ── Fetch neighborhood images from Wikipedia REST API ───
-    const WIKI_ARTICLES = {
-      yeonnam:'Yeonnam-dong', hongdae:'Hongdae', mapo:'Mangwon-dong',
-      myeongdong:'Myeong-dong', seongsu:'Seongsu-dong',
-      cheongnyangni:'Cheongnyangni', apgujeong:'Apgujeong-dong',
+    // ── Fetch neighborhood images from Visit Seoul API ───────
+    const loadNbhdImages = async () => {
+      // Only load for neighborhoods without a static image (empty imageUrl)
+      const needsImage = MAP_NBHDS.filter(n => !n.imageUrl);
+      if (!needsImage.length) return;
+      // Group by gu to reduce API calls
+      const byGu = {};
+      needsImage.forEach(n => { (byGu[n.gu] = byGu[n.gu] || []).push(n); });
+      await Promise.all(Object.entries(byGu).map(async ([gu, nbhds]) => {
+        try {
+          const params = new URLSearchParams({
+            apiKey: VISITSEOUL_KEY, lang_code: 'en', pageNo: '1',
+            numOfRows: String(nbhds.length * 4 + 4), addr: gu,
+          });
+          const data = await visitSeoulFetch(params);
+          const raw = data.items || data.list || [];
+          const withImg = (Array.isArray(raw) ? raw : [raw]).filter(i => i.firstimage);
+          nbhds.forEach((nbhd, idx) => {
+            const item = withImg[idx] || withImg[0];
+            if (!item?.firstimage) return;
+            nbhd.imageUrl = item.firstimage;
+            const m = markersRef.current[nbhd.id];
+            if (m?.imgEl) { m.imgEl.src = item.firstimage; m.imgEl.onerror = () => m.imgEl.remove(); }
+            // Refresh popup immediately if user is already hovering this neighborhood
+            if (hoveredNbhdId === nbhd.id && nbhdPopupRef.current) {
+              nbhdPopupRef.current.setLngLat([nbhd.lng, nbhd.lat]).setHTML(nbhdCardHTML(nbhd)).addTo(map);
+            }
+          });
+        } catch(e) {}
+      }));
     };
-    MAP_NBHDS.forEach(async nbhd => {
-      const article = WIKI_ARTICLES[nbhd.id];
-      if (!article) return;
-      try {
-        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(article)}`);
-        if (!res.ok) return;
-        const json = await res.json();
-        const thumb = json.thumbnail?.source;
-        if (!thumb) return;
-        const imgUrl = thumb.replace(/\/\d+px-/, '/480px-');
-        nbhd.imageUrl = imgUrl;
-        const m = markersRef.current[nbhd.id];
-        if (m?.imgEl) { m.imgEl.src = imgUrl; m.imgEl.onerror = () => m.imgEl.remove(); }
-      } catch(e) {}
-    });
+    loadNbhdImages();
 
     // ── Landmark layer ────────────────────────────────────
     const addLandmarkMarkers = (items) => {
@@ -788,13 +802,13 @@ const NeighborhoodMap = ({ onSelect }) => {
 
         const outer = document.createElement('div');
         outer.className = 'locali-lm-wrap';
-        outer.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.5;transition:opacity 0.15s;';
+        outer.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.7;transition:opacity 0.15s;';
 
         const inner = document.createElement('div');
         inner.className = 'locali-lm-inner';
-        const svgDataUri = 'data:image/svg+xml,' + encodeURIComponent(getLmSvgIcon(cat, color, 12));
+        const svgDataUri = 'data:image/svg+xml,' + encodeURIComponent(getLmSvgIcon(cat, color, 13));
         inner.style.cssText = [
-          'width:20px','height:20px','border-radius:50%',
+          'width:23px','height:23px','border-radius:50%',
           'background-color:rgba(255,255,255,0.88)',
           `border:1px solid ${color}`,
           'box-shadow:0 1px 3px rgba(0,0,0,0.10)',
