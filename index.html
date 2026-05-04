@@ -44,11 +44,12 @@
   .mapboxgl-ctrl button { border-radius:8px !important; }
   /* Bug fix: outer marker el must NOT receive transform — Mapbox uses it for positioning */
   .mapboxgl-marker { will-change:transform; }
-  /* Inner pin hover — CSS only, no JS state change */
-  .locali-pin-inner { transition: transform 0.18s ease, box-shadow 0.18s ease; }
-  .locali-pin-wrap:hover .locali-pin-inner { transform: scale(1.18) translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.28) !important; }
-  .locali-lm-inner { transition: transform 0.15s ease; }
-  .locali-lm-wrap:hover .locali-lm-inner { transform: scale(1.4); }
+  /* Neighborhood pin hover — photo circle scales up, CSS only */
+  .locali-pin-inner { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+  .locali-pin-wrap:hover .locali-pin-inner { transform: scale(1.12) translateY(-3px); box-shadow: 0 8px 22px rgba(0,0,0,0.32) !important; }
+  /* Landmark pin hover */
+  .locali-lm-inner { transition: transform 0.15s ease, opacity 0.15s ease; }
+  .locali-lm-wrap:hover .locali-lm-inner { transform: scale(1.35); opacity: 1 !important; }
   /* Mapbox Popup: strip default chrome */
   .locali-popup .mapboxgl-popup-content,
   .locali-lm-popup .mapboxgl-popup-content { background:transparent; padding:0; box-shadow:none; border-radius:0; }
@@ -457,30 +458,46 @@ const MAPBOX_TOKEN  = 'pk.eyJ1Ijoic2ltdW55YW5nIiwiYSI6ImNtb3B0YmlpZzFydWQyb3MxMH
 const VISITSEOUL_KEY = 'a01953d6-5b2b-4f7c-b265-e220e18ffe42';
 
 const MAP_NBHDS = [
-  { id:'yeonnam',    name:'Yeonnam-dong',      ko:'연남동',        tagline:'Indie cafés & park life',       desc:'Tree-lined alleys, indie cafés, record stores, and the best people-watching from Yeontral Park.',          lat:37.5665, lng:126.9240, color:'#C4714A', gu:'마포구',  priceMin:800 },
-  { id:'hongdae',    name:'Hongdae',           ko:'홍대',          tagline:'Music & street art',             desc:'Live indie music every night, street performers, vintage shops — energy that never sleeps.',                 lat:37.5570, lng:126.9245, color:'#E07B50', gu:'마포구',  priceMin:700 },
-  { id:'mapo',       name:'Mangwon · Mapo',    ko:'망원동',        tagline:'Local market life',              desc:'Authentic local market, riverside picnics, absolutely no tourists. Seoul life, unfiltered.',                 lat:37.5566, lng:126.9030, color:'#4A7C59', gu:'마포구',  priceMin:690 },
-  { id:'myeongdong', name:'Myeongdong',        ko:'명동',          tagline:'Shopping & street food',         desc:'Seoul\'s most iconic shopping district. Cosmetics flagships, street food, and nonstop energy 24/7.',         lat:37.5636, lng:126.9830, color:'#D44280', gu:'중구',    priceMin:900 },
-  { id:'euljiro',    name:'Euljiro · Jongno',  ko:'을지로·종로',   tagline:'Hidden bars & history',          desc:'Old meets new: hidden bars in 1970s alleys, palace walks, underground vinyl bars.',                          lat:37.5660, lng:126.9980, color:'#8B7355', gu:'중구',    priceMin:750 },
-  { id:'dongdaemun', name:'Dongdaemun',        ko:'동대문',        tagline:'Fashion & 24h markets',          desc:'Fashion wholesale mecca open until 5AM. DDP\'s futuristic architecture and Dongdaemun Market.',             lat:37.5713, lng:127.0100, color:'#C4490A', gu:'중구',    priceMin:720 },
-  { id:'itaewon',    name:'Itaewon · HBC',     ko:'이태원·해방촌', tagline:'International vibes',            desc:'Rooftop bars with N Seoul Tower views, food from every continent, the most diverse crowd in Korea.',         lat:37.5340, lng:126.9940, color:'#1A3A7A', gu:'용산구',  priceMin:750 },
-  { id:'yongsan',    name:'Yongsan',           ko:'용산',          tagline:'Central & connected',            desc:'Next to the National Museum of Korea and the new cultural heart of the city.',                               lat:37.5320, lng:126.9650, color:'#7A4A8A', gu:'용산구',  priceMin:680 },
-  { id:'hannam',     name:'Hannam-dong',       ko:'한남동',        tagline:'Galleries & quiet luxury',       desc:'Tree-lined streets, embassies, the best contemporary art galleries in Korea.',                              lat:37.5340, lng:127.0080, color:'#993556', gu:'용산구',  priceMin:980 },
-  { id:'seongsu',    name:'Seongsu-dong',      ko:'성수동',        tagline:'Brooklyn of Seoul',              desc:'Old shoe factories turned design studios, specialty coffee labs, pop-up flagships from every brand.',        lat:37.5450, lng:127.0560, color:'#6B4226', gu:'성동구',  priceMin:880 },
-  { id:'cheongnyangni', name:'Cheongnyangni',  ko:'청량리',        tagline:'Local hub & transport node',     desc:'A real Seoulite neighbourhood. Traditional markets, local restaurants, and a major transit hub.',             lat:37.5802, lng:127.0454, color:'#2C7A5A', gu:'동대문구', priceMin:640 },
-  { id:'apgujeong',  name:'Apgujeong',         ko:'압구정',        tagline:'K-beauty & luxury flagships',    desc:'Home to SM, JYP, HYBE HQ. Top dermatology clinics, K-beauty flagships, where K-pop idols actually live.',   lat:37.5272, lng:127.0286, color:'#7A1A5C', gu:'강남구',  priceMin:1200 },
-  { id:'gangnam',    name:'Gangnam',           ko:'강남',          tagline:'Business & K-beauty',            desc:'Sleek skyscrapers, premium K-beauty clinics, COEX underground city, clubs that go till sunrise.',            lat:37.4980, lng:127.0280, color:'#185FA5', gu:'강남구',  priceMin:950 },
-  { id:'jamsil',     name:'Jamsil · Songpa',   ko:'잠실·송파',     tagline:'Lotte Tower & lakeside',         desc:'Lotte World Tower views, Olympic Park concerts, Seokchon Lake walks.',                                      lat:37.5130, lng:127.1000, color:'#0F6E56', gu:'송파구',  priceMin:820 },
+  { id:'yeonnam',       name:'Yeonnam-dong',      ko:'연남동',        tagline:'Indie cafés & park life',       desc:'Tree-lined alleys, indie cafés, record stores, and the best people-watching from Yeontral Park.',          lat:37.5665, lng:126.9240, color:'#C4714A', gu:'마포구',   priceMin:800,  imageUrl:'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=400&q=80' },
+  { id:'hongdae',       name:'Hongdae',           ko:'홍대',          tagline:'Music & street art',             desc:'Live indie music every night, street performers, vintage shops — energy that never sleeps.',                 lat:37.5570, lng:126.9245, color:'#E07B50', gu:'마포구',   priceMin:700,  imageUrl:'https://images.unsplash.com/photo-1609590981063-3f6d2db6f0c0?w=400&q=80' },
+  { id:'mapo',          name:'Mangwon · Mapo',    ko:'망원동',        tagline:'Local market life',              desc:'Authentic local market, riverside picnics, absolutely no tourists. Seoul life, unfiltered.',                 lat:37.5566, lng:126.9030, color:'#4A7C59', gu:'마포구',   priceMin:690,  imageUrl:'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400&q=80' },
+  { id:'myeongdong',    name:'Myeongdong',        ko:'명동',          tagline:'Shopping & street food',         desc:'Seoul\'s most iconic shopping district. Cosmetics flagships, street food, and nonstop energy 24/7.',         lat:37.5636, lng:126.9830, color:'#D44280', gu:'중구',     priceMin:900,  imageUrl:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
+  { id:'euljiro',       name:'Euljiro · Jongno',  ko:'을지로·종로',   tagline:'Hidden bars & history',          desc:'Old meets new: hidden bars in 1970s alleys, palace walks, underground vinyl bars.',                          lat:37.5660, lng:126.9980, color:'#8B7355', gu:'중구',     priceMin:750,  imageUrl:'https://images.unsplash.com/photo-1601619586497-0c70d76b8b3a?w=400&q=80' },
+  { id:'dongdaemun',    name:'Dongdaemun',        ko:'동대문',        tagline:'Fashion & 24h markets',          desc:'Fashion wholesale mecca open until 5AM. DDP\'s futuristic architecture and Dongdaemun Market.',             lat:37.5713, lng:127.0100, color:'#C4490A', gu:'중구',     priceMin:720,  imageUrl:'https://images.unsplash.com/photo-1617651823081-270acbe4e507?w=400&q=80' },
+  { id:'itaewon',       name:'Itaewon · HBC',     ko:'이태원·해방촌', tagline:'International vibes',            desc:'Rooftop bars with N Seoul Tower views, food from every continent, the most diverse crowd in Korea.',         lat:37.5340, lng:126.9940, color:'#1A3A7A', gu:'용산구',   priceMin:750,  imageUrl:'https://images.unsplash.com/photo-1601984714932-c2cffd03e92f?w=400&q=80' },
+  { id:'yongsan',       name:'Yongsan',           ko:'용산',          tagline:'Central & connected',            desc:'Next to the National Museum of Korea and the new cultural heart of the city.',                               lat:37.5320, lng:126.9650, color:'#7A4A8A', gu:'용산구',   priceMin:680,  imageUrl:'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&q=80' },
+  { id:'hannam',        name:'Hannam-dong',       ko:'한남동',        tagline:'Galleries & quiet luxury',       desc:'Tree-lined streets, embassies, the best contemporary art galleries in Korea.',                              lat:37.5340, lng:127.0080, color:'#993556', gu:'용산구',   priceMin:980,  imageUrl:'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&q=80' },
+  { id:'seongsu',       name:'Seongsu-dong',      ko:'성수동',        tagline:'Brooklyn of Seoul',              desc:'Old shoe factories turned design studios, specialty coffee labs, pop-up flagships from every brand.',        lat:37.5450, lng:127.0560, color:'#6B4226', gu:'성동구',   priceMin:880,  imageUrl:'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&q=80' },
+  { id:'cheongnyangni', name:'Cheongnyangni',     ko:'청량리',        tagline:'Local hub & transport node',     desc:'A real Seoulite neighbourhood. Traditional markets, local restaurants, and a major transit hub.',             lat:37.5802, lng:127.0454, color:'#2C7A5A', gu:'동대문구', priceMin:640,  imageUrl:'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&q=80' },
+  { id:'apgujeong',     name:'Apgujeong',         ko:'압구정',        tagline:'K-beauty & luxury flagships',    desc:'Home to SM, JYP, HYBE HQ. Top dermatology clinics, K-beauty flagships, where K-pop idols actually live.',   lat:37.5272, lng:127.0286, color:'#7A1A5C', gu:'강남구',   priceMin:1200, imageUrl:'https://images.unsplash.com/photo-1617653202545-931f1d51e6c4?w=400&q=80' },
+  { id:'gangnam',       name:'Gangnam',           ko:'강남',          tagline:'Business & K-beauty',            desc:'Sleek skyscrapers, premium K-beauty clinics, COEX underground city, clubs that go till sunrise.',            lat:37.4980, lng:127.0280, color:'#185FA5', gu:'강남구',   priceMin:950,  imageUrl:'https://images.unsplash.com/photo-1540963180081-d5d6a8c45dec?w=400&q=80' },
+  { id:'jamsil',        name:'Jamsil · Songpa',   ko:'잠실·송파',     tagline:'Lotte Tower & lakeside',         desc:'Lotte World Tower views, Olympic Park concerts, Seokchon Lake walks.',                                      lat:37.5130, lng:127.1000, color:'#0F6E56', gu:'송파구',   priceMin:820,  imageUrl:'https://images.unsplash.com/photo-1614611387251-c2a13fa12bce?w=400&q=80' },
 ];
 
-const CAT_ICON = {
-  palace:'🏯', museum:'🏛️', market:'🛍️', food:'🍜',
-  shopping:'🛒', entertainment:'🎤', nature:'🌳', experience:'🎨',
-};
 const CAT_COLOR = {
   palace:'#8B4513', museum:'#5A4030', market:'#C4714A', food:'#D85A30',
   shopping:'#993556', entertainment:'#7A2C5C', nature:'#4A7C59', experience:'#185FA5',
 };
+const CAT_LABEL = {
+  palace:'Palace · Heritage', museum:'Museum', market:'Market', food:'Food',
+  shopping:'Shopping', entertainment:'Entertainment', nature:'Nature', experience:'Experience',
+};
+
+function getLmSvgIcon(category, color, size) {
+  const s = size || 14;
+  const c = color || '#8B7355';
+  const icons = {
+    palace:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L12 3L22 9L20 9L20 11L4 11L4 9Z" fill="${c}"/><rect x="5" y="11" width="2" height="9" fill="${c}"/><rect x="11" y="11" width="2" height="9" fill="${c}"/><rect x="17" y="11" width="2" height="9" fill="${c}"/><rect x="3" y="20" width="18" height="2" fill="${c}"/></svg>`,
+    museum:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8L12 3L21 8L21 9L3 9Z" fill="${c}"/><rect x="5" y="11" width="2" height="8" fill="${c}"/><rect x="9" y="11" width="2" height="8" fill="${c}"/><rect x="13" y="11" width="2" height="8" fill="${c}"/><rect x="17" y="11" width="2" height="8" fill="${c}"/><rect x="3" y="19" width="18" height="2" fill="${c}"/></svg>`,
+    market:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 8L12 4L22 8L22 10L2 10Z" fill="${c}"/><rect x="3" y="14" width="18" height="6" fill="${c}" opacity="0.35"/><rect x="3" y="20" width="18" height="1.5" fill="${c}"/></svg>`,
+    food:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 11L21 11L19 18Q19 20 17 20L7 20Q5 20 5 18Z" fill="${c}"/><ellipse cx="12" cy="11" rx="9" ry="1.5" fill="${c}"/><line x1="14" y1="7" x2="20" y2="9" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/><line x1="15" y1="6" x2="21" y2="8" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    shopping:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 5Q9 2 12 2Q15 2 15 5" stroke="${c}" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M5 7L19 7L20 21L4 21Z" fill="${c}"/></svg>`,
+    entertainment:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="2" width="6" height="11" rx="3" fill="${c}"/><path d="M5 11Q5 17 12 17Q19 17 19 11" stroke="${c}" stroke-width="1.5" fill="none" stroke-linecap="round"/><line x1="12" y1="17" x2="12" y2="21" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="21" x2="15" y2="21" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    nature:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 20L8 10L12 14L16 7L22 20Z" fill="${c}"/><rect x="2" y="20" width="20" height="1.5" fill="${c}"/></svg>`,
+    experience:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="7" r="3" stroke="${c}" stroke-width="1.5" fill="none"/><circle cx="6" cy="17" r="3" stroke="${c}" stroke-width="1.5" fill="none"/><line x1="8.5" y1="9" x2="20" y2="20" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/><line x1="8.5" y1="15" x2="20" y2="4" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  };
+  return icons[category] || icons.experience;
+}
 
 function mapCategory(vsName) {
   if (!vsName) return 'experience';
@@ -549,26 +566,32 @@ const NeighborhoodMap = ({ onSelect }) => {
 
   // ── helpers ────────────────────────────────────────────────
   const resetNbhdMarkers = () => {
-    Object.values(markersRef.current).forEach(({ inner, data }) => {
-      inner.style.background = data.color;
-      inner.style.boxShadow = '0 2px 8px rgba(0,0,0,0.22)';
+    Object.values(markersRef.current).forEach(({ inner }) => {
+      inner.style.border = '2.5px solid white';
+      inner.style.boxShadow = '0 3px 10px rgba(0,0,0,0.25)';
       inner.dataset.selected = '';
     });
   };
 
   // Builds the HTML string for the neighborhood hover popup
   const nbhdCardHTML = (nbhd) => `
-    <div style="width:260px;background:white;border-radius:14px;overflow:hidden;
-      box-shadow:0 10px 30px rgba(0,0,0,0.18);border:1px solid #E8E0D5;
+    <div style="width:280px;background:white;border-radius:14px;overflow:hidden;
+      box-shadow:0 12px 32px rgba(0,0,0,0.18);border:1px solid #E8E0D5;
       font-family:'Plus Jakarta Sans',sans-serif;">
-      <div style="height:10px;background:${nbhd.color};"></div>
-      <div style="padding:14px 16px 16px;">
-        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px;">
-          <span style="font-family:Fraunces,serif;font-size:17px;font-weight:400;color:#2C2420;">${nbhd.name}</span>
-          <span style="font-size:11px;color:#8B7355;font-family:'Noto Sans KR',sans-serif;">${nbhd.ko}</span>
+      <div style="height:148px;overflow:hidden;position:relative;background:${nbhd.color};">
+        <img src="${nbhd.imageUrl}" alt="${nbhd.name}"
+          style="width:100%;height:100%;object-fit:cover;display:block;"
+          onerror="this.style.display='none'"
+        />
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(44,36,32,0.55) 100%);"></div>
+        <div style="position:absolute;bottom:10px;left:12px;right:12px;display:flex;align-items:baseline;gap:6px;">
+          <span style="font-family:Fraunces,serif;font-size:17px;font-weight:400;color:white;">${nbhd.name}</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.75);font-family:'Noto Sans KR',sans-serif;">${nbhd.ko}</span>
         </div>
-        <p style="font-size:11px;font-weight:600;color:${nbhd.color};margin-bottom:7px;letter-spacing:0.03em;">${nbhd.tagline}</p>
-        <p style="font-size:11.5px;color:#6E5E54;line-height:1.55;margin-bottom:10px;">${nbhd.desc.substring(0,110)}…</p>
+      </div>
+      <div style="padding:12px 14px 14px;">
+        <p style="font-size:11px;font-weight:600;color:${nbhd.color};margin-bottom:6px;letter-spacing:0.03em;">${nbhd.tagline}</p>
+        <p style="font-size:11.5px;color:#6E5E54;line-height:1.55;margin-bottom:10px;">${nbhd.desc.substring(0,100)}…</p>
         <div style="display:flex;justify-content:space-between;align-items:center;
           border-top:1px solid #F0E8DC;padding-top:9px;">
           <span style="font-size:11px;color:#8B7355;">From <strong style="color:#2C2420;">$${nbhd.priceMin}</strong>/mo</span>
@@ -580,23 +603,20 @@ const NeighborhoodMap = ({ onSelect }) => {
   // Builds the HTML for a landmark hover popup
   const lmCardHTML = (lm) => {
     const color = CAT_COLOR[lm.category] || '#8B7355';
-    const icon  = CAT_ICON[lm.category]  || '📍';
+    const label = CAT_LABEL[lm.category] || lm.category;
+    const svgIcon = getLmSvgIcon(lm.category, color, 18);
+    const fallbackDiv = `<div style="height:110px;background:linear-gradient(135deg,${color}18,${color}38);display:flex;align-items:center;justify-content:center;">${svgIcon.replace(`width="18"`, `width="36"`).replace(`height="18"`, `height="36"`)}</div>`;
     const imgHtml = lm.thumbnail
-      ? `<div style="height:120px;overflow:hidden;position:relative;">
+      ? `<div style="height:110px;overflow:hidden;position:relative;background:${color}22;">
            <img src="${lm.thumbnail}" alt="${lm.name}"
              style="width:100%;height:100%;object-fit:cover;display:block;"
-             onerror="this.parentNode.innerHTML='<div style=&quot;height:120px;background:linear-gradient(135deg,${color}22,${color}44);display:flex;align-items:center;justify-content:center;font-size:32px;&quot;>${icon}</div>'"
+             onerror="this.parentNode.outerHTML='${fallbackDiv.replace(/'/g,"&#39;")}'"
            />
-           <div style="position:absolute;top:8px;left:8px;background:white;border-radius:20px;
+           <div style="position:absolute;top:7px;left:8px;background:white;border-radius:20px;
              padding:2px 8px;font-size:9px;font-weight:700;color:${color};
-             text-transform:uppercase;letter-spacing:0.05em;">${lm.category}</div>
+             text-transform:uppercase;letter-spacing:0.05em;">${label}</div>
          </div>`
-      : `<div style="height:72px;background:linear-gradient(135deg,${color}22,${color}44);
-           display:flex;align-items:center;justify-content:center;font-size:30px;
-           border-bottom:1px solid ${color}33;">${icon}
-           <span style="margin-left:8px;font-size:9px;font-weight:700;color:${color};
-             text-transform:uppercase;letter-spacing:0.05em;">${lm.category}</span>
-         </div>`;
+      : fallbackDiv;
     return `
       <div style="width:230px;background:white;border-radius:12px;overflow:hidden;
         box-shadow:0 10px 28px rgba(0,0,0,0.18);border:1px solid #E8E0D5;
@@ -615,7 +635,7 @@ const NeighborhoodMap = ({ onSelect }) => {
     resetNbhdMarkers();
     const m = markersRef.current[nbhd.id];
     if (m) {
-      m.inner.style.background = '#2C2420';
+      m.inner.style.border = '3px solid #2C2420';
       m.inner.style.boxShadow = '0 4px 18px rgba(44,36,32,0.4)';
       m.inner.dataset.selected = '1';
     }
@@ -675,19 +695,30 @@ const NeighborhoodMap = ({ onSelect }) => {
       outer.className = 'locali-pin-wrap';
       outer.style.cssText = 'cursor:pointer;display:flex;flex-direction:column;align-items:center;';
 
-      // inner: all visual effects live here, CSS class handles hover via `.locali-pin-wrap:hover .locali-pin-inner`
+      // inner: photo circle — all hover effects via CSS on this element
       const inner = document.createElement('div');
       inner.className = 'locali-pin-inner';
       inner.style.cssText = [
-        'width:34px','height:34px','border-radius:50%',
-        `background:${nbhd.color}`,
+        'width:44px','height:44px','border-radius:50%',
+        `background-color:${nbhd.color}`,
         'border:2.5px solid white',
-        'box-shadow:0 2px 8px rgba(0,0,0,0.22)',
-        'display:flex','align-items:center','justify-content:center',
-        "font-family:'Plus Jakarta Sans',sans-serif",
-        'font-size:11px','font-weight:800','color:white','user-select:none',
+        'box-shadow:0 3px 10px rgba(0,0,0,0.25)',
+        'overflow:hidden','position:relative',
       ].join(';');
-      inner.textContent = 'L';
+
+      // Photo with color-fallback: if image fails, background-color shows through
+      const imgEl = document.createElement('img');
+      imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
+      imgEl.alt = nbhd.name;
+      imgEl.onerror = () => imgEl.remove();
+      imgEl.src = nbhd.imageUrl;
+
+      // Gradient overlay for polish
+      const grd = document.createElement('div');
+      grd.style.cssText = `position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,${nbhd.color}55 100%);pointer-events:none;`;
+
+      inner.appendChild(imgEl);
+      inner.appendChild(grd);
 
       const label = document.createElement('div');
       label.style.cssText = [
@@ -706,9 +737,13 @@ const NeighborhoodMap = ({ onSelect }) => {
         if (inner.dataset.selected !== '1') {
           nbhdPopupRef.current.setLngLat([nbhd.lng, nbhd.lat]).setHTML(nbhdCardHTML(nbhd)).addTo(map);
         }
+        // Dim landmark markers while hovering a neighborhood
+        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '0.25'; });
       });
       outer.addEventListener('mouseleave', () => {
         if (inner.dataset.selected !== '1') nbhdPopupRef.current.remove();
+        // Restore landmark markers
+        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '1'; });
       });
       outer.addEventListener('click', () => {
         Object.values(markersRef.current).forEach(({ inner:i }) => { i.dataset.selected = ''; });
@@ -723,12 +758,20 @@ const NeighborhoodMap = ({ onSelect }) => {
       markersRef.current[nbhd.id] = { outer, inner, data:nbhd };
     });
 
+    // ── Zoom-based landmark visibility ───────────────────
+    const updateLmVisibility = () => {
+      const z = map.getZoom();
+      lmMarkersRef.current.forEach(({ outer:lmOut }) => {
+        lmOut.style.display = z >= 13 ? 'flex' : 'none';
+      });
+    };
+    map.on('zoom', updateLmVisibility);
+
     // ── Landmark layer ────────────────────────────────────
     const addLandmarkMarkers = (items) => {
       items.forEach(lm => {
         const cat   = lm.category;
         const color = CAT_COLOR[cat] || '#8B7355';
-        const icon  = CAT_ICON[cat]  || '📍';
 
         const outer = document.createElement('div');
         outer.className = 'locali-lm-wrap';
@@ -737,13 +780,14 @@ const NeighborhoodMap = ({ onSelect }) => {
         const inner = document.createElement('div');
         inner.className = 'locali-lm-inner';
         inner.style.cssText = [
-          'width:28px','height:28px','border-radius:50%',
-          'background:white', `border:2.5px solid ${color}`,
+          'width:26px','height:26px','border-radius:50%',
+          'background:rgba(255,255,255,0.95)',
+          `border:1.5px solid ${color}`,
           'display:flex','align-items:center','justify-content:center',
-          'box-shadow:0 2px 6px rgba(0,0,0,0.18)',
-          'font-size:13px','line-height:1',
+          'box-shadow:0 1px 4px rgba(0,0,0,0.15)',
+          'opacity:0.85',
         ].join(';');
-        inner.textContent = icon;
+        inner.innerHTML = getLmSvgIcon(cat, color, 14);
         outer.appendChild(inner);
 
         outer.addEventListener('mouseenter', () => {
@@ -754,7 +798,6 @@ const NeighborhoodMap = ({ onSelect }) => {
         new mapboxgl.Marker({ element:outer, anchor:'center' })
           .setLngLat([lm.lng, lm.lat]).addTo(map);
 
-        outer.style.display = 'flex';
         lmMarkersRef.current.push({ outer });
       });
     };
@@ -764,6 +807,7 @@ const NeighborhoodMap = ({ onSelect }) => {
       // 1. Always show static landmarks first (instant, no API needed)
       addLandmarkMarkers(STATIC_LANDMARKS);
       setLandmarks(STATIC_LANDMARKS);
+      updateLmVisibility();
 
       // 2. Try Visit Seoul API via CORS proxy to get real data + real images
       try {
@@ -791,6 +835,7 @@ const NeighborhoodMap = ({ onSelect }) => {
           lmMarkersRef.current = [];
           addLandmarkMarkers(apiItems);
           setLandmarks(apiItems);
+          updateLmVisibility();
           console.log(`Visit Seoul API: ${apiItems.length} landmarks with images loaded`);
         }
       } catch(err) {
@@ -843,10 +888,13 @@ const NeighborhoodMap = ({ onSelect }) => {
 
         {/* Category legend */}
         <div style={{ display:'flex', flexWrap:'wrap', gap:10, justifyContent:'center', marginTop:10 }}>
-          {Object.entries(CAT_ICON).map(([cat, icon]) => (
+          {Object.keys(CAT_COLOR).map(cat => (
             <div key={cat} style={{ display:'flex', alignItems:'center', gap:5, fontSize:11, color:T.n600, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-              <span style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${CAT_COLOR[cat]}`, background:'white', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:9 }}>{icon}</span>
-              <span style={{ textTransform:'capitalize' }}>{cat}</span>
+              <span
+                style={{ width:20, height:20, borderRadius:'50%', border:`1.5px solid ${CAT_COLOR[cat]}`, background:'white', display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
+                dangerouslySetInnerHTML={{ __html: getLmSvgIcon(cat, CAT_COLOR[cat], 11) }}
+              />
+              <span>{CAT_LABEL[cat]}</span>
             </div>
           ))}
         </div>
