@@ -1481,20 +1481,122 @@ const FilterBar = ({ filters, onChange }) => {
 };
 
 // ─── MAP PLACEHOLDER ─────────────────────────────────────────────────────────
-const MapPanel = ({ neighborhoodId }) => {
-  const n = NEIGHBORHOODS_DATA.find(x=>x.id===neighborhoodId);
+const StaysMapPanel = ({ neighborhoodId, onNeighborhoodChange }) => {
+  const containerRef = React.useRef(null);
+  const mapRef       = React.useRef(null);
+  const markersRef   = React.useRef({});
+  const popupRef     = React.useRef(null);
+  const onChangeRef  = React.useRef(onNeighborhoodChange);
+  const nbhdIdRef    = React.useRef(neighborhoodId);
+
+  React.useEffect(() => { onChangeRef.current = onNeighborhoodChange; }, [onNeighborhoodChange]);
+  React.useEffect(() => { nbhdIdRef.current   = neighborhoodId; },      [neighborhoodId]);
+
+  // Initialize map once
+  React.useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: 'mapbox://styles/mapbox/light-v11',
+      accessToken: MAPBOX_TOKEN,
+      center: [127.010, 37.535],
+      zoom: 11.0, minZoom: 9.5, maxZoom: 17,
+    });
+    mapRef.current = map;
+    map.addControl(new mapboxgl.NavigationControl({ showCompass:false }), 'top-right');
+
+    popupRef.current = new mapboxgl.Popup({
+      closeButton:false, closeOnClick:false,
+      className:'locali-popup', offset:50, anchor:'bottom', maxWidth:'none',
+    });
+
+    MAP_NBHDS.forEach(nbhd => {
+      const outer = document.createElement('div');
+      outer.style.cssText = 'cursor:pointer;display:flex;flex-direction:column;align-items:center;';
+
+      const inner = document.createElement('div');
+      inner.style.cssText = [
+        'width:40px','height:40px','border-radius:50%',
+        `background-color:${nbhd.color}`,
+        'border:2.5px solid white',
+        'box-shadow:0 3px 10px rgba(0,0,0,0.25)',
+        'overflow:hidden','position:relative',
+        'transition:transform 0.15s,box-shadow 0.15s,border-color 0.15s',
+      ].join(';');
+
+      const imgEl = document.createElement('img');
+      imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
+      imgEl.alt = nbhd.name;
+      imgEl.onerror = () => imgEl.remove();
+      if (nbhd.imageUrl) imgEl.src = nbhd.imageUrl;
+      inner.appendChild(imgEl);
+
+      const grd = document.createElement('div');
+      grd.style.cssText = `position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,${nbhd.color}55 100%);pointer-events:none;`;
+      inner.appendChild(grd);
+
+      const label = document.createElement('div');
+      label.style.cssText = [
+        'margin-top:3px','padding:2px 7px','background:white',
+        'border:0.5px solid #E8E0D5','border-radius:4px','font-size:10px',
+        'color:#2C2420','font-weight:600','white-space:nowrap',
+        'box-shadow:0 1px 4px rgba(0,0,0,0.08)',
+        "font-family:'Plus Jakarta Sans',sans-serif",
+        'transition:opacity 0.15s',
+      ].join(';');
+      label.textContent = nbhd.name;
+
+      outer.appendChild(inner);
+      outer.appendChild(label);
+
+      outer.addEventListener('mouseenter', () => {
+        popupRef.current.setLngLat([nbhd.lng, nbhd.lat]).setHTML(nbhdCardHTML(nbhd)).addTo(map);
+      });
+      outer.addEventListener('mouseleave', () => popupRef.current.remove());
+      outer.addEventListener('click', () => {
+        const next = nbhdIdRef.current === nbhd.id ? null : nbhd.id;
+        onChangeRef.current(next);
+      });
+
+      new mapboxgl.Marker({ element:outer, anchor:'bottom' })
+        .setLngLat([nbhd.lng, nbhd.lat]).addTo(map);
+
+      markersRef.current[nbhd.id] = { inner, label };
+    });
+
+    return () => { map.remove(); mapRef.current = null; };
+  }, []);
+
+  // Sync selection + fly when neighborhoodId changes
+  React.useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    Object.entries(markersRef.current).forEach(([id, { inner, label }]) => {
+      const sel = id === neighborhoodId;
+      inner.style.transform   = sel ? 'scale(1.2)'                  : 'scale(1)';
+      inner.style.boxShadow   = sel ? '0 4px 18px rgba(0,0,0,0.38)' : '0 3px 10px rgba(0,0,0,0.25)';
+      inner.style.borderColor = sel ? '#C4714A'                      : 'white';
+      label.style.opacity     = (!neighborhoodId || sel) ? '1'       : '0.45';
+      label.style.fontWeight  = sel ? '700'                          : '600';
+    });
+
+    if (neighborhoodId) {
+      const nbhd = MAP_NBHDS.find(n => n.id === neighborhoodId);
+      if (nbhd) {
+        const fly = () => map.flyTo({ center:[nbhd.lng, nbhd.lat], zoom:13.2, duration:700 });
+        map.isStyleLoaded() ? fly() : map.once('load', fly);
+      }
+    } else {
+      const reset = () => map.flyTo({ center:[127.010, 37.535], zoom:11.0, duration:700 });
+      map.isStyleLoaded() ? reset() : map.once('load', reset);
+    }
+  }, [neighborhoodId]);
+
   return (
-    <div style={{ position:'sticky', top:120, height:'calc(100vh - 130px)', background:'#e8f0e8', borderRadius:14, overflow:'hidden', border:`1px solid ${T.border}` }}>
-      <iframe
-        src={`https://www.openstreetmap.org/export/embed.html?bbox=126.85,37.45,127.20,37.68&layer=mapnik`}
-        style={{ width:'100%', height:'100%', border:'none' }}
-        title="Seoul map"
-      />
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(250,247,242,0.95)', borderTop:`1px solid ${T.border}`, padding:'10px 16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <span style={{ fontSize:12, color:T.muted }}>📍 {n?n.name:'Seoul'} · Interactive Map</span>
-        <a href={`https://maps.google.com/?q=${n?n.name+',Seoul':'Seoul,Korea'}`} target="_blank" rel="noopener noreferrer"
-          style={{ fontSize:12, color:T.accent, fontWeight:600 }}>Open in Google Maps →</a>
-      </div>
+    <div style={{ position:'sticky', top:120, height:'calc(100vh - 130px)', borderRadius:14, overflow:'hidden', border:`1px solid ${T.border}` }}>
+      <div ref={containerRef} style={{ width:'100%', height:'100%' }}/>
     </div>
   );
 };
@@ -1554,7 +1656,10 @@ const StaysPage = ({ initialNeighborhood, onStayClick, onBack }) => {
             )}
           </div>
           {/* Right: Map */}
-          <MapPanel neighborhoodId={filters.neighborhood}/>
+          <StaysMapPanel
+            neighborhoodId={filters.neighborhood}
+            onNeighborhoodChange={(id) => setFilters(f => ({ ...f, neighborhood: id }))}
+          />
         </div>
       </div>
     </div>
