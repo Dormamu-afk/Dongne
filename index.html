@@ -458,18 +458,18 @@ const MAPBOX_TOKEN  = 'pk.eyJ1Ijoic2ltdW55YW5nIiwiYSI6ImNtb3B0YmlpZzFydWQyb3MxMH
 const VISITSEOUL_KEY = 'a01953d6-5b2b-4f7c-b265-e220e18ffe42';
 
 const MAP_NBHDS = [
-  { id:'yeonnam',       name:'Yeonnam-dong',      ko:'연남동',        tagline:'Indie cafés & park life',       desc:'Tree-lined alleys, indie cafés, record stores, and the best people-watching from Yeontral Park.',          lat:37.5665, lng:126.9240, color:'#C4714A', gu:'마포구',   priceMin:800,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Bukchon_Hanok_Village_Seoul.jpg/480px-Bukchon_Hanok_Village_Seoul.jpg' },
-  { id:'hongdae',       name:'Hongdae',           ko:'홍대',          tagline:'Music & street art',             desc:'Live indie music every night, street performers, vintage shops — energy that never sleeps.',                 lat:37.5570, lng:126.9245, color:'#E07B50', gu:'마포구',   priceMin:700,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Insadong_alley.jpg/480px-Insadong_alley.jpg' },
-  { id:'mapo',          name:'Mangwon · Mapo',    ko:'망원동',        tagline:'Local market life',              desc:'Authentic local market, riverside picnics, absolutely no tourists. Seoul life, unfiltered.',                 lat:37.5566, lng:126.9030, color:'#4A7C59', gu:'마포구',   priceMin:690,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Gwangjang_Market%2C_Seoul_%2814367694079%29.jpg/480px-Gwangjang_Market%2C_Seoul_%2814367694079%29.jpg' },
-  { id:'myeongdong',    name:'Myeongdong',        ko:'명동',          tagline:'Shopping & street food',         desc:'Seoul\'s most iconic shopping district. Cosmetics flagships, street food, and nonstop energy 24/7.',         lat:37.5636, lng:126.9830, color:'#D44280', gu:'중구',     priceMin:900,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Namdaemun_Market_Seoul.jpg/480px-Namdaemun_Market_Seoul.jpg' },
+  { id:'yeonnam',       name:'Yeonnam-dong',      ko:'연남동',        tagline:'Indie cafés & park life',       desc:'Tree-lined alleys, indie cafés, record stores, and the best people-watching from Yeontral Park.',          lat:37.5665, lng:126.9240, color:'#C4714A', gu:'마포구',   priceMin:800,  imageUrl:'' },
+  { id:'hongdae',       name:'Hongdae',           ko:'홍대',          tagline:'Music & street art',             desc:'Live indie music every night, street performers, vintage shops — energy that never sleeps.',                 lat:37.5570, lng:126.9245, color:'#E07B50', gu:'마포구',   priceMin:700,  imageUrl:'' },
+  { id:'mapo',          name:'Mangwon · Mapo',    ko:'망원동',        tagline:'Local market life',              desc:'Authentic local market, riverside picnics, absolutely no tourists. Seoul life, unfiltered.',                 lat:37.5566, lng:126.9030, color:'#4A7C59', gu:'마포구',   priceMin:690,  imageUrl:'' },
+  { id:'myeongdong',    name:'Myeongdong',        ko:'명동',          tagline:'Shopping & street food',         desc:'Seoul\'s most iconic shopping district. Cosmetics flagships, street food, and nonstop energy 24/7.',         lat:37.5636, lng:126.9830, color:'#D44280', gu:'중구',     priceMin:900,  imageUrl:'' },
   { id:'euljiro',       name:'Euljiro · Jongno',  ko:'을지로·종로',   tagline:'Hidden bars & history',          desc:'Old meets new: hidden bars in 1970s alleys, palace walks, underground vinyl bars.',                          lat:37.5660, lng:126.9980, color:'#8B7355', gu:'중구',     priceMin:750,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Cheonggyecheon_Seoul.jpg/480px-Cheonggyecheon_Seoul.jpg' },
   { id:'dongdaemun',    name:'Dongdaemun',        ko:'동대문',        tagline:'Fashion & 24h markets',          desc:'Fashion wholesale mecca open until 5AM. DDP\'s futuristic architecture and Dongdaemun Market.',             lat:37.5713, lng:127.0100, color:'#C4490A', gu:'중구',     priceMin:720,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Dongdaemun_Design_Plaza_2014.jpg/480px-Dongdaemun_Design_Plaza_2014.jpg' },
   { id:'itaewon',       name:'Itaewon · HBC',     ko:'이태원·해방촌', tagline:'International vibes',            desc:'Rooftop bars with N Seoul Tower views, food from every continent, the most diverse crowd in Korea.',         lat:37.5340, lng:126.9940, color:'#1A3A7A', gu:'용산구',   priceMin:750,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/N_Seoul_Tower_2.jpg/480px-N_Seoul_Tower_2.jpg' },
   { id:'yongsan',       name:'Yongsan',           ko:'용산',          tagline:'Central & connected',            desc:'Next to the National Museum of Korea and the new cultural heart of the city.',                               lat:37.5320, lng:126.9650, color:'#7A4A8A', gu:'용산구',   priceMin:680,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/National_Museum_of_Korea_2009.jpg/480px-National_Museum_of_Korea_2009.jpg' },
   { id:'hannam',        name:'Hannam-dong',       ko:'한남동',        tagline:'Galleries & quiet luxury',       desc:'Tree-lined streets, embassies, the best contemporary art galleries in Korea.',                              lat:37.5340, lng:127.0080, color:'#993556', gu:'용산구',   priceMin:980,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Leeum%2C_Samsung_Museum_of_Art_%288%29.jpg/480px-Leeum%2C_Samsung_Museum_of_Art_%288%29.jpg' },
-  { id:'seongsu',       name:'Seongsu-dong',      ko:'성수동',        tagline:'Brooklyn of Seoul',              desc:'Old shoe factories turned design studios, specialty coffee labs, pop-up flagships from every brand.',        lat:37.5450, lng:127.0560, color:'#6B4226', gu:'성동구',   priceMin:880,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Seoul_Forest_2.jpg/480px-Seoul_Forest_2.jpg' },
-  { id:'cheongnyangni', name:'Cheongnyangni',     ko:'청량리',        tagline:'Local hub & transport node',     desc:'A real Seoulite neighbourhood. Traditional markets, local restaurants, and a major transit hub.',             lat:37.5802, lng:127.0454, color:'#2C7A5A', gu:'동대문구', priceMin:640,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Gyeongbokgung_Palace_in_Seoul_Morning.jpg/480px-Gyeongbokgung_Palace_in_Seoul_Morning.jpg' },
-  { id:'apgujeong',     name:'Apgujeong',         ko:'압구정',        tagline:'K-beauty & luxury flagships',    desc:'Home to SM, JYP, HYBE HQ. Top dermatology clinics, K-beauty flagships, where K-pop idols actually live.',   lat:37.5272, lng:127.0286, color:'#7A1A5C', gu:'강남구',   priceMin:1200, imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Changdeokgung_03.jpg/480px-Changdeokgung_03.jpg' },
+  { id:'seongsu',       name:'Seongsu-dong',      ko:'성수동',        tagline:'Brooklyn of Seoul',              desc:'Old shoe factories turned design studios, specialty coffee labs, pop-up flagships from every brand.',        lat:37.5450, lng:127.0560, color:'#6B4226', gu:'성동구',   priceMin:880,  imageUrl:'' },
+  { id:'cheongnyangni', name:'Cheongnyangni',     ko:'청량리',        tagline:'Local hub & transport node',     desc:'A real Seoulite neighbourhood. Traditional markets, local restaurants, and a major transit hub.',             lat:37.5802, lng:127.0454, color:'#2C7A5A', gu:'동대문구', priceMin:640,  imageUrl:'' },
+  { id:'apgujeong',     name:'Apgujeong',         ko:'압구정',        tagline:'K-beauty & luxury flagships',    desc:'Home to SM, JYP, HYBE HQ. Top dermatology clinics, K-beauty flagships, where K-pop idols actually live.',   lat:37.5272, lng:127.0286, color:'#7A1A5C', gu:'강남구',   priceMin:1200, imageUrl:'' },
   { id:'gangnam',       name:'Gangnam',           ko:'강남',          tagline:'Business & K-beauty',            desc:'Sleek skyscrapers, premium K-beauty clinics, COEX underground city, clubs that go till sunrise.',            lat:37.4980, lng:127.0280, color:'#185FA5', gu:'강남구',   priceMin:950,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/COEX_Mall_Seoul.jpg/480px-COEX_Mall_Seoul.jpg' },
   { id:'jamsil',        name:'Jamsil · Songpa',   ko:'잠실·송파',     tagline:'Lotte Tower & lakeside',         desc:'Lotte World Tower views, Olympic Park concerts, Seokchon Lake walks.',                                      lat:37.5130, lng:127.1000, color:'#0F6E56', gu:'송파구',   priceMin:820,  imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Lotte_World_Tower_20170601.jpg/480px-Lotte_World_Tower_20170601.jpg' },
 ];
@@ -706,12 +706,12 @@ const NeighborhoodMap = ({ onSelect }) => {
         'overflow:hidden','position:relative',
       ].join(';');
 
-      // Photo with color-fallback: if image fails, background-color shows through
+      // Photo with color-fallback: if image fails or URL is empty, background-color shows
       const imgEl = document.createElement('img');
       imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
       imgEl.alt = nbhd.name;
       imgEl.onerror = () => imgEl.remove();
-      imgEl.src = nbhd.imageUrl;
+      if (nbhd.imageUrl) imgEl.src = nbhd.imageUrl;
 
       // Gradient overlay for polish
       const grd = document.createElement('div');
@@ -738,12 +738,12 @@ const NeighborhoodMap = ({ onSelect }) => {
           nbhdPopupRef.current.setLngLat([nbhd.lng, nbhd.lat]).setHTML(nbhdCardHTML(nbhd)).addTo(map);
         }
         // Dim landmark markers while hovering a neighborhood
-        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '0.25'; });
+        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '0.12'; });
       });
       outer.addEventListener('mouseleave', () => {
         if (inner.dataset.selected !== '1') nbhdPopupRef.current.remove();
-        // Restore landmark markers
-        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '1'; });
+        // Restore landmark markers to their default muted opacity
+        lmMarkersRef.current.forEach(({ outer:lmOut }) => { lmOut.style.opacity = '0.5'; });
       });
       outer.addEventListener('click', () => {
         Object.values(markersRef.current).forEach(({ inner:i }) => { i.dataset.selected = ''; });
@@ -755,17 +755,30 @@ const NeighborhoodMap = ({ onSelect }) => {
       new mapboxgl.Marker({ element:outer, anchor:'bottom' })
         .setLngLat([nbhd.lng, nbhd.lat]).addTo(map);
 
-      markersRef.current[nbhd.id] = { outer, inner, data:nbhd };
+      markersRef.current[nbhd.id] = { outer, inner, imgEl, data:nbhd };
     });
 
-    // ── Zoom-based landmark visibility ───────────────────
-    const updateLmVisibility = () => {
-      const z = map.getZoom();
-      lmMarkersRef.current.forEach(({ outer:lmOut }) => {
-        lmOut.style.display = z >= 13 ? 'flex' : 'none';
-      });
+    // ── Fetch neighborhood images from Wikipedia REST API ───
+    const WIKI_ARTICLES = {
+      yeonnam:'Yeonnam-dong', hongdae:'Hongdae', mapo:'Mangwon-dong',
+      myeongdong:'Myeong-dong', seongsu:'Seongsu-dong',
+      cheongnyangni:'Cheongnyangni', apgujeong:'Apgujeong-dong',
     };
-    map.on('zoom', updateLmVisibility);
+    MAP_NBHDS.forEach(async nbhd => {
+      const article = WIKI_ARTICLES[nbhd.id];
+      if (!article) return;
+      try {
+        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(article)}`);
+        if (!res.ok) return;
+        const json = await res.json();
+        const thumb = json.thumbnail?.source;
+        if (!thumb) return;
+        const imgUrl = thumb.replace(/\/\d+px-/, '/480px-');
+        nbhd.imageUrl = imgUrl;
+        const m = markersRef.current[nbhd.id];
+        if (m?.imgEl) { m.imgEl.src = imgUrl; m.imgEl.onerror = () => m.imgEl.remove(); }
+      } catch(e) {}
+    });
 
     // ── Landmark layer ────────────────────────────────────
     const addLandmarkMarkers = (items) => {
@@ -775,17 +788,16 @@ const NeighborhoodMap = ({ onSelect }) => {
 
         const outer = document.createElement('div');
         outer.className = 'locali-lm-wrap';
-        outer.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center;';
+        outer.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.5;transition:opacity 0.15s;';
 
         const inner = document.createElement('div');
         inner.className = 'locali-lm-inner';
-        const svgDataUri = 'data:image/svg+xml,' + encodeURIComponent(getLmSvgIcon(cat, color, 14));
+        const svgDataUri = 'data:image/svg+xml,' + encodeURIComponent(getLmSvgIcon(cat, color, 12));
         inner.style.cssText = [
-          'width:26px','height:26px','border-radius:50%',
-          'background-color:rgba(255,255,255,0.95)',
-          `border:1.5px solid ${color}`,
-          'box-shadow:0 1px 4px rgba(0,0,0,0.15)',
-          'opacity:0.85',
+          'width:20px','height:20px','border-radius:50%',
+          'background-color:rgba(255,255,255,0.88)',
+          `border:1px solid ${color}`,
+          'box-shadow:0 1px 3px rgba(0,0,0,0.10)',
           `background-image:url("${svgDataUri}")`,
           'background-size:55% 55%',
           'background-repeat:no-repeat',
@@ -810,7 +822,6 @@ const NeighborhoodMap = ({ onSelect }) => {
       // 1. Always show static landmarks first (instant, no API needed)
       addLandmarkMarkers(STATIC_LANDMARKS);
       setLandmarks(STATIC_LANDMARKS);
-      updateLmVisibility();
 
       // 2. Try Visit Seoul API via CORS proxy to get real data + real images
       try {
@@ -838,15 +849,12 @@ const NeighborhoodMap = ({ onSelect }) => {
           lmMarkersRef.current = [];
           addLandmarkMarkers(apiItems);
           setLandmarks(apiItems);
-          updateLmVisibility();
           console.log(`Visit Seoul API: ${apiItems.length} landmarks with images loaded`);
         }
       } catch(err) {
         console.info('Visit Seoul API unavailable, using static landmarks:', err.message);
       }
     });
-
-    // Landmarks always visible at all zoom levels
 
     mapRef.current = map;
     return () => {
