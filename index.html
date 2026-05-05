@@ -759,6 +759,14 @@ const NeighborhoodMap = ({ onSelect }) => {
   const [loadingAttr, setLoadingAttr] = React.useState(false);
   const [apiError, setApiError] = React.useState(false);
   const [landmarks, setLandmarks] = React.useState([]);
+  const [nbhdPhotos, setNbhdPhotos] = React.useState({});
+
+  React.useEffect(() => {
+    fetch('https://zkewjuqlfdtsrzueiozz.supabase.co/storage/v1/object/public/neighborhood-photos/_manifest.json')
+      .then(r => r.ok ? r.json() : {})
+      .catch(() => ({}))
+      .then(setNbhdPhotos);
+  }, []);
 
   // ── helpers ────────────────────────────────────────────────
   const resetNbhdMarkers = () => {
@@ -1139,129 +1147,158 @@ const NeighborhoodMap = ({ onSelect }) => {
           ))}
         </div>
 
-        {/* Attractions panel */}
+        {/* Neighborhood detail panel */}
         {selectedId && (
-          <div className="animate-in" style={{ marginTop:24 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
-              <div>
-                <span style={{ fontFamily:'Fraunces,serif', fontSize:22, fontWeight:400, color:T.primary }}>{selectedNbhd?.name}</span>
-                <span style={{ fontFamily:'Noto Sans KR,sans-serif', fontSize:15, color:T.muted, marginLeft:8 }}>{selectedNbhd?.ko}</span>
-              </div>
-              <div style={{ display:'flex', gap:10 }}>
+          <div className="animate-in" style={{ marginTop:24, background:T.white, borderRadius:20, border:`1px solid ${T.border}`, overflow:'hidden', boxShadow:'0 4px 28px rgba(44,36,32,0.09)' }}>
+
+            {/* ── Hero photo ── */}
+            <div style={{ position:'relative', height:280, background:`linear-gradient(135deg, ${selectedNbhd?.color || T.accent}22, ${selectedNbhd?.color || T.accent}44)`, flexShrink:0 }}>
+              {(nbhdPhotos[selectedId] || selectedNbhd?.imageUrl) && (
+                <img
+                  src={nbhdPhotos[selectedId] || selectedNbhd?.imageUrl}
+                  alt={selectedNbhd?.name}
+                  style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
+                />
+              )}
+              <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, transparent 35%, rgba(30,22,18,0.72) 100%)' }}/>
+              {/* Close */}
+              <button onClick={handleClose}
+                style={{ position:'absolute', top:14, right:14, width:34, height:34, borderRadius:'50%', background:'rgba(30,22,18,0.55)', border:'none', color:'white', cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)', lineHeight:1 }}
+              >✕</button>
+              {/* Name overlay */}
+              <div style={{ position:'absolute', bottom:18, left:22, right:22, display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
+                <div>
+                  <div style={{ fontFamily:'Fraunces,serif', fontSize:30, fontWeight:400, color:'white', lineHeight:1.15, textShadow:'0 1px 8px rgba(0,0,0,0.3)' }}>{selectedNbhd?.name}</div>
+                  <div style={{ fontFamily:'Noto Sans KR,sans-serif', fontSize:14, color:'rgba(255,255,255,0.72)', marginTop:3 }}>{selectedNbhd?.ko}</div>
+                </div>
                 <button onClick={() => onSelect(selectedId)}
-                  style={{ padding:'8px 18px', background:T.primary, color:T.white, borderRadius:8, border:'none', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'background 0.18s' }}
-                  onMouseEnter={e=>e.currentTarget.style.background=T.accent}
-                  onMouseLeave={e=>e.currentTarget.style.background=T.primary}
+                  style={{ padding:'10px 22px', background:T.accent, color:'white', borderRadius:10, border:'none', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', whiteSpace:'nowrap', boxShadow:'0 2px 14px rgba(196,113,74,0.45)', flexShrink:0 }}
+                  onMouseEnter={e=>e.currentTarget.style.background=T.accentHov}
+                  onMouseLeave={e=>e.currentTarget.style.background=T.accent}
                 >View stays →</button>
-                <button onClick={handleClose}
-                  style={{ padding:'8px 12px', background:'transparent', color:T.muted, borderRadius:8, border:`1px solid ${T.border}`, fontSize:14, cursor:'pointer' }}
-                >✕</button>
               </div>
             </div>
 
-            {/* Neighborhood profile */}
-            {NBHD_PROFILES[selectedId] && (() => {
-              const p = NBHD_PROFILES[selectedId];
-              return (
-                <div style={{ marginBottom:20 }}>
-                  <p style={{ fontSize:13.5, color:T.n600, lineHeight:1.7, margin:'0 0 14px 0' }}>{p.vibe}</p>
+            {/* ── Content ── */}
+            <div style={{ padding:'26px 28px 30px' }}>
 
-                  {/* Traveler chips */}
-                  <div style={{ display:'flex', gap:7, flexWrap:'wrap', marginBottom:14 }}>
-                    {[
-                      { label:'Age', val: p.traveler.age },
-                      { label:'From', val: p.traveler.from },
-                      { label:'Gender', val: p.traveler.gender },
-                      { label:'Travel for', val: p.traveler.why },
-                    ].map(chip => (
-                      <span key={chip.label} style={{ display:'inline-flex', alignItems:'center', gap:5, padding:'4px 10px', background:T.accentSubtle, borderRadius:20, fontSize:12, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-                        <span style={{ fontSize:10, fontWeight:700, color:T.accent, textTransform:'uppercase', letterSpacing:'0.04em' }}>{chip.label}</span>
-                        <span style={{ fontWeight:500 }}>{chip.val}</span>
-                      </span>
+              {/* Tagline */}
+              {selectedNbhd?.tagline && (
+                <p style={{ fontSize:11, fontWeight:800, color:selectedNbhd.color || T.accent, marginBottom:16, textTransform:'uppercase', letterSpacing:'0.09em' }}>{selectedNbhd.tagline}</p>
+              )}
+
+              {NBHD_PROFILES[selectedId] && (() => {
+                const p = NBHD_PROFILES[selectedId];
+                return (
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 270px', gap:26, alignItems:'start' }}>
+
+                    {/* Left: about + traveler + spots */}
+                    <div>
+                      <p style={{ fontSize:14.5, color:T.n700, lineHeight:1.78, margin:'0 0 20px 0' }}>{p.vibe}</p>
+
+                      {/* Traveler profile */}
+                      <div style={{ marginBottom:18 }}>
+                        <div style={{ fontSize:10, fontWeight:800, color:T.muted, letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:9 }}>Who lives here</div>
+                        <div style={{ display:'flex', gap:7, flexWrap:'wrap' }}>
+                          {[
+                            { label:'Age',      val: p.traveler.age },
+                            { label:'From',     val: p.traveler.from },
+                            { label:'Style',    val: p.traveler.gender },
+                            { label:'Here for', val: p.traveler.why },
+                          ].map(chip => (
+                            <span key={chip.label} style={{ display:'inline-flex', alignItems:'center', gap:5, padding:'5px 11px', background:T.surface, border:`1px solid ${T.border}`, borderRadius:24, fontSize:12 }}>
+                              <span style={{ fontSize:9, fontWeight:800, color:T.accent, textTransform:'uppercase', letterSpacing:'0.07em' }}>{chip.label}</span>
+                              <span style={{ fontWeight:600, color:T.n800 }}>{chip.val}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Key spots */}
+                      <div>
+                        <div style={{ fontSize:10, fontWeight:800, color:T.muted, letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:9 }}>Key spots</div>
+                        <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                          {p.spots.map(s => (
+                            <span key={s} style={{ padding:'5px 12px', border:`1px solid ${T.border}`, borderRadius:24, fontSize:12, color:T.n600, background:T.white, fontWeight:500 }}>{s}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: cost cards */}
+                    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                      <div style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px 18px' }}>
+                        <div style={{ fontSize:10, fontWeight:800, color:T.muted, letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:13 }}>Daily costs</div>
+                        {[['Coffee', p.dailyCost.coffee],['Meal', p.dailyCost.meal],['Beer / drink', p.dailyCost.beer]].map(([label, val]) => (
+                          <div key={label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:13, marginBottom:8 }}>
+                            <span style={{ color:T.muted, fontWeight:500 }}>{label}</span>
+                            <span style={{ fontWeight:700, color:T.primary }}>{val}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:14, padding:'16px 18px' }}>
+                        <div style={{ fontSize:10, fontWeight:800, color:T.muted, letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:13 }}>Accommodation</div>
+                        {[['Monthly rent', p.stayRange.monthly],['Per night (est.)', p.stayRange.nightly]].map(([label, val]) => (
+                          <div key={label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:13, marginBottom:8 }}>
+                            <span style={{ color:T.muted, fontWeight:500 }}>{label}</span>
+                            <span style={{ fontWeight:700, color:T.primary }}>{val}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+                );
+              })()}
+
+              {/* ── Nearby attractions ── */}
+              <div style={{ borderTop:`1px solid ${T.border}`, marginTop:26, paddingTop:24 }}>
+                <div style={{ fontSize:10, fontWeight:800, color:T.muted, letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:14 }}>Nearby attractions</div>
+
+                {loadingAttr && (
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
+                    {[0,1,2,3].map(i => <div key={i} style={{ background:T.border, borderRadius:12, height:160, animation:'pulse 1.5s ease infinite', animationDelay:`${i*0.1}s` }}/>)}
+                  </div>
+                )}
+
+                {apiError && !loadingAttr && (
+                  <div style={{ textAlign:'center', padding:'32px 16px', background:T.surface, borderRadius:14, border:`1px solid ${T.border}` }}>
+                    <p style={{ color:T.muted, fontSize:14, marginBottom:12 }}>Visit Seoul API unavailable right now.</p>
+                    <button onClick={() => onSelect(selectedId)}
+                      style={{ padding:'9px 22px', background:T.accent, color:T.white, borderRadius:8, border:'none', cursor:'pointer', fontSize:13, fontWeight:600, fontFamily:'Plus Jakarta Sans,sans-serif' }}
+                    >Browse stays in {selectedNbhd?.name} →</button>
+                  </div>
+                )}
+
+                {!loadingAttr && !apiError && attractions.length > 0 && (
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
+                    {attractions.map(attr => (
+                      <div key={attr.id}
+                        style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:12, overflow:'hidden', transition:'border-color 0.18s, box-shadow 0.18s' }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor=T.accent; e.currentTarget.style.boxShadow='0 4px 14px rgba(196,113,74,0.14)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor=T.border; e.currentTarget.style.boxShadow='none'; }}
+                      >
+                        {attr.thumbnail
+                          ? <div style={{ height:108, overflow:'hidden' }}><img src={attr.thumbnail} alt={attr.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} loading="lazy"/></div>
+                          : <div style={{ height:108, background:`linear-gradient(135deg,${T.accentSubtle},${T.border})`, display:'flex', alignItems:'center', justifyContent:'center' }}><span style={{ fontSize:26 }}>📍</span></div>
+                        }
+                        <div style={{ padding:'10px 12px' }}>
+                          {attr.category && <div style={{ fontSize:10, fontWeight:700, color:T.accent, marginBottom:3, textTransform:'uppercase', letterSpacing:'0.05em' }}>{attr.category}</div>}
+                          <div style={{ fontSize:12.5, fontWeight:700, color:T.primary, lineHeight:1.35, marginBottom:4, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{attr.name}</div>
+                          {attr.description && <div style={{ fontSize:11.5, color:T.muted, lineHeight:1.55, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{attr.description}</div>}
+                        </div>
+                      </div>
                     ))}
                   </div>
+                )}
 
-                  {/* Key spots */}
-                  <div style={{ marginBottom:14 }}>
-                    <div style={{ fontSize:10, fontWeight:700, color:T.muted, letterSpacing:'0.07em', textTransform:'uppercase', marginBottom:7 }}>Key spots</div>
-                    <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-                      {p.spots.map(s => (
-                        <span key={s} style={{ padding:'4px 10px', border:`1px solid ${T.border}`, borderRadius:20, fontSize:12, color:T.n600, fontFamily:'Plus Jakarta Sans,sans-serif', background:T.white }}>{s}</span>
-                      ))}
-                    </div>
+                {!loadingAttr && !apiError && attractions.length === 0 && (
+                  <div style={{ textAlign:'center', padding:'28px', color:T.muted, fontSize:14, background:T.surface, borderRadius:12, border:`1px solid ${T.border}` }}>
+                    No tourism listings found for this area.
                   </div>
-
-                  {/* Price cards */}
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-                    <div style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:12, padding:'13px 15px' }}>
-                      <div style={{ fontSize:10, fontWeight:700, color:T.muted, letterSpacing:'0.07em', textTransform:'uppercase', marginBottom:10 }}>Daily costs</div>
-                      {[['Coffee', p.dailyCost.coffee],['Meal', p.dailyCost.meal],['Beer / drink', p.dailyCost.beer]].map(([label, val]) => (
-                        <div key={label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:12.5, marginBottom:5 }}>
-                          <span style={{ color:T.muted }}>{label}</span>
-                          <span style={{ fontWeight:700, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{val}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:12, padding:'13px 15px' }}>
-                      <div style={{ fontSize:10, fontWeight:700, color:T.muted, letterSpacing:'0.07em', textTransform:'uppercase', marginBottom:10 }}>Accommodation</div>
-                      {[['Monthly rent', p.stayRange.monthly],['Per night (est.)', p.stayRange.nightly]].map(([label, val]) => (
-                        <div key={label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:12.5, marginBottom:5 }}>
-                          <span style={{ color:T.muted }}>{label}</span>
-                          <span style={{ fontWeight:700, color:T.primary, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{val}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Divider before attractions */}
-                  <div style={{ borderTop:`1px solid ${T.border}`, marginTop:20, marginBottom:20 }}/>
-                  <div style={{ fontSize:10, fontWeight:700, color:T.muted, letterSpacing:'0.07em', textTransform:'uppercase', marginBottom:12 }}>Nearby attractions</div>
-                </div>
-              );
-            })()}
-
-            {loadingAttr && (
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
-                {[0,1,2,3].map(i => <div key={i} style={{ background:T.border, borderRadius:12, height:160, animation:'pulse 1.5s ease infinite', animationDelay:`${i*0.1}s` }}/>)}
+                )}
               </div>
-            )}
-
-            {apiError && !loadingAttr && (
-              <div style={{ textAlign:'center', padding:'32px 16px', background:T.white, borderRadius:14, border:`1px solid ${T.border}` }}>
-                <p style={{ color:T.muted, fontSize:14, marginBottom:12 }}>Visit Seoul API unavailable right now.</p>
-                <button onClick={() => onSelect(selectedId)}
-                  style={{ padding:'9px 22px', background:T.accent, color:T.white, borderRadius:8, border:'none', cursor:'pointer', fontSize:13, fontWeight:600, fontFamily:'Plus Jakarta Sans,sans-serif' }}
-                >Browse stays in {selectedNbhd?.name} →</button>
-              </div>
-            )}
-
-            {!loadingAttr && !apiError && attractions.length > 0 && (
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
-                {attractions.map(attr => (
-                  <div key={attr.id}
-                    style={{ background:T.white, border:`1px solid ${T.border}`, borderRadius:12, overflow:'hidden', transition:'border-color 0.18s, box-shadow 0.18s' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor=T.accent; e.currentTarget.style.boxShadow='0 4px 14px rgba(196,113,74,0.14)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor=T.border; e.currentTarget.style.boxShadow='none'; }}
-                  >
-                    {attr.thumbnail
-                      ? <div style={{ height:108, overflow:'hidden' }}><img src={attr.thumbnail} alt={attr.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} loading="lazy"/></div>
-                      : <div style={{ height:108, background:`linear-gradient(135deg,${T.accentSubtle},${T.border})`, display:'flex', alignItems:'center', justifyContent:'center' }}><span style={{ fontSize:26 }}>📍</span></div>
-                    }
-                    <div style={{ padding:'10px 12px' }}>
-                      {attr.category && <div style={{ fontSize:10, fontWeight:600, color:T.accent, marginBottom:3, textTransform:'uppercase', letterSpacing:'0.05em' }}>{attr.category}</div>}
-                      <div style={{ fontSize:12, fontWeight:700, color:T.primary, lineHeight:1.35, marginBottom:4, fontFamily:'Plus Jakarta Sans,sans-serif', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{attr.name}</div>
-                      {attr.description && <div style={{ fontSize:11, color:T.muted, lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{attr.description}</div>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {!loadingAttr && !apiError && attractions.length === 0 && (
-              <div style={{ textAlign:'center', padding:'28px', color:T.muted, fontSize:14, background:T.white, borderRadius:12, border:`1px solid ${T.border}` }}>
-                No tourism listings found for this area.
-              </div>
-            )}
+            </div>
           </div>
         )}
 
