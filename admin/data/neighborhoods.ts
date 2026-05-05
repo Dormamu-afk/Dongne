@@ -1,0 +1,16 @@
+export const NEIGHBORHOODS = [
+  { id: 'yeonnam',       name: 'Yeonnam-dong',     nameKo: '연남동'      },
+  { id: 'hongdae',       name: 'Hongdae',           nameKo: '홍대'        },
+  { id: 'mapo',          name: 'Mangwon · Mapo',    nameKo: '망원동'      },
+  { id: 'myeongdong',    name: 'Myeongdong',        nameKo: '명동'        },
+  { id: 'euljiro',       name: 'Euljiro · Jongno',  nameKo: '을지로·종로' },
+  { id: 'dongdaemun',    name: 'Dongdaemun',        nameKo: '동대문'      },
+  { id: 'itaewon',       name: 'Itaewon · HBC',     nameKo: '이태원·해방촌'},
+  { id: 'yongsan',       name: 'Yongsan',           nameKo: '용산'        },
+  { id: 'hannam',        name: 'Hannam-dong',       nameKo: '한남동'      },
+  { id: 'seongsu',       name: 'Seongsu-dong',      nameKo: '성수동'      },
+  { id: 'cheongnyangni', name: 'Cheongnyangni',     nameKo: '청량리'      },
+  { id: 'apgujeong',     name: 'Apgujeong',         nameKo: '압구정'      },
+  { id: 'gangnam',       name: 'Gangnam',           nameKo: '강남'        },
+  { id: 'jamsil',        name: 'Jamsil · Songpa',   nameKo: '잠실·송파'   },
+];
