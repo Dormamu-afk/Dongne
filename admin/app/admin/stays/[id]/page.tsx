@@ -3,6 +3,8 @@ import { StayForm } from '@/components/admin/StayForm';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 
+export const runtime = 'edge';
+
 export default async function EditStayPage({
   params,
 }: {

@@ -1,6 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NeighborhoodPhotoUploader } from '@/components/admin/NeighborhoodPhotoUploader';
 
+export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 const NEIGHBORHOODS = [

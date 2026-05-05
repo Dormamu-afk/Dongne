@@ -2,6 +2,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import { DeleteHostButton } from '@/components/admin/DeleteHostButton';
 
+export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 const ENGLISH_LABEL: Record<string, string> = {

@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { NEIGHBORHOODS } from '@/data/neighborhoods';
 import { DeleteStayButton } from '@/components/admin/DeleteStayButton';
 
+export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 export default async function AdminStaysPage({

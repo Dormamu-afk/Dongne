@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { HostForm } from '@/components/admin/HostForm';
 import Link from 'next/link';
 
+export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 export default async function EditHostPage({ params }: { params: Promise<{ id: string }> }) {

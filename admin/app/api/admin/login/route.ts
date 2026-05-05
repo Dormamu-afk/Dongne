@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createHmac } from 'crypto';
 
-function getToken() {
-  return createHmac('sha256', process.env.ADMIN_PASSWORD!).update('session').digest('hex');
+export const runtime = 'edge';
+
+async function getToken(): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(process.env.ADMIN_PASSWORD!), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode('session'));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export async function POST(req: Request) {
@@ -11,7 +15,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
   }
   const res = NextResponse.json({ ok: true });
-  res.cookies.set('admin_session', getToken(), {
+  res.cookies.set('admin_session', await getToken(), {
     httpOnly: true,
     path: '/',
     sameSite: 'lax',

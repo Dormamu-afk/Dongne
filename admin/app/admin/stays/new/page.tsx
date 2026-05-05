@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { StayForm } from '@/components/admin/StayForm';
 
+export const runtime = 'edge';
+
 export default function NewStayPage() {
   return (
     <div>

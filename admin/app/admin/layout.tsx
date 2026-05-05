@@ -1,19 +1,28 @@
 import Link from 'next/link';
 import { LogoutButton } from '@/components/admin/LogoutButton';
 import { cookies } from 'next/headers';
-import { createHmac } from 'crypto';
+import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
+
+export const runtime = 'edge';
+
+async function sessionToken(password: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode('session'));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 async function isAuthenticated() {
   const cookieStore = await cookies();
   const session = cookieStore.get('admin_session')?.value;
   if (!session || !process.env.ADMIN_PASSWORD) return false;
-  const expected = createHmac('sha256', process.env.ADMIN_PASSWORD).update('session').digest('hex');
+  const expected = await sessionToken(process.env.ADMIN_PASSWORD);
   return session === expected;
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  if (!(await isAuthenticated())) return <>{children}</>;
+  if (!(await isAuthenticated())) redirect('/admin/login');
 
   const admin = createAdminClient();
   const [staysRes, hostsRes, bookingsRes] = await Promise.all([

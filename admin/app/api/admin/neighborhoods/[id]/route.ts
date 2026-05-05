@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { checkAdminAuth } from '@/lib/admin-auth';
 
+export const runtime = 'edge';
+
 const BUCKET = 'neighborhood-photos';
 const MANIFEST = '_manifest.json';
 

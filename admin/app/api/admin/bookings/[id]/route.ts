@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { checkAdminAuth } from '@/lib/admin-auth';
 
+export const runtime = 'edge';
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!await checkAdminAuth()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { id } = await params;

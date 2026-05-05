@@ -7,6 +7,8 @@ import { BookingActivityTimeline } from '@/components/admin/BookingActivityTimel
 import { BookingStayLinker } from '@/components/admin/BookingStayLinker';
 import { NEIGHBORHOODS } from '@/data/neighborhoods';
 
+export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 function fmtDate(d: string) {

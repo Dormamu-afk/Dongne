@@ -1,6 +1,8 @@
 import { HostForm } from '@/components/admin/HostForm';
 import Link from 'next/link';
 
+export const runtime = 'edge';
+
 export default function NewHostPage() {
   return (
     <div className="max-w-2xl">

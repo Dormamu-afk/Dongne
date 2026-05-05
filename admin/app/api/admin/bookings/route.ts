@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { checkAdminAuth } from '@/lib/admin-auth';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
   if (!await checkAdminAuth()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json();

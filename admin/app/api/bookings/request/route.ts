@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
   const body = await request.json();
   if (!body.guest_name || !body.guest_email || !body.check_in_date || !body.check_out_date) {

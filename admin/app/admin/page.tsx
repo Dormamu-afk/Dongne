@@ -2,6 +2,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { BookingKanbanBoard } from '@/components/admin/BookingKanbanBoard';
 import Link from 'next/link';
 
+export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 const ACTIVE_STATUSES = ['inquiry','curating','proposed','host_pending','host_confirmed','payment_pending','paid','booked','checked_in'];

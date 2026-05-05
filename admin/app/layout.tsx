@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Locali Admin",
   description: "Locali stays management",
